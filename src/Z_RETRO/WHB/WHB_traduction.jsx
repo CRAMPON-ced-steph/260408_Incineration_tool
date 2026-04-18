@@ -284,12 +284,69 @@ export const translations = {
     Calculating: "Calcolo in corso..."
   },
 
+  pt: {
+    // Titres et labels principaux
+    Parametres: "Parâmetros",
+    calculer_et_envoyer_data: "Calcular e Enviar Dados",
+    ShowResults: "Mostrar Resultados",
+
+    // Champs de saisie WHB
+    T_eau_alimentation: "Temperatura da Água de Alimentação",
+    Q_eau_purge: "Vazão de Água de Purga",
+    T_air_exterieur: "Temperatura do Ar Externo",
+    Pertes_thermiques: "Perdas Térmicas",
+    Pression_vapeur: "Pressão do Vapor",
+    T_vapeur_surchauffee: "Temperatura do Vapor Superaquecido",
+    T_amont_WHB: "Temperatura a Montante do WHB",
+    Q_eau_alimentation: "Vazão de Água de Alimentação",
+    Q_air_parasite: "Vazão de Ar Parasita",
+    O2_sec_mesure: "O₂ Seco Medido",
+
+    // Types de bilan
+    BilanTypeVapeur: "Tipo de Balanço de Vapor",
+    BilanType: "Tipo de Balanço",
+    BilanAirType: "Tipo de Balanço de Ar",
+
+    // Options de vapeur
+    VapeurSaturee: "Vapor Saturado",
+    VapeurSurchauffee: "Vapor Superaquecido",
+
+    // Options de bilan principal
+    BilanParT: "Balanço por Temperatura",
+    BilanParQeau: "Balanço por Vazão de Água",
+
+    // Options de bilan air
+    BilanParQair: "Balanço por Vazão de Ar Parasita",
+    BilanParO2: "Balanço por Medição de O₂",
+
+    // Unités
+    celsius: "°C",
+    percent: "%",
+    bar: "Bar",
+    kg_h: "kg/h",
+    Nm3_h: "Nm³/h",
+
+    // Boutons et actions
+    Calculate: "Calcular",
+    Clear: "Limpar",
+    Close: "Fechar",
+    Send: "Enviar",
+
+    // Messages et validations
+    InvalidInput: "Valor de entrada inválido",
+    CalculationError: "Erro de cálculo",
+    DataSaved: "Dados salvos",
+    NoResults: "Nenhum resultado disponível",
+    NoInputData: "Nenhum dado de entrada disponível",
+    Calculating: "Calculando...",
+  },
+
   zh: {
     // Titres et labels principaux
     Parametres: "参数",
     calculer_et_envoyer_data: "计算并发送数据",
     ShowResults: "显示结果",
-    
+
     // Champs de saisie WHB
     T_eau_alimentation: "给水温度",
     Q_eau_purge: "排污水流量",

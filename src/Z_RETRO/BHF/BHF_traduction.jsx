@@ -119,6 +119,30 @@ export const translations = {
     NoInputData: "Nessun dato di input disponibile",
   },
 
+  pt: {
+    Parametres: "Parâmetros",
+    calculer_et_envoyer_data: "Calcular e Enviar Dados",
+    ShowResults: "Mostrar Resultados",
+
+    Qair_decolmatation: "Vazão de Ar de Limpeza",
+    Tair: "Temperatura do Ar",
+    T_fumees_amont: "Temperatura dos Gases a Montante",
+    PDC_aero: "Queda de Pressão Aerodinâmica",
+
+    celsius: "°C",
+    m3_h: "m³/h",
+    mmCE: "mmCA",
+
+    Calculate: "Calcular",
+    Clear: "Limpar",
+    Close: "Fechar",
+
+    InvalidInput: "Valor de entrada inválido",
+    CalculationError: "Erro de cálculo",
+    NoResults: "Nenhum resultado disponível",
+    NoInputData: "Nenhum dado de entrada disponível",
+  },
+
   zh: {
     Parametres: "参数",
     calculer_et_envoyer_data: "计算并发送数据",

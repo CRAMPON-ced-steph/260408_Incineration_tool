@@ -124,6 +124,31 @@ export const translations = {
     NoInputData: "Nessun dato di input disponibile",
   },
 
+  pt: {
+    Parametres: "Parâmetros",
+    calculer_et_envoyer_data: "Calcular e Enviar Dados",
+    ShowResults: "Mostrar Resultados",
+
+    T_eau_injectee: "Temperatura da Água Injetada",
+    T_vapeur_injectee: "Temperatura do Vapor Injetado",
+    Q_eau: "Vazão de Água",
+    Q_vapeur: "Vazão de Vapor",
+    PDC: "Queda de Pressão",
+
+    celsius: "°C",
+    kg_h: "kg/h",
+    mmCE: "mmCA",
+
+    Calculate: "Calcular",
+    Clear: "Limpar",
+    Close: "Fechar",
+
+    InvalidInput: "Valor de entrada inválido",
+    CalculationError: "Erro de cálculo",
+    NoResults: "Nenhum resultado disponível",
+    NoInputData: "Nenhum dado de entrada disponível",
+  },
+
   zh: {
     Parametres: "参数",
     calculer_et_envoyer_data: "计算并发送数据",
