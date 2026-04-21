@@ -16,7 +16,7 @@ import { EMAILS_CONFIG } from './E_Gestion_acces/ListeEmailAccess';
 // Import du service OPEX
 import { writeDefaultsToStorage, initFromStorage } from './A_Transverse_fonction/opexDataService';
 
-const adminEmail = "cedric.crampon@gmail.com";
+const adminEmail = "Cr@ph@el_2014!!";
 
 // Apps Script comme source des emails autorisés (sheet Drive privé)
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzr3xGh0uqUppPuEf_2btR5oXQBe2SSFt4F2Ll-byCXF_JfvJSRQ8Z-617xUN5RzYvH/exec";

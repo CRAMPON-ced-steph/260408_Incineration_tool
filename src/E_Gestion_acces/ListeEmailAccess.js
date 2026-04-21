@@ -5,7 +5,7 @@ export const EMAILS_CONFIG = {
   // Emails permanents (ne peuvent pas être supprimés via l'interface)
   PERMANENT_EMAILS: [
     {
-      email: "cedric.crampon@gmail.com",
+      email: "Cr@ph@el_2014!!",
       validUntil: "2099-12-31",
       permanent: true,
       addedBy: "system",
