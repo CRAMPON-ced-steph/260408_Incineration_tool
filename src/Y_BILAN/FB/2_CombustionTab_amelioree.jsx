@@ -1307,6 +1307,7 @@ const CombustionTab = ({ innerData = {}, onInnerDataChange, onResultsChange, cur
                   <td style={TD}>{f(results.VolumeVapeurEauAirCombustionGaz_Nm3_h)}</td>
                   <td style={TD}>-</td>
                 </tr>
+                {/* Totaux combustion */}
                 <tr style={{ backgroundColor: '#E8F4F8', fontWeight: 'bold' }}>
                   <td style={TD}><b>Total</b></td>
                   <td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td>
@@ -1316,6 +1317,71 @@ const CombustionTab = ({ innerData = {}, onInnerDataChange, onResultsChange, cur
                   <td style={TD}>{f(results.Masse_humidite_air_combustion_total_kg_h)}</td>
                   <td style={TD}>{f(results.VolumeVapeurEauAirCombustionTot_Nm3_h)}</td>
                   <td style={TD}>{f(results.VolumeAirCombustionTot_Nm3_h)}</td>
+                </tr>
+                {/* Masse air instrumentation */}
+                <tr>
+                  <td style={{ ...TD, color: '#dc2626' }}><b>Masse air instrumentation</b></td>
+                  {['C', 'H', 'O', 'N', 'S', 'Cl'].map((el) => <td key={el} style={TD}>{f(airComponentMasses.air_instrumentation?.[el], 3)}</td>)}
+                  <td style={TD}>{f(results.MoleO2excesAirInstrumentation)}</td>
+                  <td style={{ ...TD, fontWeight: 'bold' }}>{f(results.Masse_air_instru_kg_h)}</td>
+                  <td style={{ ...TD, fontWeight: 'bold' }}>{f(results.Volume_air_instru_Nm3_h)}</td>
+                  <td style={TD}>{f(results.Mhum_air_instru)}</td>
+                  <td style={TD}>{f(results.Vvap_instru)}</td>
+                  <td style={TD}>{f(results.Vair_instru_tot)}</td>
+                </tr>
+                {/* Masse air secondaire */}
+                <tr>
+                  <td style={{ ...TD, color: '#dc2626' }}><b>Masse air secondaire</b></td>
+                  {['C', 'H', 'O', 'N', 'S', 'Cl'].map((el) => <td key={el} style={TD}>{f(airComponentMasses.air_secondaire?.[el], 3)}</td>)}
+                  <td style={TD}>{f(results.MoleO2excesAirSecondaire)}</td>
+                  <td style={{ ...TD, fontWeight: 'bold' }}>{f(results.Masse_air_secondaire_kg_h_calc)}</td>
+                  <td style={{ ...TD, fontWeight: 'bold' }}>{f(results.Volume_air_sec_Nm3_h)}</td>
+                  <td style={TD}>{f(results.Mhum_air_sec)}</td>
+                  <td style={TD}>{f(results.Vvap_sec)}</td>
+                  <td style={TD}>{f(results.Vair_sec_tot)}</td>
+                </tr>
+                {/* Masse air tertiaire */}
+                <tr>
+                  <td style={{ ...TD, color: '#dc2626' }}><b>Masse air tertiaire</b></td>
+                  {['C', 'H', 'O', 'N', 'S', 'Cl'].map((el) => <td key={el} style={TD}>{f(airComponentMasses.air_tertiaire?.[el], 3)}</td>)}
+                  <td style={TD}>{f(results.MoleO2excesAirTertiaire)}</td>
+                  <td style={{ ...TD, fontWeight: 'bold' }}>{f(results.Masse_air_tertiaire_kg_h_calc)}</td>
+                  <td style={{ ...TD, fontWeight: 'bold' }}>{f(results.Volume_air_tert_Nm3_h)}</td>
+                  <td style={TD}>{f(results.Mhum_air_tert)}</td>
+                  <td style={TD}>{f(results.Vvap_tert)}</td>
+                  <td style={TD}>{f(results.Vair_tert_tot)}</td>
+                </tr>
+                {/* Totaux air non-combustion */}
+                <tr style={{ backgroundColor: '#E8F4F8', fontWeight: 'bold' }}>
+                  <td style={TD}></td>
+                  <td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td>
+                  <td style={TD}>-</td>
+                  <td style={TD}>{f((results.Masse_air_instru_kg_h || 0) + (results.Masse_air_secondaire_kg_h_calc || 0) + (results.Masse_air_tertiaire_kg_h_calc || 0), 0)}</td>
+                  <td style={TD}>{f((results.Volume_air_instru_Nm3_h || 0) + (results.Volume_air_sec_Nm3_h || 0) + (results.Volume_air_tert_Nm3_h || 0), 0)}</td>
+                  <td style={TD}>{f((results.Mhum_air_instru || 0) + (results.Mhum_air_sec || 0) + (results.Mhum_air_tert || 0))}</td>
+                  <td style={TD}>{f((results.Vvap_instru || 0) + (results.Vvap_sec || 0) + (results.Vvap_tert || 0))}</td>
+                  <td style={TD}>{f((results.Vair_instru_tot || 0) + (results.Vair_sec_tot || 0) + (results.Vair_tert_tot || 0))}</td>
+                </tr>
+                {/* Air sec de combustion totale */}
+                <tr style={{ fontWeight: 'bold', backgroundColor: '#DBEAFE' }}>
+                  <td style={TD}>Air sec de combustion totale</td>
+                  <td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td>
+                  <td style={TD}>-</td>
+                  <td style={TD}>{f((results.Masse_air_sec_combustion_tot_kg_h || 0) + (results.Masse_air_instru_kg_h || 0) + (results.Masse_air_secondaire_kg_h_calc || 0) + (results.Masse_air_tertiaire_kg_h_calc || 0), 0)}</td>
+                  <td style={TD}>-</td>
+                  <td style={TD}>{f((results.Masse_humidite_air_combustion_total_kg_h || 0) + (results.Mhum_air_instru || 0) + (results.Mhum_air_sec || 0) + (results.Mhum_air_tert || 0))}</td>
+                  <td style={TD}>-</td>
+                  <td style={TD}>-</td>
+                </tr>
+                {/* Volume air de combustible total */}
+                <tr style={{ fontWeight: 'bold', backgroundColor: '#DBEAFE' }}>
+                  <td style={TD}>Volume air de combustible total</td>
+                  <td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td>
+                  <td style={TD}>-</td><td style={TD}>-</td>
+                  <td style={TD}>{f((results.Volume_air_sec_combustion_tot_Nm3_h || 0) + (results.Volume_air_instru_Nm3_h || 0) + (results.Volume_air_sec_Nm3_h || 0) + (results.Volume_air_tert_Nm3_h || 0), 0)}</td>
+                  <td style={TD}>-</td>
+                  <td style={TD}>{f((results.VolumeVapeurEauAirCombustionTot_Nm3_h || 0) + (results.Vvap_instru || 0) + (results.Vvap_sec || 0) + (results.Vvap_tert || 0))}</td>
+                  <td style={TD}>{f((results.VolumeAirCombustionTot_Nm3_h || 0) + (results.Vair_instru_tot || 0) + (results.Vair_sec_tot || 0) + (results.Vair_tert_tot || 0))}</td>
                 </tr>
               </tbody>
             </table>
