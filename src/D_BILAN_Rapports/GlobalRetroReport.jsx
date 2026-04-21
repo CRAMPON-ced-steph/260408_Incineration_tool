@@ -1,6 +1,19 @@
 import React, { useRef, useState } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 // Map node label → truthy = has a retro report available
 const RETRO_REPORT_MAP = {
@@ -27,6 +40,173 @@ const EQUIPMENT_ORDER = [
   'COOLINGTOWER', 'IDFAN', 'STACK',
 ];
 
+// ─── Combustion Diagram Section ───────────────────────────────────────────────
+
+const loadPt = (key, def) => {
+  try {
+    const s = localStorage.getItem(key);
+    return s ? JSON.parse(s) : def;
+  } catch { return def; }
+};
+
+const CombustionDiagramSection = () => {
+  const pA = loadPt('pointA', { x: 100, y: 2 });
+  const pB = loadPt('pointB', { x: 150, y: 10 });
+  const pC = loadPt('pointC', { x: 800, y: 10 });
+  const pD = loadPt('pointD', { x: 300, y: 2 });
+  const pE = loadPt('pointE', { x: 500, y: 8 });
+
+  const isBelow = pA.y < pB.y * 0.4 || pD.y < pC.y * 0.4;
+
+  const chartData = {
+    datasets: [
+      {
+        type: 'line',
+        label: 'Domaine opératoire',
+        data: [pA, pB, pC, pD, pA],
+        borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: 'rgba(75, 192, 192, 0.15)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0,
+        pointBackgroundColor: ['red', 'blue', 'green', 'purple', 'red'],
+        pointRadius: 6,
+      },
+      {
+        type: 'scatter',
+        label: 'Point E — résultat rétro-calcul',
+        data: [pE],
+        backgroundColor: 'orange',
+        pointRadius: 9,
+        pointHoverRadius: 11,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: false,
+    plugins: {
+      legend: { position: 'top' },
+      title: {
+        display: true,
+        text: 'Diagramme de combustion — Domaine opératoire',
+        font: { size: 15 },
+      },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => {
+            const lbl = ctx.dataset.label;
+            const x = ctx.parsed.x;
+            const y = ctx.parsed.y;
+            if (lbl?.includes('Point E')) return `E : ${x} kg/h — ${y} MW`;
+            const names = ['A', 'B', 'C', 'D', 'A'];
+            return `${names[ctx.dataIndex]} : ${x} kg/h — ${y} MW`;
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        type: 'linear',
+        position: 'bottom',
+        min: 0,
+        title: {
+          display: true,
+          text: 'Débit déchets [kg/h]',
+          font: { size: 13, weight: 'bold' },
+        },
+        grid: { color: 'rgba(0,0,0,0.07)' },
+      },
+      y: {
+        min: 0,
+        title: {
+          display: true,
+          text: 'Puissance incinérateur [MW]',
+          font: { size: 13, weight: 'bold' },
+        },
+        grid: { color: 'rgba(0,0,0,0.07)' },
+      },
+    },
+  };
+
+  const pointRows = [
+    { pt: 'A', role: 'Débit min — Puissance min', color: 'red',    d: pA },
+    { pt: 'B', role: 'Débit min — Puissance max', color: 'blue',   d: pB },
+    { pt: 'C', role: 'Débit max — Puissance max', color: 'green',  d: pC },
+    { pt: 'D', role: 'Débit max — Puissance min', color: 'purple', d: pD },
+    { pt: 'E', role: 'Point de calcul rétro',     color: 'orange', d: pE },
+  ];
+
+  return (
+    <div style={diagStyles.wrapper}>
+      <div style={diagStyles.header}>
+        <span style={diagStyles.headerIcon}>🔥</span>
+        <span style={diagStyles.headerTitle}>Diagramme de combustion — Positionnement du point de calcul</span>
+      </div>
+      <div style={diagStyles.body}>
+        {isBelow && (
+          <div style={diagStyles.warning}>
+            ⚠ Puissance minimale inférieure à 40 % de la puissance maximale — vérifier le domaine opératoire.
+          </div>
+        )}
+
+        <table style={diagStyles.table}>
+          <thead>
+            <tr>
+              <th style={{ ...diagStyles.th, width: 50 }}>Point</th>
+              <th style={{ ...diagStyles.th, textAlign: 'left' }}>Rôle</th>
+              <th style={diagStyles.th}>Débit [kg/h]</th>
+              <th style={diagStyles.th}>Puissance [MW]</th>
+            </tr>
+          </thead>
+          <tbody>
+            {pointRows.map(({ pt, role, color, d }) => (
+              <tr key={pt} style={{ background: pt === 'E' ? '#fff8e8' : '#fff' }}>
+                <td style={{ ...diagStyles.td, color, fontWeight: 'bold', textAlign: 'center' }}>{pt}</td>
+                <td style={{ ...diagStyles.td, textAlign: 'left' }}>{role}</td>
+                <td style={diagStyles.td}>{d.x}</td>
+                <td style={diagStyles.td}>{d.y}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <div style={{ height: 420, marginTop: 20 }}>
+          <Line options={chartOptions} data={chartData} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const diagStyles = {
+  wrapper: { background: '#fff' },
+  header: {
+    display: 'flex', alignItems: 'center', gap: 10,
+    background: 'linear-gradient(90deg, #7b2d2d 0%, #c0392b 100%)',
+    color: '#fff', padding: '14px 20px',
+  },
+  headerIcon: { fontSize: 20 },
+  headerTitle: { fontSize: 17, fontWeight: 'bold' },
+  body: { border: '1px solid #f0d5d5', borderTop: 'none', padding: '20px' },
+  warning: {
+    background: '#ffdddd', color: '#a94442', border: '1px solid #ebccd1',
+    borderRadius: 4, padding: '10px 14px', marginBottom: 16,
+    fontWeight: 'bold', fontSize: 13,
+  },
+  table: { width: '100%', borderCollapse: 'collapse', fontSize: 13, marginBottom: 4 },
+  th: {
+    background: '#fdf0f0', padding: '8px 12px',
+    border: '1px solid #e8cece', textAlign: 'right',
+    fontWeight: 'bold', fontSize: 12,
+  },
+  td: { padding: '7px 12px', border: '1px solid #f0e0e0', textAlign: 'right' },
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 const GlobalRetroReport = ({ nodes, onClose }) => {
   const reportRef = useRef();
   const [generating, setGenerating] = useState(false);
@@ -43,28 +223,57 @@ const GlobalRetroReport = ({ nodes, onClose }) => {
     if (!reportRef.current) return;
     setGenerating(true);
     try {
-      const canvas = await html2canvas(reportRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-      });
-      const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const imgHeight = (canvas.height * pageWidth) / canvas.width;
+      const PW = pdf.internal.pageSize.getWidth();   // 210 mm
+      const PH = pdf.internal.pageSize.getHeight();  // 297 mm
 
-      let position = 0;
-      let heightLeft = imgHeight;
-      pdf.addImage(imgData, 'PNG', 0, position, pageWidth, imgHeight);
-      heightLeft -= pageHeight;
-      while (heightLeft > 0) {
-        position -= pageHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, pageWidth, imgHeight);
-        heightLeft -= pageHeight;
+      const sections = Array.from(
+        reportRef.current.querySelectorAll('[data-pdf-section]')
+      );
+
+      for (let i = 0; i < sections.length; i++) {
+        if (i > 0) pdf.addPage();
+
+        // ── Cover page: force exact A4 height so it fills the page ───────────
+        if (i === 0) {
+          const sectionW   = sections[0].offsetWidth;
+          const a4PxHeight = Math.round(sectionW * PH / PW);
+          const savedH     = sections[0].style.height;
+          sections[0].style.height = `${a4PxHeight}px`;
+
+          const canvas = await html2canvas(sections[0], {
+            scale: 2, useCORS: true, logging: false,
+            backgroundColor: '#1a3a6b',
+          });
+          sections[0].style.height = savedH;
+
+          pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, PW, PH);
+          continue;
+        }
+
+        // ── Other sections: sliding window ────────────────────────────────────
+        const canvas = await html2canvas(sections[i], {
+          scale: 2, useCORS: true, logging: false,
+          backgroundColor: '#ffffff',
+        });
+
+        const imgData   = canvas.toDataURL('image/png');
+        const imgHeight = (canvas.height * PW) / canvas.width;
+
+        let position   = 0;
+        let heightLeft = imgHeight;
+
+        pdf.addImage(imgData, 'PNG', 0, position, PW, imgHeight);
+        heightLeft -= PH;
+
+        while (heightLeft > 0) {
+          position -= PH;
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 0, position, PW, imgHeight);
+          heightLeft -= PH;
+        }
       }
+
       const date = new Date().toISOString().slice(0, 10);
       pdf.save(`rapport_retro_global_${date}.pdf`);
     } catch (err) {
@@ -116,7 +325,7 @@ const GlobalRetroReport = ({ nodes, onClose }) => {
             <div ref={reportRef} style={styles.reportContent}>
 
               {/* Page de couverture */}
-              <div style={styles.coverPage}>
+              <div data-pdf-section style={styles.coverPage}>
                 <div style={styles.coverLogo}>⚙</div>
                 <h1 style={styles.coverTitle}>Rapport de Rétro-calcul — Incinération</h1>
                 <p style={styles.coverDate}>
@@ -136,10 +345,11 @@ const GlobalRetroReport = ({ nodes, onClose }) => {
 
               {/* Une section par nœud actif */}
               {activeNodes.map((node, idx) => {
+
                 const hasResult = !!node.data.result;
 
                 return (
-                  <div key={node.id} style={styles.equipSection}>
+                  <div key={node.id} data-pdf-section style={styles.equipSection}>
                     <div style={styles.equipSeparator}>
                       <span style={styles.equipIndex}>{idx + 1}</span>
                       <span style={styles.equipLabel}>{node.data.label}</span>
@@ -160,6 +370,12 @@ const GlobalRetroReport = ({ nodes, onClose }) => {
                   </div>
                 );
               })}
+
+              {/* Diagramme de combustion — toujours en dernier */}
+              <div data-pdf-section style={styles.diagSection}>
+                <CombustionDiagramSection />
+              </div>
+
             </div>
           )}
         </div>
@@ -1288,6 +1504,7 @@ const styles = {
   coverPage: {
     padding:'60px 48px', textAlign:'center', borderBottom:'4px solid #4a90e2',
     background:'linear-gradient(135deg, #1a3a6b 0%, #2c5aa0 100%)', color:'#fff',
+    display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
   },
   coverLogo: { fontSize:64, marginBottom:16 },
   coverTitle: { fontSize:28, fontWeight:'bold', margin:'0 0 12px 0', color:'#fff' },
@@ -1311,6 +1528,7 @@ const styles = {
   equipLabel: { fontSize:16, fontWeight:'bold', color:'#1a3a6b' },
   equipTitle: { fontSize:14, color:'#555' },
   noData: { padding:'20px 24px', color:'#999', fontSize:13, fontStyle:'italic' },
+  diagSection: { borderTop:'3px solid #c0392b', marginTop:0 },
 };
 
 const bodyStyles = {
