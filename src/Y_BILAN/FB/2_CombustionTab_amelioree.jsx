@@ -164,48 +164,48 @@ function runIterativeCalc({
 
     // --- Moles boues ---
     const MB_C = (Mboue.C / 12.01) * 1000;
-    const MB_H = ((Mboue.H / 1.008 + (2 * Debit_eau) / 18.016) * 1000);
-    const MB_O = (Mboue.O / 16 + Debit_eau / 18.016 + ((Maire_sec_comb_boue / 4.310055 + Maire_balayage / 4.32) / 16)) * 1000;
-    const MB_N = ((Mboue.N + (Maire_sec_comb_boue * (1 - 1 / 4.310055) + Maire_balayage * (1 - 1 / 4.32)))) * 1000 / 14.008;
+    const MB_H = ((Mboue.H / 1.008 + (2 * Debit_eau) / 18.015) * 1000);
+    const MB_O = (Mboue.O / 16 + Debit_eau / 18.015 + ((Maire_sec_comb_boue / 4.310055 + Maire_balayage / 4.32) / 16)) * 1000;
+    const MB_N = ((Mboue.N + (Maire_sec_comb_boue * (1 - 1 / 4.310055) + Maire_balayage * (1 - 1 / 4.32)))) * 1000 / 14.007;
     const MB_S = (Mboue.S / 32.066) * 1000;
-    const MB_Cl = (Mboue.Cl / 35.457) * 1000;
+    const MB_Cl = (Mboue.Cl / 35.45) * 1000;
 
     // --- Moles eau issue de la boue ---
-    const MEau_H = (2 * Debit_eau / 18.016) * 1000;
-    const MEau_O = (Debit_eau / 18.016) * 1000;
+    const MEau_H = (2 * Debit_eau / 18.015) * 1000;
+    const MEau_O = (Debit_eau / 18.015) * 1000;
 
     // --- Moles gaz ---
     const MG_C = (Mgaz.C / 12.01) * 1000;
-    const MG_H = ((Mgaz.H / 1.008 + (2 * Mhum_comb_gaz) / 18.016) * 1000);
-    const MG_O = ((Mgaz.O / 16 + Mhum_comb_gaz / 18.016 + Maire_sec_comb_gaz / 4.310055 / 16) * 1000);
-    const MG_N = ((Mgaz.N + Maire_sec_comb_gaz * (1 - 1 / 4.310055)) * 1000) / 14.008;
+    const MG_H = ((Mgaz.H / 1.008 + (2 * Mhum_comb_gaz) / 18.015) * 1000);
+    const MG_O = ((Mgaz.O / 16 + Mhum_comb_gaz / 18.015 + Maire_sec_comb_gaz / 4.310055 / 16) * 1000);
+    const MG_N = ((Mgaz.N + Maire_sec_comb_gaz * (1 - 1 / 4.310055)) * 1000) / 14.007;
     const MG_S = (Mgaz.S / 32.066) * 1000;
-    const MG_Cl = (Mgaz.Cl / 35.457) * 1000;
+    const MG_Cl = (Mgaz.Cl / 35.45) * 1000;
 
     // --- Moles air combustion boues ---
-    const MAirCombBoue_H = (Maire_sec_comb_boue * (airCombBoue.H2O_pct / 100) / 1.008) * 1000;
+    const MAirCombBoue_H = (Maire_sec_comb_boue * Teneur_en_eau_kgH2O_kgAS * 2 / 18.015) * 1000;
     const MAirCombBoue_O = (Maire_sec_comb_boue * (airCombBoue.O2_pct / 100) / 16) * 1000;
-    const MAirCombBoue_N = (Maire_sec_comb_boue * (airCombBoue.N2_pct / 100) / 14.008) * 1000;
+    const MAirCombBoue_N = (Maire_sec_comb_boue * (airCombBoue.N2_pct / 100) / 14.007) * 1000;
 
     // --- Moles air combustion gaz ---
-    const MAirCombGaz_H = (Maire_sec_comb_gaz * (airCombGaz.H2O_pct / 100) / 1.008) * 1000;
+    const MAirCombGaz_H = (Maire_sec_comb_gaz * Teneur_en_eau_kgH2O_kgAS * 2 / 18.015) * 1000;
     const MAirCombGaz_O = (Maire_sec_comb_gaz * (airCombGaz.O2_pct / 100) / 16) * 1000;
-    const MAirCombGaz_N = (Maire_sec_comb_gaz * (airCombGaz.N2_pct / 100) / 14.008) * 1000;
+    const MAirCombGaz_N = (Maire_sec_comb_gaz * (airCombGaz.N2_pct / 100) / 14.007) * 1000;
 
     // --- Moles air instrumentation ---
-    const MAirInstru_H = (Maire_balayage * (airInstru.H2O_pct / 100) / 1.008) * 1000;
+    const MAirInstru_H = (Maire_balayage * Teneur_en_eau_kgH2O_kgAS * 2 / 18.015) * 1000;
     const MAirInstru_O = (Maire_balayage * (airInstru.O2_pct / 100) / 16) * 1000;
-    const MAirInstru_N = (Maire_balayage * (airInstru.N2_pct / 100) / 14.008) * 1000;
+    const MAirInstru_N = (Maire_balayage * (airInstru.N2_pct / 100) / 14.007) * 1000;
 
     // --- Moles air secondaire ---
-    const MAirSec_H = (Masse_air_secondaire_kg_h * (airSec.H2O_pct / 100) / 1.008) * 1000;
+    const MAirSec_H = (Masse_air_secondaire_kg_h * Teneur_en_eau_kgH2O_kgAS * 2 / 18.015) * 1000;
     const MAirSec_O = (Masse_air_secondaire_kg_h * (airSec.O2_pct / 100) / 16) * 1000;
-    const MAirSec_N = (Masse_air_secondaire_kg_h * (airSec.N2_pct / 100) / 14.008) * 1000;
+    const MAirSec_N = (Masse_air_secondaire_kg_h * (airSec.N2_pct / 100) / 14.007) * 1000;
 
     // --- Moles air tertiaire ---
-    const MAirTert_H = (Masse_air_tertiaire_kg_h * (airTert.H2O_pct / 100) / 1.008) * 1000;
+    const MAirTert_H = (Masse_air_tertiaire_kg_h * Teneur_en_eau_kgH2O_kgAS * 2 / 18.015) * 1000;
     const MAirTert_O = (Masse_air_tertiaire_kg_h * (airTert.O2_pct / 100) / 16) * 1000;
-    const MAirTert_N = (Masse_air_tertiaire_kg_h * (airTert.N2_pct / 100) / 14.008) * 1000;
+    const MAirTert_N = (Masse_air_tertiaire_kg_h * (airTert.N2_pct / 100) / 14.007) * 1000;
 
     const MolesO2excGaz = ((Maire_sec_comb_gaz * (1 - 1 / (1 + Exces_air_combustible / 100))) * (1 / 4.310055) * 1000) / 32;
 
@@ -446,8 +446,8 @@ function runIterativeCalc({
         Display_MolesBoues_N: (Mboue.N / 14.007) * 1000,
         Display_MolesBoues_S: (Mboue.S / 32.066) * 1000,
         Display_MolesBoues_Cl: (Mboue.Cl / 35.45) * 1000,
-        Display_MolesEauBoue_H: (2 * Masse_eau_kg_h / 18.016) * 1000,
-        Display_MolesEauBoue_O: (Masse_eau_kg_h / 18.016) * 1000,
+        Display_MolesEauBoue_H: (2 * Masse_eau_kg_h / 18.015) * 1000,
+        Display_MolesEauBoue_O: (Masse_eau_kg_h / 18.015) * 1000,
         Display_MolesGaz_C: (Mgaz.C / 12.01) * 1000,
         Display_MolesGaz_H: (Mgaz.H / 1.008) * 1000,
         Display_MolesGaz_O: (Mgaz.O / 16) * 1000,
@@ -491,8 +491,14 @@ const ToggleSwitch = ({ label, checked, onChange }) => (
 const CombustionTab = ({ innerData = {}, onInnerDataChange, onResultsChange, currentLanguage = 'fr' }) => {
   const t = useTranslation(currentLanguage);
 
-  const [emissions, setEmissions] = useState(() => lsGet('emissions', DEFAULT_EMISSIONS));
-  const [thermalParams, setThermalParams] = useState(() => lsGet('thermalParams', DEFAULT_THERMAL));
+  const [emissions, setEmissions] = useState(() => {
+    const saved = lsGet('emissions', {});
+    return { ...DEFAULT_EMISSIONS, ...Object.fromEntries(Object.entries(saved).filter(([, v]) => v != null)) };
+  });
+  const [thermalParams, setThermalParams] = useState(() => {
+    const saved = lsGet('thermalParams', {});
+    return { ...DEFAULT_THERMAL, ...Object.fromEntries(Object.entries(saved).filter(([, v]) => v != null)) };
+  });
   const [airComposition, setAirComposition] = useState(() => lsGet('airComposition', DEFAULT_AIR_COMPOSITION));
   const [showExpertAir, setShowExpertAir] = useState(false);
   const [showExpertFumees, setShowExpertFumees] = useState(false);
@@ -806,13 +812,13 @@ const CombustionTab = ({ innerData = {}, onInnerDataChange, onResultsChange, cur
         <div style={secTitle}>💨 {t('Paramètres de Combustion')}</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px' }}>
           <div><label style={labelStyle}>{t("Excès d'air Lit Fluidisé")} (%)</label>
-            <input type="number" step="0.1" placeholder="78" value={emissions.Exces_air_lit} onChange={(e) => handleEmission('Exces_air_lit', e.target.value)} style={inputStyle} /></div>
+            <input type="number" step="0.1" value={emissions.Exces_air_lit ?? DEFAULT_EMISSIONS.Exces_air_lit} onChange={(e) => handleEmission('Exces_air_lit', e.target.value)} style={inputStyle} /></div>
           <div><label style={labelStyle}>{t("Excès d'air Combustible d'appoint")} (%)</label>
-            <input type="number" step="0.1" placeholder="78" value={emissions.Exces_air_combustible} onChange={(e) => handleEmission('Exces_air_combustible', e.target.value)} style={inputStyle} /></div>
+            <input type="number" step="0.1" value={emissions.Exces_air_combustible ?? DEFAULT_EMISSIONS.Exces_air_combustible} onChange={(e) => handleEmission('Exces_air_combustible', e.target.value)} style={inputStyle} /></div>
           <div><label style={labelStyle}>{t('O₂% air de combustion lit')}</label>
-            <input type="number" step="0.1" placeholder="21" value={emissions.O2_pct_air_combustion} onChange={(e) => handleEmission('O2_pct_air_combustion', e.target.value)} style={inputStyle} /></div>
+            <input type="number" step="0.1" value={emissions.O2_pct_air_combustion ?? DEFAULT_EMISSIONS.O2_pct_air_combustion} onChange={(e) => handleEmission('O2_pct_air_combustion', e.target.value)} style={inputStyle} /></div>
           <div><label style={labelStyle}>{t('Teneur en eau')} (kg H₂O/kg AS)</label>
-            <input type="number" step="0.0001" placeholder="0.008" value={emissions.Teneur_en_eau_kgH2O_kgAS} onChange={(e) => handleEmission('Teneur_en_eau_kgH2O_kgAS', e.target.value)} style={inputStyle} /></div>
+            <input type="number" step="0.0001" value={emissions.Teneur_en_eau_kgH2O_kgAS ?? DEFAULT_EMISSIONS.Teneur_en_eau_kgH2O_kgAS} onChange={(e) => handleEmission('Teneur_en_eau_kgH2O_kgAS', e.target.value)} style={inputStyle} /></div>
         </div>
       </div>
 
@@ -897,8 +903,9 @@ const CombustionTab = ({ innerData = {}, onInnerDataChange, onResultsChange, cur
               ].map(({ key, label, masseKey }) => {
                 const masse  = thermalParams[masseKey] || 0;
                 const comp   = airComposition[key] || DEFAULT_AIR_COMP_ROW;
+                const te     = emissions.Teneur_en_eau_kgH2O_kgAS || 0;
                 const CO2_kg = masse * (comp.CO2_pct || 0) / 100;
-                const H2O_kg = masse * (comp.H2O_pct || 0) / 100;
+                const H2O_kg = masse * te;
                 const O2_kg  = masse * (comp.O2_pct  || 0) / 100;
                 const N2_kg  = masse * (comp.N2_pct  || 0) / 100;
                 const SO2_kg = masse * (comp.SO2_pct || 0) / 100;
@@ -921,7 +928,7 @@ const CombustionTab = ({ innerData = {}, onInnerDataChange, onResultsChange, cur
                     <td style={TD}>{f(comp.O2_pct, 2)}</td>
                     <td style={TD}>{f(comp.N2_pct, 2)}</td>
                     <td style={TD}>{mkInput(CO2_kg, 'CO2_pct')}</td>
-                    <td style={TD}>{mkInput(H2O_kg, 'H2O_pct')}</td>
+                    <td style={{ ...TD, backgroundColor: '#f0f0f0', fontStyle: 'italic' }}>{f(H2O_kg)}</td>
                     <td style={TD}>{mkInput(O2_kg,  'O2_pct')}</td>
                     <td style={TD}>{mkInput(N2_kg,  'N2_pct')}</td>
                     <td style={TD}>{mkInput(SO2_kg, 'SO2_pct')}</td>
@@ -1205,7 +1212,7 @@ const CombustionTab = ({ innerData = {}, onInnerDataChange, onResultsChange, cur
                   <td style={TD}></td>
                   <td style={{ ...TD, fontWeight: 'bold' }}>{f((results.Masse_air_instru_kg_h || 0) + (results.Masse_air_secondaire_kg_h_calc || 0) + (results.Masse_air_tertiaire_kg_h_calc || 0), 0)}</td>
                   <td style={{ ...TD, fontWeight: 'bold' }}>{f((results.Volume_air_instru_Nm3_h || 0) + (results.Volume_air_sec_Nm3_h || 0) + (results.Volume_air_tert_Nm3_h || 0), 0)}</td>
-                  <td style={TD}></td>
+                  <td style={{ ...TD, fontWeight: 'bold' }}>{f((results.Mhum_air_instru || 0) + (results.Mhum_air_sec || 0) + (results.Mhum_air_tert || 0))}</td>
                   <td style={{ ...TD, fontWeight: 'bold' }}>{f((results.Vvap_instru || 0) + (results.Vvap_sec || 0) + (results.Vvap_tert || 0))}</td>
                   <td style={{ ...TD, fontWeight: 'bold' }}>{f((results.Vair_instru_tot || 0) + (results.Vair_sec_tot || 0) + (results.Vair_tert_tot || 0))}</td>
                 </tr>
@@ -1280,18 +1287,6 @@ const CombustionTab = ({ innerData = {}, onInnerDataChange, onResultsChange, cur
                 </tr>
               </thead>
               <tbody>
-                <tr style={{ backgroundColor: '#FFFFCC' }}>
-                  <td style={TD}><b>Boue</b></td>
-                  {['C', 'H', 'O', 'N', 'S', 'Cl'].map((el) => <td key={el} style={TD}>{f(sludgeComp[el], 1)}</td>)}
-                  <td style={{ ...TD, backgroundColor: '#FFB6C1' }}>-</td>
-                  <td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td>
-                </tr>
-                <tr style={{ backgroundColor: '#FFFFCC' }}>
-                  <td style={TD}><b>{emissions.type_energy}</b></td>
-                  {['C_percent', 'H_percent', 'O_percent', 'N_percent', 'S_percent', 'Cl_percent'].map((k) => <td key={k} style={TD}>{f(composition[k], 1)}</td>)}
-                  <td style={{ ...TD, backgroundColor: '#FFB6C1' }}>-</td>
-                  <td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td>
-                </tr>
                 <tr style={{ backgroundColor: '#FFE6CC' }}>
                   <td style={TD}><b>Masse comp. boue</b></td>
                   {['C', 'H', 'O', 'N', 'S', 'Cl'].map((el) => <td key={el} style={TD}>{f(results.Masses_boues_composition_kg_h?.[el])}</td>)}
@@ -1346,18 +1341,24 @@ const CombustionTab = ({ innerData = {}, onInnerDataChange, onResultsChange, cur
               <tbody>
                 <tr style={{ backgroundColor: '#FFFDE7' }}>
                   <td style={TDL}>Moles issues de la boue</td>
-                  <td style={TD}>{f(results.MolesBoues_C)}</td><td style={TD}>{f(results.MolesBoues_H)}</td>
-                  <td style={TD}>{f(results.MolesBoues_O)}</td><td style={TD}>{f(results.MolesBoues_N)}</td>
-                  <td style={TD}>{f(results.MolesBoues_S)}</td><td style={TD}>{f(results.MolesBoues_Cl)}</td>
+                  <td style={TD}>{f((results.Display_MolesBoues_C || 0) + (airMolesCalc.air_combustion_boue?.C || 0), 1)}</td>
+                  <td style={TD}>{f((results.Display_MolesBoues_H || 0) + (results.Display_MolesEauBoue_H || 0) + (airMolesCalc.air_combustion_boue?.H || 0), 1)}</td>
+                  <td style={TD}>{f((results.Display_MolesBoues_O || 0) + (results.Display_MolesEauBoue_O || 0) + (airMolesCalc.air_combustion_boue?.O || 0), 1)}</td>
+                  <td style={TD}>{f((results.Display_MolesBoues_N || 0) + (airMolesCalc.air_combustion_boue?.N || 0), 1)}</td>
+                  <td style={TD}>{f((results.Display_MolesBoues_S || 0) + (airMolesCalc.air_combustion_boue?.S || 0), 3)}</td>
+                  <td style={TD}>{f((results.Display_MolesBoues_Cl || 0) + (airMolesCalc.air_combustion_boue?.Cl || 0), 3)}</td>
                   <td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td>
                   <td style={TD}>{f(results.MolesO2excesBoue)}</td><td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td>
                   <td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td>
                 </tr>
                 <tr style={{ backgroundColor: '#FFFDE7' }}>
                   <td style={TDL}>Moles combustible</td>
-                  <td style={TD}>{f(results.MolesGaz_C)}</td><td style={TD}>{f(results.MolesGaz_H)}</td>
-                  <td style={TD}>{f(results.MolesGaz_O)}</td><td style={TD}>{f(results.MolesGaz_N)}</td>
-                  <td style={TD}>{f(results.MolesGaz_S)}</td><td style={TD}>{f(results.MolesGaz_Cl)}</td>
+                  <td style={TD}>{f((results.Display_MolesGaz_C || 0) + (airMolesCalc.air_combustion_gaz?.C || 0), 3)}</td>
+                  <td style={TD}>{f((results.Display_MolesGaz_H || 0) + (airMolesCalc.air_combustion_gaz?.H || 0), 3)}</td>
+                  <td style={TD}>{f((results.Display_MolesGaz_O || 0) + (airMolesCalc.air_combustion_gaz?.O || 0), 3)}</td>
+                  <td style={TD}>{f((results.Display_MolesGaz_N || 0) + (airMolesCalc.air_combustion_gaz?.N || 0), 3)}</td>
+                  <td style={TD}>{f((results.Display_MolesGaz_S || 0) + (airMolesCalc.air_combustion_gaz?.S || 0), 3)}</td>
+                  <td style={TD}>{f((results.Display_MolesGaz_Cl || 0) + (airMolesCalc.air_combustion_gaz?.Cl || 0), 3)}</td>
                   <td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td>
                   <td style={TD}>{f(results.MolesO2excesGaz)}</td><td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td>
                   <td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td><td style={TD}>-</td>
@@ -1368,15 +1369,33 @@ const CombustionTab = ({ innerData = {}, onInnerDataChange, onResultsChange, cur
                 </tr>
                 <tr style={{ backgroundColor: '#F3F4F6' }}>
                   <td style={TDR}>Moles air instrumentation</td>
-                  {Array(18).fill(null).map((_, i) => <td key={i} style={TD}>-</td>)}
+                  <td style={TD}>{f(airMolesCalc.air_instrumentation?.C, 3)}</td>
+                  <td style={TD}>{f(airMolesCalc.air_instrumentation?.H, 1)}</td>
+                  <td style={TD}>{f(airMolesCalc.air_instrumentation?.O, 1)}</td>
+                  <td style={TD}>{f(airMolesCalc.air_instrumentation?.N, 1)}</td>
+                  <td style={TD}>{f(airMolesCalc.air_instrumentation?.S, 3)}</td>
+                  <td style={TD}>{f(airMolesCalc.air_instrumentation?.Cl, 3)}</td>
+                  {Array(12).fill(null).map((_, i) => <td key={i} style={TD}>-</td>)}
                 </tr>
                 <tr style={{ backgroundColor: '#F3F4F6' }}>
                   <td style={TDR}>Moles air secondaire</td>
-                  {Array(18).fill(null).map((_, i) => <td key={i} style={TD}>-</td>)}
+                  <td style={TD}>{f(airMolesCalc.air_secondaire?.C, 3)}</td>
+                  <td style={TD}>{f(airMolesCalc.air_secondaire?.H, 1)}</td>
+                  <td style={TD}>{f(airMolesCalc.air_secondaire?.O, 1)}</td>
+                  <td style={TD}>{f(airMolesCalc.air_secondaire?.N, 1)}</td>
+                  <td style={TD}>{f(airMolesCalc.air_secondaire?.S, 3)}</td>
+                  <td style={TD}>{f(airMolesCalc.air_secondaire?.Cl, 3)}</td>
+                  {Array(12).fill(null).map((_, i) => <td key={i} style={TD}>-</td>)}
                 </tr>
                 <tr style={{ backgroundColor: '#F3F4F6' }}>
                   <td style={TDR}>Moles air tertiaire</td>
-                  {Array(18).fill(null).map((_, i) => <td key={i} style={TD}>-</td>)}
+                  <td style={TD}>{f(airMolesCalc.air_tertiaire?.C, 3)}</td>
+                  <td style={TD}>{f(airMolesCalc.air_tertiaire?.H, 1)}</td>
+                  <td style={TD}>{f(airMolesCalc.air_tertiaire?.O, 1)}</td>
+                  <td style={TD}>{f(airMolesCalc.air_tertiaire?.N, 1)}</td>
+                  <td style={TD}>{f(airMolesCalc.air_tertiaire?.S, 3)}</td>
+                  <td style={TD}>{f(airMolesCalc.air_tertiaire?.Cl, 3)}</td>
+                  {Array(12).fill(null).map((_, i) => <td key={i} style={TD}>-</td>)}
                 </tr>
                 <tr style={{ backgroundColor: '#E8F5E9', fontWeight: 'bold' }}>
                   <td style={TDL}>Moles totale</td>
