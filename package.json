@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@auth/core": "^0.41.1",
     "@vercel/blob": "^2.3.3",
     "@vercel/postgres": "^0.10.0",
     "@xyflow/react": "^12.3.6",
@@ -22,7 +21,6 @@
     "jsonwebtoken": "^9.0.2",
     "jspdf": "^3.0.1",
     "lucide-react": "^0.479.0",
-    "next-auth": "^4.24.11",
     "perfect-freehand": "^1.2.3",
     "qrcode.react": "^4.2.0",
     "react": "^18.3.1",
