@@ -109,7 +109,7 @@ const FlueGasPollutantEmission = ({ innerData, currentLanguage = 'fr' }) => {
 
   // Calculs des masses de polluants d'entrée
   const Masse_polluant_Cl_kg_h = innerData?.Clmass || 1;
-  const Masse_polluant_HCl_kg_h = Masse_polluant_Cl_kg_h * 36.5 / 35.5;
+  const Masse_polluant_HCl_kg_h = Masse_polluant_Cl_kg_h * 36.46 / 35.45;
   const Masse_polluant_S_kg_h = innerData?.Smass || 1;
   const Masse_polluant_SO2_kg_h = Masse_polluant_S_kg_h * 64 / 32;
   const Masse_polluant_HF_kg_h = HF_pourcent / 100 * masse_dechets;

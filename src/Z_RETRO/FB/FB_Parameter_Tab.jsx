@@ -19,6 +19,11 @@ const BALANCE_TYPES = {
   DS: 'DRY SOLIDS'
 };
 
+const DIAGRAM_MODES = {
+  NO: 'NO',
+  YES: 'YES'
+};
+
 // Nouveaux types de déchets
 const WASTE_TYPES = {
   PRIMAIRE: 'PRIMAIRE',
@@ -36,6 +41,7 @@ const DEFAULT_VALUES = {
   NCV_kcal_kg: '2200',
   Masse_dechet_kg_h: '6000',
   bilanType: BALANCE_TYPES.DS,
+  diagramMode: DIAGRAM_MODES.NO,
   // Nouveaux paramètres
   wasteType: WASTE_TYPES.PRIMAIRE,
   Q_boue_kg_h: '1000',
@@ -73,8 +79,11 @@ const FB_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguag
   const [MS_percent, setMS_percent] = useState(() => 
     localStorage.getItem('MS_percent') || DEFAULT_VALUES.MS_percent
   );
-  const [MV_percent, setMV_percent] = useState(() => 
+  const [MV_percent, setMV_percent] = useState(() =>
     localStorage.getItem('MV_percent') || DEFAULT_VALUES.MV_percent
+  );
+  const [diagramMode, setDiagramMode] = useState(() =>
+    localStorage.getItem('FB_diagramMode') || DEFAULT_VALUES.diagramMode
   );
 
   // États pour l'interface
@@ -99,6 +108,7 @@ const FB_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguag
         localStorage.setItem('NCV_kcal_kg', NCV_kcal_kg);
         localStorage.setItem('Masse_dechet_kg_h', Masse_dechet_kg_h);
         localStorage.setItem('bilanType', bilanType);
+        localStorage.setItem('FB_diagramMode', diagramMode);
         // Nouveaux paramètres
         localStorage.setItem('wasteType', wasteType);
         localStorage.setItem('Q_boue_kg_h', Q_boue_kg_h);
@@ -111,7 +121,7 @@ const FB_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguag
     saveToLocalStorage();
   }, [
     Tair_FB_C, Thermal_losses_MW, NCV_kcal_kg, Masse_dechet_kg_h, 
-    bilanType, wasteType, Q_boue_kg_h, MS_percent, MV_percent
+    bilanType, wasteType, Q_boue_kg_h, MS_percent, MV_percent, diagramMode
   ]);
 
   // Sauvegarde des résultats de calcul
@@ -189,6 +199,10 @@ const FB_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguag
 
 
       setCalculationResult_FB(result);
+      if (diagramMode === DIAGRAM_MODES.YES) {
+        const pointE = { x: result.MasseDechet || 0, y: result.P_incinerateur_MWH || 0 };
+        localStorage.setItem('pointE', JSON.stringify(pointE));
+      }
       onSendData({ result, inputData: { Tair_FB_C, Thermal_losses_MW, bilanType, wasteType, Q_boue_kg_h, MS_percent, MV_percent, NCV_kcal_kg } });
       
     } catch (error) {
@@ -200,6 +214,13 @@ const FB_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguag
   }, [
     nodeData, bilanType, wasteType, validateInputs, onSendData, t
   ]);
+
+  // Toggle pour le diagramme de combustion
+  const toggleDiagramMode = useCallback(() => {
+    setDiagramMode(prev =>
+      prev === DIAGRAM_MODES.NO ? DIAGRAM_MODES.YES : DIAGRAM_MODES.NO
+    );
+  }, []);
 
   // Toggle pour le type de bilan
   const toggleBilanType = useCallback(() => {
@@ -227,6 +248,7 @@ const FB_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguag
       setNCV_kcal_kg(DEFAULT_VALUES.NCV_kcal_kg);
       setMasse_dechet_kg_h(DEFAULT_VALUES.Masse_dechet_kg_h);
       setBilanType(DEFAULT_VALUES.bilanType);
+      setDiagramMode(DEFAULT_VALUES.diagramMode);
       // Nouveaux paramètres
       setWasteType(DEFAULT_VALUES.wasteType);
       setQ_boue_kg_h(DEFAULT_VALUES.Q_boue_kg_h);
@@ -258,6 +280,11 @@ const FB_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguag
   const balanceDisplayMapping = useMemo(() => ({
     [BALANCE_TYPES.DS]: 'DRY SOLIDS',
     [BALANCE_TYPES.QBOUE]: 'Q SLUDGE'
+  }), []);
+
+  const diagramDisplayMapping = useMemo(() => ({
+    [DIAGRAM_MODES.NO]: 'Non',
+    [DIAGRAM_MODES.YES]: 'Oui'
   }), []);
 
   // Mapping pour les types de déchets
@@ -423,8 +450,19 @@ const FB_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguag
           </>
         )}
 
+        {/* Toggle pour l'envoi vers le diagramme de combustion */}
+        <div className="toggle-container">
+          <ToggleButton
+            label="Diagramme"
+            value={diagramMode}
+            mapping={diagramDisplayMapping}
+            onChange={toggleDiagramMode}
+            testId="diagram-toggle"
+          />
+        </div>
+
         {/* Champ PCI */}
-        <InputField 
+        <InputField
           label={t.PCI}
           unit={`[${t.kcalPerKg}]`} 
           value={NCV_kcal_kg} 

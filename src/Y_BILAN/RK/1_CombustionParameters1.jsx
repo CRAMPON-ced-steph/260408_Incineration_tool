@@ -300,8 +300,8 @@ const CombustionParameters = ({ innerData, currentLanguage = 'fr' }) => {
         updatedRows2[3].data['H [kg/h]'] = updatedRows2[0].data['H [kg/h]'] / 2.016;
         updatedRows2[3].data['O [kg/h]'] = updatedRows2[0].data['O [kg/h]'] / 16/2;
         updatedRows2[3].data['N [kg/h]'] = updatedRows2[0].data['N [kg/h]'] / 14.007/2;
-        updatedRows2[3].data['S [kg/h]'] = updatedRows2[0].data['S [kg/h]'] / 32.06;
-        updatedRows2[3].data['Cl [kg/h]'] = updatedRows2[0].data['Cl [kg/h]'] / 35.5;
+        updatedRows2[3].data['S [kg/h]'] = updatedRows2[0].data['S [kg/h]'] / 32.066;
+        updatedRows2[3].data['Cl [kg/h]'] = updatedRows2[0].data['Cl [kg/h]'] / 35.45;
 
         setCmoles (updatedRows2[3].data['C [kg/h]'])
         setHmoles (updatedRows2[3].data['H [kg/h]'])

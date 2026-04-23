@@ -11,7 +11,7 @@ import CalculationResults from '../../C_Components/ShowCalculationResult_retro';
 import BHF_Retro_Rapport from './BHF_Retro_Rapport';
 import '../../index.css';
 
-const BHF_Parameter_Tab = ({ nodeData, title, onSendData, onClose }) => {
+const BHF_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguage }) => {
   const [Qair_decolmatation, setQair_decolmatation] = useState(() => parseFloat(localStorage.getItem('Qair_decolmatation')) || 0);
   const [T_air_decolmatation, setT_air_decolmatation] = useState(() => parseFloat(localStorage.getItem('T_air_decolmatation')) || 15);
   const [T_amont_BHF, setT_amont_BHF] = useState(() => parseFloat(localStorage.getItem('T_amont_BHF')) || nodeData?.result?.dataFlow?.T || '10');

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 // CO2_calculations.js non implémenté — stub local
 const performCalculation_CO2 = () => null;
 
-const CO2_Parameter_Tab = ({ nodeData, title, onSendData, onClose }) => {
+const CO2_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguage }) => {
     // Initialiser les états avec les données reçues ou des valeurs par défaut
     const [calculationResult_CO2, setCalculationResult] = useState(nodeData?.calculationResult || null);
     const [isSliderOpen, setIsSliderOpen] = useState(false);

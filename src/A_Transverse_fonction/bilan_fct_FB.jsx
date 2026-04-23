@@ -371,7 +371,7 @@ export const vitesse = (Q, S) => {
 
 export const Vol_Air = (DebitCarbone, DebitHydrogene, DebitSoufre, DebitOxygene) => {
   const Masse_Air = MasseAir(DebitCarbone, DebitHydrogene, DebitSoufre, DebitOxygene);
-  return Masse_Air / 1.293017;
+  return Masse_Air / 1.293;
 };
 
 
@@ -469,7 +469,7 @@ export const DP_RecupAir = (Pvoute, Volairtot, TempAirMoy, VitesseAir, Npasse, F
 };
 
 
-export const MasseAir_e = (DebitCarbone, DebitHydrogene, DebitSoufre, DebitOxygene, e = 40, O2_target = 4) => {
+export const MasseAir_e = (DebitCarbone, DebitHydrogene, DebitSoufre, DebitOxygene, e , O2_target ) => {
   const pourcent_O2 = O2_target;
   const pourcent_N2 = 100 - 0.93 - pourcent_O2;
 
@@ -490,7 +490,7 @@ export const MasseAir_e = (DebitCarbone, DebitHydrogene, DebitSoufre, DebitOxyge
 
 
 
-export const Vol_Air_e = (DebitCarbone, DebitHydrogene, DebitSoufre, DebitOxygene, e = 40, O2_target = 4) => {
+export const Vol_Air_e = (DebitCarbone, DebitHydrogene, DebitSoufre, DebitOxygene, e , O2_target) => {
   const Masse_Air = MasseAir_e(DebitCarbone, DebitHydrogene, DebitSoufre, DebitOxygene, e, O2_target).MasseAir_e;
   const pourcent_O2 = O2_target;
   const pourcent_N2 = 100 - 0.93 - pourcent_O2;

@@ -131,7 +131,7 @@ const FBPollutantEmission = ({ innerData, currentLanguage = 'fr' }) => {
 
   // Calculs des masses de polluants d'entrée
   const Masse_polluant_HCl_kg_h = innerData?.FG_pollutant_OUT_kg_h?.HCl ?? 0;
-  const Masse_polluant_Cl_kg_h = (Masse_polluant_HCl_kg_h * 35.5) / 36.5;
+  const Masse_polluant_Cl_kg_h = (Masse_polluant_HCl_kg_h * 35.45) / 36.46;
 
   const Masse_polluant_SO2_kg_h = innerData?.FG_pollutant_OUT_kg_h?.SO2 ?? 0;
   const Masse_polluant_S_kg_h = (Masse_polluant_SO2_kg_h * 32) / 64;

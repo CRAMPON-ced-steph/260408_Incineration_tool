@@ -211,30 +211,27 @@ function runIterativeCalc({
     const MolesO2excGaz = ((Maire_sec_comb_gaz * (1 - 1 / (1 + Exces_air_combustible / 100))) * (1 / 4.310055) * 1000) / 32;
 
     const MF_C = MB_C + MG_C;
-    const MF_H = MB_H + MG_H;
+    const MF_H = MB_H + MG_H + MAirSec_H + MAirTert_H;
     const MF_O2 = MB_O + MG_O;
-    const MF_N = MB_N + MG_N;
+    const MF_N = MB_N + MG_N + MAirSec_N + MAirTert_N;
     const MF_SO2 = MB_S + MG_S;
     const MF_HCl = MB_Cl + MG_Cl;
 
     const MF_CO2 = (MF_C * Math.sqrt(Math.max(MF_O2, 0))) / (0.05 + Math.sqrt(Math.max(MF_O2, 0)));
     const MF_CO = MF_C - MF_CO2;
 
-
-
-
     const MolesO2excBoue = Mole_Excess_O2(Exces_air_lit, Maire_sec_comb_boue) || 0;
     const MoleO2excesAirInstrumentation = Mole_Excess_O2_air_varia(Maire_balayage) || 0;
     const MoleO2excesAirSecondaire = Mole_Excess_O2_air_varia(Masse_air_secondaire_kg_h) || 0;
     const MoleO2excesAirTertiaire = Mole_Excess_O2_air_varia(Masse_air_tertiaire_kg_h) || 0;
 
-
-
-
-    const MF_O2exc = MolesO2excGaz + MolesO2excBoue;
-
-    const ParamB1 = MF_O2 - 2 * MF_C - 2 * MF_O2exc - 2 * MF_SO2;
-    const MF_H2O = ParamB1 + MF_CO;
+    // Bilan O sur zone primaire (inclut air instru dont l'O2 est entièrement en excès)
+    const MF_O2exc_primary = MolesO2excGaz + MolesO2excBoue + MoleO2excesAirInstrumentation;
+    const ParamB1 = MF_O2 - 2 * MF_C - 2 * MF_O2exc_primary - 2 * MF_SO2;
+    const MF_H2O_primary = ParamB1 + MF_CO;
+    // Ajout des contributions de l'air secondaire et tertiaire aux fumées finales
+    const MF_O2exc = MF_O2exc_primary + MoleO2excesAirSecondaire + MoleO2excesAirTertiaire;
+    const MF_H2O = MF_H2O_primary + (Masse_air_secondaire_kg_h + Masse_air_tertiaire_kg_h) * Teneur_en_eau_kgH2O_kgAS / 18.015 * 1000;
 
     const MF_NOX = MoleNOx(MS_pourcent, MV_pourcent, PCI_boue_kcal_kgMV, BoueBrute_kg_h) || 0;
     const MF_N2 = (MF_N - MF_NOX) / 2;
@@ -1437,8 +1434,8 @@ const CombustionTab = ({ innerData = {}, onInnerDataChange, onResultsChange, cur
                 <tr style={{ backgroundColor: '#F3F4F6' }}>
                   <td style={TDR}>Moles eau additionnelle dans carneau</td>
                   <td style={TD}>-</td>
-                  <td style={TD}>{f((2 * (emissions.eau_add_kg_h || 0) / 18.016) * 1000, 3)}</td>
-                  <td style={TD}>{f(((emissions.eau_add_kg_h || 0) / 18.016) * 1000, 3)}</td>
+                  <td style={TD}>{f((2 * (emissions.eau_add_kg_h || 0) / 18.015) * 1000, 3)}</td>
+                  <td style={TD}>{f(((emissions.eau_add_kg_h || 0) / 18.015) * 1000, 3)}</td>
                   {Array(15).fill(null).map((_, i) => <td key={i} style={TD}>-</td>)}
                 </tr>
                 <tr style={{ backgroundColor: '#F3F4F6' }}>

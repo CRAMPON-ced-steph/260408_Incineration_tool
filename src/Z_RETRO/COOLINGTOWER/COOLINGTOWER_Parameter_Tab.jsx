@@ -12,7 +12,7 @@ import CalculationResults from '../../C_Components/ShowCalculationResult_retro';
 import COOLINGTOWER_Retro_Rapport from './COOLINGTOWER_Retro_Rapport';
 import '../../index.css';
 
-const COOLINGTOWER_Parameter_Tab = ({ nodeData, title, onSendData, onClose }) => {
+const COOLINGTOWER_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguage }) => {
   
   const [Teau, setTeau] = useState(() => parseFloat(localStorage.getItem('Teau')) || 15);
   const [T_steam_C, setT_steam_C] = useState(() => parseFloat(localStorage.getItem('T_steam_C')) || (nodeData?.result?.dataFlow?.T || 120));

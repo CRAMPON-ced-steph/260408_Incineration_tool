@@ -219,25 +219,25 @@ function runIterativeCalc({
       Maire_sec_comb_boue * Teneur_en_eau_kgH2O_kgAS;
 
     const MB_C = (Mboue.C / 12.01) * 1000;
-    const MB_H = ((Mboue.H / 1.008 + (2 * Debit_eau) / 18.016) * 1000);
+    const MB_H = ((Mboue.H / 1.008 + (2 * Debit_eau) / 18.015) * 1000);
     const MB_O =
       (Mboue.O / 16 +
-        Debit_eau / 18.016 +
+        Debit_eau / 18.015 +
         ((Maire_sec_comb_boue / 4.310055 + Maire_balayage / 4.32) / 16)) *
       1000;
     const MB_N =
       ((Mboue.N + (Maire_sec_comb_boue * (1 - 1 / 4.310055) + Maire_balayage * (1 - 1 / 4.32)))) *
       1000 /
-      14.008;
+      14.007;
     const MB_S = (Mboue.S / 32.066) * 1000;
-    const MB_Cl = (Mboue.Cl / 35.457) * 1000;
+    const MB_Cl = (Mboue.Cl / 35.45) * 1000;
 
     const MG_C = (Mgaz.C / 12.01) * 1000;
-    const MG_H = ((Mgaz.H / 1.008 + (2 * Mhum_comb_gaz) / 18.016) * 1000);
-    const MG_O = ((Mgaz.O / 16 + Mhum_comb_gaz / 18.016 + Maire_sec_comb_gaz / 4.310055 / 16) * 1000);
-    const MG_N = ((Mgaz.N + Maire_sec_comb_gaz * (1 - 1 / 4.310055)) * 1000) / 14.008;
+    const MG_H = ((Mgaz.H / 1.008 + (2 * Mhum_comb_gaz) / 18.015) * 1000);
+    const MG_O = ((Mgaz.O / 16 + Mhum_comb_gaz / 18.015 + Maire_sec_comb_gaz / 4.310055 / 16) * 1000);
+    const MG_N = ((Mgaz.N + Maire_sec_comb_gaz * (1 - 1 / 4.310055)) * 1000) / 14.007;
     const MG_S = (Mgaz.S / 32.066) * 1000;
-    const MG_Cl = (Mgaz.Cl / 35.457) * 1000;
+    const MG_Cl = (Mgaz.Cl / 35.45) * 1000;
 
     const MolesO2excGaz = ((Maire_sec_comb_gaz * (1 - 1 / (1 + Exces_air / 100))) * (1 / 4.310055) * 1000) / 32;
 

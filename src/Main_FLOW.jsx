@@ -1,5 +1,5 @@
+/* eslint-disable react/prop-types */
 import React, { useState, useCallback, useEffect } from 'react';
-import COLORS from './C_Components/couleur';
 import {ReactFlow, Controls, Background, Panel, useNodesState, useEdgesState, addEdge, getIncomers, getOutgoers, getConnectedEdges, useReactFlow} from '@xyflow/react';
 import { Eraser } from './C_Components/EraserTool/Eraser';
 import '@xyflow/react/dist/style.css';
@@ -72,13 +72,11 @@ function LockScrollButton() {
   );
 }
 
-function Flow({ 
+function Flow({
   currentUser,
   adminEmail,
-  authorizedEmails,
-  onUpdateEmails,
   onShowEmailManagement,
-  onLogout 
+  onLogout
 }) {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -96,8 +94,6 @@ function Flow({
     localStorage.getItem('selectedLanguage') || 'fr'
   );
   
-  const activeNodes = nodes.filter(node => node.data?.isActive);
-
   // Fonction pour mettre à jour la langue
   const handleLanguageChange = useCallback((newLanguage) => {
     setCurrentLanguage(newLanguage);

@@ -3,7 +3,7 @@ export const mole_H = 2;
 export const mole_O = 16/2;
 export const mole_N = 14/2;
 export const mole_S = 32;
-export const mole_Cl = 35.5;
+export const mole_Cl = 35.45;
 
 export const O2_masse_volume = (21 * 32/22.4)/(21 * 32/22.4 + 79*28/22.4);
 export const rho_air = 0.21*32/22.4+0.79*28/22.4;
@@ -12,16 +12,16 @@ export const molarMasses = {
   C:12.01,
   H: 1.008,
   O: 16.00,
-  N: 14.008,
+  N: 14.007,
   S: 32.066,
-  Cl: 35.457,
+  Cl: 35.45,
   CO : 28.01,
   HCl: 36.46,
   HF: 20.01,
   //Cl: 35.45,
   //S: 32.07,
   SO2: 64.07,
-  N2: 28.016,
+  N2: 28.014,
   NOx: 30.01, // Supposons que NOx est principalement NO2
   CO2: 44.01,
   NH3: 17.03,
@@ -36,7 +36,7 @@ export const molarMasses = {
   NaHCO3: 84,
   CaO: 56,
   O2: 32,
-  H2O: 18.016,
+  H2O: 18.015,
   // S
   CaSO3: 120,
   CaSO3_H2O: 138, // (CaSO3,H2O)

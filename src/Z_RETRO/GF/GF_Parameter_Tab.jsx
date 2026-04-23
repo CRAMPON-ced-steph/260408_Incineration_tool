@@ -53,7 +53,8 @@ const STORAGE_KEYS = {
   INJECTED_WATER_ENABLED: 'injectedWaterEnabled',
   AIR_INGRESS_ENABLED: 'AirIngressEnabled',
   
-  CALCULATION_RESULT: 'calculationResult_GF'
+  CALCULATION_RESULT: 'calculationResult_GF',
+  DIAGRAM_MODE: 'GF_diagramMode'
 };
 
 // Valeurs par défaut
@@ -94,7 +95,8 @@ const DEFAULT_VALUES = {
   superheatedWaterEnabled: false,
   recycledFlueGasEnabled: false,
   injectedWaterEnabled: false,
-  AirIngressEnabled: false
+  AirIngressEnabled: false,
+  diagramMode: 'NO'
 };
 
 const GF_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguage }) => {
@@ -208,8 +210,11 @@ const GF_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguag
   const [injectedWaterEnabled, setInjectedWaterEnabled] = useState(() => 
     localStorage.getItem(STORAGE_KEYS.INJECTED_WATER_ENABLED) === 'true'
   );
-  const [AirIngressEnabled, setAirIngressEnabled] = useState(() => 
+  const [AirIngressEnabled, setAirIngressEnabled] = useState(() =>
     localStorage.getItem(STORAGE_KEYS.AIR_INGRESS_ENABLED) === 'true'
+  );
+  const [diagramMode, setDiagramMode] = useState(() =>
+    localStorage.getItem(STORAGE_KEYS.DIAGRAM_MODE) || DEFAULT_VALUES.diagramMode
   );
 
   // États pour l'interface
@@ -274,7 +279,8 @@ const GF_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguag
           [STORAGE_KEYS.SUPERHEATED_WATER_ENABLED]: superheatedWaterEnabled.toString(),
           [STORAGE_KEYS.RECYCLED_FLUE_GAS_ENABLED]: recycledFlueGasEnabled.toString(),
           [STORAGE_KEYS.INJECTED_WATER_ENABLED]: injectedWaterEnabled.toString(),
-          [STORAGE_KEYS.AIR_INGRESS_ENABLED]: AirIngressEnabled.toString()
+          [STORAGE_KEYS.AIR_INGRESS_ENABLED]: AirIngressEnabled.toString(),
+          [STORAGE_KEYS.DIAGRAM_MODE]: diagramMode
         };
 
         Object.entries(dataToSave).forEach(([key, value]) => {
@@ -299,7 +305,8 @@ const GF_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguag
     Unburnt_LCV_kcal_kg, Reference_temperature_C,
     // États des toggles
     saturatedSteamEnabled, superheatedSteamEnabled, superheatedWaterEnabled,
-    recycledFlueGasEnabled, injectedWaterEnabled, AirIngressEnabled
+    recycledFlueGasEnabled, injectedWaterEnabled, AirIngressEnabled,
+    diagramMode
   ]);
 
   // Sauvegarde des résultats de calcul
@@ -422,6 +429,10 @@ const GF_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguag
       );
 
       setCalculationResult_GF(result);
+      if (diagramMode === 'YES') {
+        const pointE = { x: result.Waste_flow_rate_kg_h || 0, y: result.P_incinerateur_MWH || 0 };
+        localStorage.setItem('pointE', JSON.stringify(pointE));
+      }
       if (onSendData) {
         onSendData({ result, inputData: { Waste_flow_rate_kg_h, Pressure_losse_mmCE, Combustion_air_flowrate_Nm3_h, Measured_air_temperature_C, Q_feed_water_kg_h, T_feed_water_C, Blowdown_pourcent } });
       }
@@ -483,7 +494,8 @@ const GF_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguag
       setRecycledFlueGasEnabled(DEFAULT_VALUES.recycledFlueGasEnabled);
       setInjectedWaterEnabled(DEFAULT_VALUES.injectedWaterEnabled);
       setAirIngressEnabled(DEFAULT_VALUES.AirIngressEnabled);
-      
+      setDiagramMode(DEFAULT_VALUES.diagramMode);
+
     } catch (error) {
       console.warn('Erreur lors de l\'effacement:', error);
     }
@@ -534,6 +546,10 @@ const GF_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguag
       setQ_superheated_steam_kg_h('0');
       setP_superheated_steam_bar('0');
     }
+  }, []);
+
+  const toggleDiagramMode = useCallback(() => {
+    setDiagramMode(prev => prev === 'NO' ? 'YES' : 'NO');
   }, []);
 
   const handleToggleSuperheatedWater = useCallback((value) => {
@@ -808,13 +824,26 @@ const GF_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguag
           onChange={createInputHandler(setUnburnt_LCV_kcal_kg, DEFAULT_VALUES.Unburnt_LCV_kcal_kg)}
           disabled={isCalculating}
         />
-        <InputField 
-          label={t.Reference_temperature} 
-          unit={`[${t.celsius}]`} 
-          value={Reference_temperature_C} 
+        <InputField
+          label={t.Reference_temperature}
+          unit={`[${t.celsius}]`}
+          value={Reference_temperature_C}
           onChange={createInputHandler(setReference_temperature_C, DEFAULT_VALUES.Reference_temperature_C)}
           disabled={isCalculating}
         />
+
+        {/* Toggle pour l'envoi vers le diagramme de combustion */}
+        <div className="toggle-container" style={{ marginTop: '10px', display: 'flex', alignItems: 'center' }}>
+          <label style={{ marginRight: '10px' }}>Diagramme:</label>
+          <button
+            onClick={toggleDiagramMode}
+            data-testid="diagram-toggle"
+            className={`toggle-button ${diagramMode === 'NO' ? 'toggle-button--option1' : 'toggle-button--option2'}`}
+            disabled={isCalculating}
+          >
+            {diagramMode === 'NO' ? 'Non' : 'Oui'}
+          </button>
+        </div>
       </div>
 
       {/* Boutons d'action */}
