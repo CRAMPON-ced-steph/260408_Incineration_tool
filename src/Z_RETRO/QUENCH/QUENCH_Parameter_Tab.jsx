@@ -26,7 +26,7 @@ const STORAGE_KEYS = {
   T_AMONT_QUENCH: 'T_amont_QUENCH',
   Q_EAU: 'Qeau',
   PDC_AERO: 'PDC_aero',
-  BILAN_TYPE: 'bilanType',
+  BILAN_TYPE: 'QUENCH_bilanType',
   CALCULATION_RESULT: 'calculationResult_QUENCH'
 };
 
@@ -57,9 +57,10 @@ const QUENCH_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLan
   );
 
   // Type de bilan
-  const [bilanType, setBilanType] = useState(() => 
-    localStorage.getItem(STORAGE_KEYS.BILAN_TYPE) || DEFAULT_VALUES.bilanType
-  );
+  const [bilanType, setBilanType] = useState(() => {
+    const stored = localStorage.getItem(STORAGE_KEYS.BILAN_TYPE);
+    return Object.values(BALANCE_TYPES).includes(stored) ? stored : DEFAULT_VALUES.bilanType;
+  });
 
   // États pour l'interface
   const [calculationResult_QUENCH, setCalculationResult_QUENCH] = useState(() => {

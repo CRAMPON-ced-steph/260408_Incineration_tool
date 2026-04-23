@@ -25,7 +25,7 @@ const STORAGE_KEYS = {
   T_EAU: 'Teau',
   T_AMONT_SCRUBBER: 'T_amont_SCRUBBER',
   PDC_AERO: 'PDC_aero',
-  BILAN_TYPE: 'bilanType',
+  BILAN_TYPE: 'SCRUBBER_bilanType',
   CALCULATION_RESULT: 'calculationResult_SCRUBBER'
 };
 
@@ -52,9 +52,10 @@ const SCRUBBER_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentL
   );
 
   // États pour les modes de calcul
-  const [bilanType, setBilanType] = useState(() => 
-    localStorage.getItem(STORAGE_KEYS.BILAN_TYPE) || DEFAULT_VALUES.bilanType
-  );
+  const [bilanType, setBilanType] = useState(() => {
+    const stored = localStorage.getItem(STORAGE_KEYS.BILAN_TYPE);
+    return Object.values(BALANCE_TYPES).includes(stored) ? stored : DEFAULT_VALUES.bilanType;
+  });
 
   // États pour l'interface
   const [calculationResult_SCRUBBER, setCalculationResult_SCRUBBER] = useState(() => {

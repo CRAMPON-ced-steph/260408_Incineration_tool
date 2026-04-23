@@ -45,7 +45,7 @@ const STORAGE_KEYS = {
   Q_EAU_ALIMENTATION: 'Q_eau_alimentation',
   O2_MESURE: 'O2_mesure',
   BILAN_TYPE_VAPEUR: 'bilanTypeVapeur',
-  BILAN_TYPE: 'bilanType',
+  BILAN_TYPE: 'WHB_bilanType',
   BILAN_TYPE_AIR: 'bilanTypeAir',
   CALCULATION_RESULT: 'calculationResult_WHB'
 };
@@ -108,9 +108,10 @@ const WHB_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLangua
   const [bilanTypeVapeur, setBilanTypeVapeur] = useState(() => 
     localStorage.getItem(STORAGE_KEYS.BILAN_TYPE_VAPEUR) || DEFAULT_VALUES.bilanTypeVapeur
   );
-  const [bilanType, setBilanType] = useState(() => 
-    localStorage.getItem(STORAGE_KEYS.BILAN_TYPE) || DEFAULT_VALUES.bilanType
-  );
+  const [bilanType, setBilanType] = useState(() => {
+    const stored = localStorage.getItem(STORAGE_KEYS.BILAN_TYPE);
+    return Object.values(BALANCE_TYPES).includes(stored) ? stored : DEFAULT_VALUES.bilanType;
+  });
   const [bilanTypeAir, setBilanTypeAir] = useState(() => 
     localStorage.getItem(STORAGE_KEYS.BILAN_TYPE_AIR) || DEFAULT_VALUES.bilanTypeAir
   );

@@ -66,7 +66,7 @@ const FB_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguag
 
   // États pour les types de calcul
   const [bilanType, setBilanType] = useState(() => 
-    localStorage.getItem('bilanType') || DEFAULT_VALUES.bilanType
+    (() => { const s = localStorage.getItem('FB_bilanType'); return Object.values(BALANCE_TYPES).includes(s) ? s : DEFAULT_VALUES.bilanType; })()
   );
 
   // Nouveaux états pour les paramètres ajoutés
@@ -107,7 +107,7 @@ const FB_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguag
         localStorage.setItem('Thermal_losses_MW', Thermal_losses_MW);
         localStorage.setItem('NCV_kcal_kg', NCV_kcal_kg);
         localStorage.setItem('Masse_dechet_kg_h', Masse_dechet_kg_h);
-        localStorage.setItem('bilanType', bilanType);
+        localStorage.setItem('FB_bilanType', bilanType);
         localStorage.setItem('FB_diagramMode', diagramMode);
         // Nouveaux paramètres
         localStorage.setItem('wasteType', wasteType);
