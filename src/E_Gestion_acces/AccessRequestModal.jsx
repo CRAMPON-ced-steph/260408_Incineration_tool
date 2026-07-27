@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
+import { getAuthTranslations } from './auth_traduction';
+import { getLanguageCode } from '../F_Gestion_Langues/Fonction_Traduction';
 
 function AccessRequestModal({ onClose, adminEmail = "cedric.crampon@gmail.com" }) {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  const langCode = getLanguageCode(localStorage.getItem('selectedLanguage') || 'fr');
+  const t = getAuthTranslations(langCode);
 
   const validateEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -13,43 +18,41 @@ function AccessRequestModal({ onClose, adminEmail = "cedric.crampon@gmail.com" }
 
   const handleSubmitRequest = (e) => {
     e.preventDefault();
-    
+
     if (!validateEmail(email)) {
-      setError("Veuillez entrer une adresse email valide.");
+      setError(t.validEmail);
       return;
     }
 
-    // Préparer le contenu de l'email
-    const subject = encodeURIComponent("Demande d'accès à l'application");
+    const subject = encodeURIComponent(t.mailSubject);
     const body = encodeURIComponent(
-      `Bonjour,\n\n` +
-      `Je souhaiterais obtenir un accès à l'application.\n\n` +
-      `Mon adresse email : ${email}\n\n` +
-      `Message : ${message || "Aucun message supplémentaire"}\n\n` +
-      `Merci de bien vouloir étudier ma demande.\n\n` +
-      `Cordialement`
+      `${t.mailGreeting}\n\n` +
+      `${t.mailBody1}\n\n` +
+      `${t.mailMyEmail} ${email}\n\n` +
+      `${t.mailMessage} ${message || t.mailNoMessage}\n\n` +
+      `${t.mailThanks}\n\n` +
+      `${t.mailRegards}`
     );
 
-    // Ouvrir le client email par défaut
     const mailtoLink = `mailto:${adminEmail}?subject=${subject}&body=${body}`;
-    
+
     try {
       window.location.href = mailtoLink;
-      setSuccess("Votre demande d'accès a été préparée. Veuillez envoyer l'email qui vient de s'ouvrir dans votre client email.");
+      setSuccess(t.requestPrepared);
       setTimeout(() => {
         onClose();
       }, 3000);
-    } catch (error) {
-      setError(`Impossible d'ouvrir votre client email. Veuillez contacter ${adminEmail} manuellement.`);
+    } catch (err) {
+      setError(`${t.emailErrorPrefix}${adminEmail}${t.emailErrorSuffix}`);
     }
   };
 
   return (
     <div style={{
-      position: 'fixed', 
-      top: 0, 
-      left: 0, 
-      width: '100%', 
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100%',
       height: '100%',
       backgroundColor: 'rgba(0,0,0,0.5)',
       display: 'flex',
@@ -65,48 +68,48 @@ function AccessRequestModal({ onClose, adminEmail = "cedric.crampon@gmail.com" }
         maxHeight: '80vh',
         overflowY: 'auto'
       }}>
-        <h2>Demander un accès</h2>
+        <h2>{t.requestTitle}</h2>
         <p style={{ color: '#666', marginBottom: '20px' }}>
-          Remplissez ce formulaire pour demander un accès à l'application. Un email sera automatiquement préparé pour l'administrateur.
+          {t.requestDesc}
         </p>
-        
+
         <form onSubmit={handleSubmitRequest}>
           <div style={{ marginBottom: '15px' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-              Votre adresse email *
+              {t.yourEmail}
             </label>
             <input
               type="email"
-              placeholder="votre.email@exemple.com"
+              placeholder={t.emailPlaceholder}
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
                 setError("");
               }}
-              style={{ 
+              style={{
                 width: '100%',
-                padding: '10px', 
-                borderRadius: '4px', 
+                padding: '10px',
+                borderRadius: '4px',
                 border: error ? '1px solid red' : '1px solid #ccc',
                 fontSize: '14px'
               }}
               required
             />
           </div>
-          
+
           <div style={{ marginBottom: '20px' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-              Message (optionnel)
+              {t.messageLabel}
             </label>
             <textarea
-              placeholder="Indiquez la raison de votre demande d'accès..."
+              placeholder={t.messagePlaceholder}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={4}
-              style={{ 
+              style={{
                 width: '100%',
-                padding: '10px', 
-                borderRadius: '4px', 
+                padding: '10px',
+                borderRadius: '4px',
                 border: '1px solid #ccc',
                 fontSize: '14px',
                 resize: 'vertical'
@@ -119,7 +122,7 @@ function AccessRequestModal({ onClose, adminEmail = "cedric.crampon@gmail.com" }
               {error}
             </p>
           )}
-          
+
           {success && (
             <p style={{ color: 'green', marginBottom: '15px', fontSize: '14px' }}>
               {success}
@@ -130,31 +133,31 @@ function AccessRequestModal({ onClose, adminEmail = "cedric.crampon@gmail.com" }
             <button
               type="button"
               onClick={onClose}
-              style={{ 
-                padding: '10px 20px', 
-                backgroundColor: '#607D8B', 
-                color: 'white', 
-                border: 'none', 
-                borderRadius: '4px', 
+              style={{
+                padding: '10px 20px',
+                backgroundColor: '#607D8B',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
                 cursor: 'pointer',
                 fontSize: '14px'
               }}
             >
-              Annuler
+              {t.cancel}
             </button>
             <button
               type="submit"
-              style={{ 
-                padding: '10px 20px', 
-                backgroundColor: '#4CAF50', 
-                color: 'white', 
-                border: 'none', 
-                borderRadius: '4px', 
+              style={{
+                padding: '10px 20px',
+                backgroundColor: '#4CAF50',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
                 cursor: 'pointer',
                 fontSize: '14px'
               }}
             >
-              Envoyer la demande
+              {t.send}
             </button>
           </div>
         </form>

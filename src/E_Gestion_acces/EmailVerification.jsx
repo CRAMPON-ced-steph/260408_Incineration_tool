@@ -1,12 +1,17 @@
 /* eslint-disable react/prop-types */
 import React, { useState } from 'react';
 import AccessRequestModal from './AccessRequestModal';
+import { getAuthTranslations } from './auth_traduction';
+import { getLanguageCode } from '../F_Gestion_Langues/Fonction_Traduction';
 
 function EmailVerification({ onAuthorize, authorizedEmails = [] }) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [showEmail, setShowEmail] = useState(false);
   const [showAccessRequest, setShowAccessRequest] = useState(false);
+
+  const langCode = getLanguageCode(localStorage.getItem('selectedLanguage') || 'fr');
+  const t = getAuthTranslations(langCode);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -20,7 +25,7 @@ function EmailVerification({ onAuthorize, authorizedEmails = [] }) {
       localStorage.setItem("authorizedEmailValidUntil", authorizedEmail.validUntil.toISOString());
       onAuthorize(true, email);
     } else {
-      setError("Accès refusé : adresse e-mail non autorisée ou expirée.");
+      setError(t.accessDenied);
     }
   };
 
@@ -31,27 +36,27 @@ function EmailVerification({ onAuthorize, authorizedEmails = [] }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
       <div style={{ textAlign: 'center', padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>
-        <h2>Accès restreint</h2>
+        <h2>{t.restrictedAccess}</h2>
         <form onSubmit={handleSubmit} style={{ marginTop: '10px' }}>
           <div style={{ position: 'relative', display: 'inline-block' }}>
             <input
               type={showEmail ? "text" : "password"}
-              placeholder="Entrez votre email"
+              placeholder={t.enterEmail}
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
                 setError("");
               }}
-              style={{ 
-                padding: '8px', 
+              style={{
+                padding: '8px',
                 paddingRight: '30px',
-                borderRadius: '4px', 
-                border: error ? '1px solid red' : '1px solid #ccc', 
-                width: '250px' 
+                borderRadius: '4px',
+                border: error ? '1px solid red' : '1px solid #ccc',
+                width: '250px'
               }}
               required
             />
-            <span 
+            <span
               onClick={toggleEmailVisibility}
               style={{
                 position: 'absolute',
@@ -65,32 +70,31 @@ function EmailVerification({ onAuthorize, authorizedEmails = [] }) {
               {showEmail ? '👁️' : '👁️‍🗨️'}
             </span>
           </div>
-          <button 
-            type="submit" 
-            style={{ 
-              marginLeft: '10px', 
-              padding: '8px', 
-              backgroundColor: '#4CAF50', 
-              color: 'white', 
-              border: 'none', 
-              borderRadius: '4px', 
-              cursor: 'pointer' 
+          <button
+            type="submit"
+            style={{
+              marginLeft: '10px',
+              padding: '8px',
+              backgroundColor: '#4CAF50',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
             }}
           >
-            Vérifier
+            {t.verify}
           </button>
         </form>
-        
+
         {error && (
           <p style={{ color: 'red', marginTop: '10px' }}>
             {error}
           </p>
         )}
-        
-        {/* Bouton pour demander un accès */}
+
         <div style={{ marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '15px' }}>
           <p style={{ color: '#666', fontSize: '14px', marginBottom: '10px' }}>
-            Vous n&apos;avez pas encore d&apos;accès ?
+            {t.noAccess}
           </p>
           <button
             onClick={() => setShowAccessRequest(true)}
@@ -104,12 +108,11 @@ function EmailVerification({ onAuthorize, authorizedEmails = [] }) {
               fontSize: '14px'
             }}
           >
-            Demander un accès
+            {t.requestAccess}
           </button>
         </div>
       </div>
-      
-      {/* Modal de demande d'accès */}
+
       {showAccessRequest && (
         <AccessRequestModal onClose={() => setShowAccessRequest(false)} />
       )}

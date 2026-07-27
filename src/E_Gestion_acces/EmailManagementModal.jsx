@@ -1,11 +1,16 @@
 /* eslint-disable react/prop-types */
 import React from 'react';
+import { getAuthTranslations } from './auth_traduction';
+import { getLanguageCode } from '../F_Gestion_Langues/Fonction_Traduction';
 
 const formatDate = (date) => {
   try { return new Date(date).toISOString().split('T')[0]; } catch { return '—'; }
 };
 
 function EmailManagementModal({ onClose, currentEmails, gsheetEditUrl }) {
+  const langCode = getLanguageCode(localStorage.getItem('selectedLanguage') || 'fr');
+  const t = getAuthTranslations(langCode);
+
   return (
     <div style={{
       position: 'fixed',
@@ -23,11 +28,11 @@ function EmailManagementModal({ onClose, currentEmails, gsheetEditUrl }) {
         maxHeight: '80vh',
         overflowY: 'auto'
       }}>
-        <h2 style={{ marginTop: 0 }}>Gestion des accès utilisateurs</h2>
+        <h2 style={{ marginTop: 0 }}>{t.managementTitle}</h2>
 
         <div style={{ marginBottom: '20px', padding: '12px', backgroundColor: '#E3F2FD', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '12px' }}>
           <span style={{ fontSize: '14px', color: '#1565C0' }}>
-            Les accès sont gérés via Google Sheets. Ajoute ou supprime des emails directement dans le sheet — les changements prennent effet au prochain chargement de l&apos;application.
+            {t.gsheetInfo}
           </span>
           <a
             href={gsheetEditUrl}
@@ -45,17 +50,17 @@ function EmailManagementModal({ onClose, currentEmails, gsheetEditUrl }) {
               fontSize: '14px'
             }}
           >
-            Ouvrir Google Sheet
+            {t.openGsheet}
           </a>
         </div>
 
-        <h3>Utilisateurs autorisés ({currentEmails.length})</h3>
+        <h3>{t.authorizedUsers} ({currentEmails.length})</h3>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
-              <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ddd' }}>Email</th>
-              <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ddd' }}>Valide jusqu&apos;au</th>
-              <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ddd' }}>Source</th>
+              <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ddd' }}>{t.colEmail}</th>
+              <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ddd' }}>{t.colValidUntil}</th>
+              <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ddd' }}>{t.colSource}</th>
             </tr>
           </thead>
           <tbody>
@@ -64,7 +69,7 @@ function EmailManagementModal({ onClose, currentEmails, gsheetEditUrl }) {
                 <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{item.email}</td>
                 <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{formatDate(item.validUntil)}</td>
                 <td style={{ padding: '8px', borderBottom: '1px solid #eee', color: '#888', fontSize: '13px' }}>
-                  {item.permanent ? 'Permanent' : item.addedBy === 'gsheet' ? 'Google Sheet' : 'Temporaire'}
+                  {item.permanent ? t.srcPermanent : item.addedBy === 'gsheet' ? t.srcGsheet : t.srcTemporary}
                 </td>
               </tr>
             ))}
@@ -76,7 +81,7 @@ function EmailManagementModal({ onClose, currentEmails, gsheetEditUrl }) {
             onClick={onClose}
             style={{ padding: '8px 16px', backgroundColor: '#607D8B', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
           >
-            Fermer
+            {t.close}
           </button>
         </div>
       </div>
