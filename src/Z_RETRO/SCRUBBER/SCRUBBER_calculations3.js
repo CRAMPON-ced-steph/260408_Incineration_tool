@@ -13,7 +13,7 @@ export const performCalculation_SCRUBBER_option_TsupTsat = (nodeData, Teau,T_amo
 // LECTURE DU NOEUD PRECEDENT
 
 let T = T_amont_SCRUBBER;
-let T_intermediaire = 99;
+let T_intermediaire = 80;
 
     const Qm_CO2_out_kg_h_intermediaire = nodeData.result.dataFlow.Qm_CO2_kg_h;
     const Qm_H2O_out_kg_h_intermediaire = nodeData.result.dataFlow.Qm_H2O_kg_h;
@@ -205,8 +205,12 @@ const H2O_scrubber_kW_intermediaire = H2O_scrubber_kj_intermediaire / 3600;
 
 
 
-  const dataSCRUBBER = {Qeau,   Qeau_condensee_kg_h, PDC_aero,
-    P_out_mmCE,}
+  const dataSCRUBBER = {
+    'Q eau saturation [kg/h]': Qeau,
+    'Q eau condensée [kg/h]': Qeau_condensee_kg_h,
+    PDC_aero,
+    P_out_mmCE,
+  }
  
   const dataFlow = {
 

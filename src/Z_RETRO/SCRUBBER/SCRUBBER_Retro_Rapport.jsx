@@ -183,7 +183,7 @@ const SCRUBBER_Retro_Rapport = ({ calculationResult, inputParams, onClose }) => 
             <Section title="4. Bilan eau">
               <div style={styles.twoCol}>
                 <SubSection title="Eau condensée / retirée">
-                  <KV label="Eau retirée (condensation)" value={fmt(ds.Qeau, 0)}              unit="kg/h" />
+                  <KV label="Eau retirée (condensation)" value={fmt(ds['Q eau saturation [kg/h]'] ?? ds.Qeau, 0)} unit="kg/h" />
                   <KV label="Enthalpie eau retirée"       value={fmt(ds.H2O_scrubber_kj, 0)}  unit="kJ/h" />
                   <KV label="Puissance eau retirée"       value={fmt(ds.H2O_scrubber_kW, 1)}  unit="kW" />
                 </SubSection>
@@ -202,7 +202,7 @@ const SCRUBBER_Retro_Rapport = ({ calculationResult, inputParams, onClose }) => 
                   { label: 'Débit humide [Nm³/h]',     val: fmt(df.Qv_wet_Nm3_h, 0),     color: '#4a90e2' },
                   { label: 'Débit sec [Nm³/h]',        val: fmt(df.Qv_sec_Nm3_h, 0),     color: '#2980b9' },
                   { label: 'Débit massique [kg/h]',    val: fmt(df.Qm_tot_kg_h, 0),      color: '#2ecc71' },
-                  { label: 'Eau retirée [kg/h]',       val: fmt(ds.Qeau, 0),              color: '#8e44ad' },
+                  { label: 'Eau retirée [kg/h]',       val: fmt(ds['Q eau saturation [kg/h]'] ?? ds.Qeau, 0), color: '#8e44ad' },
                   { label: 'Puissance [kW]',           val: fmt(df.H_tot_kW, 1),          color: '#f39c12' },
                   { label: 'O₂ sec [%]',               val: fmt(df.O2_dry_pourcent, 2),   color: '#9b59b6' },
                 ].map(({ label, val, color }) => (
