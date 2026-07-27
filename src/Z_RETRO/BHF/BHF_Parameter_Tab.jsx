@@ -8,6 +8,7 @@ import ToggleButton from '../../C_Components/toggle_button_retro';
 import CloseButton from '../../C_Components/OnCloseButton_retro';
 import CalculationResults from '../../C_Components/ShowCalculationResult_retro';
 import CalculateSendButton from '../../C_Components/CalculateSendButton';
+import useBatchCalcResult from '../../C_Components/useBatchCalcResult';
 
 import BHF_Retro_Rapport from './BHF_Retro_Rapport';
 import '../../index.css';
@@ -19,6 +20,7 @@ const BHF_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLangua
   const [PDC_aero, setPDC_aero] = useState(() => localStorage.getItem(`PDC_aero_BHF_${nodeId}`) || '200');
 
   const [CalculationResult_BHF, setCalculationResult] = useState(null);
+  useBatchCalcResult(nodeId, setCalculationResult);
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [showReport, setShowReport] = useState(false);
 

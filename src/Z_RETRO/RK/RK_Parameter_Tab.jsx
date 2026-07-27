@@ -12,6 +12,7 @@ import '../../index.css';
 
 import { getLanguageCode } from '../../F_Gestion_Langues/Fonction_Traduction';
 import { translations } from './RK_traduction';
+import useBatchCalcResult from '../../C_Components/useBatchCalcResult';
 import RK_Retro_Rapport from './RK_Retro_Rapport';
 
 // Constantes pour les valeurs logiques (ne changent pas avec la langue)
@@ -76,6 +77,7 @@ const RK_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguag
       return null;
     }
   });
+  useBatchCalcResult(nodeId, setCalculationResult_RK);
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showReport, setShowReport] = useState(false);

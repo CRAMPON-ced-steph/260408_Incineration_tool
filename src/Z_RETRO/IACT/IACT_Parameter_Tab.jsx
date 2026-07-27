@@ -8,6 +8,7 @@ import ShowResultButton from '../../C_Components/Show_result_retro';
 import CloseButton from '../../C_Components/OnCloseButton_retro';
 import CalculationResults from '../../C_Components/ShowCalculationResult_retro';
 import CalculateSendButton from '../../C_Components/CalculateSendButton';
+import useBatchCalcResult from '../../C_Components/useBatchCalcResult';
 
 import IACT_Retro_Rapport from './IACT_Retro_Rapport';
 import '../../index.css';
@@ -32,6 +33,7 @@ const IACT_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLangu
   const [PDC_aero, setPDC_aero]                 = useState(() => parseFloat(localStorage.getItem(getStorageKeys(nodeId).PDC_AERO)) || 10);
 
   const [CalculationResult_IACT, setCalculationResult] = useState(null);
+  useBatchCalcResult(nodeId, setCalculationResult);
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [showReport, setShowReport] = useState(false);
 

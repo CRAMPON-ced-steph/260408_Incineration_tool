@@ -13,6 +13,7 @@ import '../../index.css';
 
 import { getLanguageCode } from '../../F_Gestion_Langues/Fonction_Traduction';
 import { translations } from './FB_traduction';
+import useBatchCalcResult from '../../C_Components/useBatchCalcResult';
 
 // Constantes pour les valeurs logiques (ne changent pas avec la langue)
 const BALANCE_TYPES = {
@@ -95,6 +96,7 @@ const FB_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguag
 
   // États pour l'interface
   const [calculationResult_FB, setCalculationResult_FB] = useState(null);
+  useBatchCalcResult(nodeId, setCalculationResult_FB);
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showReport, setShowReport] = useState(false);

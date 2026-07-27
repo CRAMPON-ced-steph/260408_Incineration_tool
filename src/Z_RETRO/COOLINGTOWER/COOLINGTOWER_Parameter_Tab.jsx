@@ -9,6 +9,7 @@ import ToggleButton from '../../C_Components/toggle_button_retro';
 import CloseButton from '../../C_Components/OnCloseButton_retro';
 import CalculationResults from '../../C_Components/ShowCalculationResult_retro';
 import CalculateSendButton from '../../C_Components/CalculateSendButton';
+import useBatchCalcResult from '../../C_Components/useBatchCalcResult';
 
 import COOLINGTOWER_Retro_Rapport from './COOLINGTOWER_Retro_Rapport';
 import '../../index.css';
@@ -23,6 +24,7 @@ const COOLINGTOWER_Parameter_Tab = ({ nodeData, title, onSendData, onClose, curr
 
 
   const [calculationResult_COOLINGTOWER, setCalculationResult] = useState(null);
+  useBatchCalcResult(nodeId, setCalculationResult);
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [showReport, setShowReport] = useState(false);
 

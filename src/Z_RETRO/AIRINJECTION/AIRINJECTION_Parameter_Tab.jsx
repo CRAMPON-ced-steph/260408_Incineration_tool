@@ -10,6 +10,7 @@ import CalculateSendButton from '../../C_Components/CalculateSendButton';
 
 import { getLanguageCode } from '../../F_Gestion_Langues/Fonction_Traduction';
 import { translations } from './AIRINJECTION_traduction';
+import useBatchCalcResult from '../../C_Components/useBatchCalcResult';
 
 import AIRINJECTION_Retro_Rapport from './AIRINJECTION_Retro_Rapport';
 import '../../index.css';
@@ -59,6 +60,7 @@ const AIRINJECTION_Parameter_Tab = ({ nodeData, title, onSendData, onClose, curr
       return null;
     }
   });
+  useBatchCalcResult(nodeId, setCalculationResult_AIRINJECTION);
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showReport, setShowReport] = useState(false);

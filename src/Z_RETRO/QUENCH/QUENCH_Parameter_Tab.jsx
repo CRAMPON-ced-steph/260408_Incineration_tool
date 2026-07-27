@@ -12,6 +12,7 @@ import CalculateSendButton from '../../C_Components/CalculateSendButton';
 
 import { getLanguageCode } from '../../F_Gestion_Langues/Fonction_Traduction';
 import { translations } from './QUENCH_traduction';
+import useBatchCalcResult from '../../C_Components/useBatchCalcResult';
 
 import QUENCH_Retro_Rapport from './QUENCH_Retro_Rapport';
 import '../../index.css';
@@ -75,6 +76,7 @@ const QUENCH_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLan
       return null;
     }
   });
+  useBatchCalcResult(nodeId, setCalculationResult_QUENCH);
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showReport, setShowReport] = useState(false);

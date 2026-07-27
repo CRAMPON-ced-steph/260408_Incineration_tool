@@ -10,6 +10,7 @@ import ClearButton from '../../C_Components/Clear_Button';
 
 import { getLanguageCode } from '../../F_Gestion_Langues/Fonction_Traduction';
 import { translations } from './STACK_traduction';
+import useBatchCalcResult from '../../C_Components/useBatchCalcResult';
 import STACK_Retro_Rapport from './STACK_Retro_Rapport';
 
 import '../../index.css';
@@ -98,6 +99,7 @@ const STACK_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLang
       return null;
     }
   });
+  useBatchCalcResult(nodeId, setCalculationResult);
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showReport, setShowReport] = useState(false);

@@ -16,6 +16,7 @@ import '../../index.css';
 
 import { getLanguageCode } from '../../F_Gestion_Langues/Fonction_Traduction';
 import { translations } from './SCRUBBER_traduction';
+import useBatchCalcResult from '../../C_Components/useBatchCalcResult';
 
 // Constantes pour les modes de calcul
 const BALANCE_TYPES = {
@@ -72,6 +73,7 @@ const SCRUBBER_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentL
       return null;
     }
   });
+  useBatchCalcResult(nodeId, setCalculationResult_SCRUBBER);
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showReport, setShowReport] = useState(false);

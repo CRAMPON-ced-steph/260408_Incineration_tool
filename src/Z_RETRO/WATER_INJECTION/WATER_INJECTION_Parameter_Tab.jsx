@@ -12,6 +12,7 @@ import CalculateSendButton from '../../C_Components/CalculateSendButton';
 
 import { getLanguageCode } from '../../F_Gestion_Langues/Fonction_Traduction';
 import { translations } from './WATER_INJECTION_traduction';
+import useBatchCalcResult from '../../C_Components/useBatchCalcResult';
 
 import WATER_INJECTION_Retro_Rapport from './WATER_INJECTION_Retro_Rapport';
 import '../../index.css';
@@ -75,6 +76,7 @@ const WATER_INJECTION_Parameter_Tab = ({ nodeData, title, onSendData, onClose, c
       return null;
     }
   });
+  useBatchCalcResult(nodeId, setCalculationResult_WATER_INJECTION);
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showReport, setShowReport] = useState(false);

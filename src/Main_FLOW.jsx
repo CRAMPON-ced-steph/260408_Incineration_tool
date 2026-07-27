@@ -35,6 +35,7 @@ import DashboardWindow from './G_Graphiques/Dashboard/Dashboard';
 import GlobalReport from './D_BILAN_Rapports/GlobalReport';
 import GlobalRetroReport from './D_BILAN_Rapports/GlobalRetroReport';
 import { batchCalcMap } from './Z_RETRO/batchCalculators';
+import { BATCH_CALC_RESULT_EVENT } from './C_Components/useBatchCalcResult';
 import CustomNode from './C_Components/CustomNode';
 
 const initialNodes = [];
@@ -516,6 +517,11 @@ function Flow({
           try { localStorage.setItem(storageKey, JSON.stringify(result)); } catch {}
         }
         localStorage.setItem(`calcSent_${node.data.label}_${node.id}`, 'true');
+
+        // Notify any open Parameter_Tab so it can refresh its displayed result immediately
+        window.dispatchEvent(new CustomEvent(BATCH_CALC_RESULT_EVENT, {
+          detail: { nodeId: node.id, result }
+        }));
       }
 
       setBatchDoneCount(i + 1);

@@ -15,6 +15,7 @@ import '../../index.css';
 
 import { getLanguageCode } from '../../F_Gestion_Langues/Fonction_Traduction';
 import { translations } from './WHB_traduction';
+import useBatchCalcResult from '../../C_Components/useBatchCalcResult';
 
 // Constantes pour les modes de calcul
 const STEAM_TYPES = {
@@ -128,6 +129,7 @@ const WHB_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLangua
       return null;
     }
   });
+  useBatchCalcResult(nodeId, setCalculationResult_WHB);
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showReport, setShowReport] = useState(false);

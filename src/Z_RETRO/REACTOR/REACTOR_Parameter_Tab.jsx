@@ -13,6 +13,7 @@ import '../../index.css';
 
 import { getLanguageCode } from '../../F_Gestion_Langues/Fonction_Traduction';
 import { translations } from './REACTOR_traduction';
+import useBatchCalcResult from '../../C_Components/useBatchCalcResult';
 
 // Constantes pour les types de réactifs
 const REAGENT_TYPES = {
@@ -95,6 +96,7 @@ const REACTOR_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLa
       return null;
     }
   });
+  useBatchCalcResult(nodeId, setCalculationResult_REACTOR);
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showReport, setShowReport] = useState(false);

@@ -10,6 +10,7 @@ import CalculateSendButton from '../../C_Components/CalculateSendButton';
 
 import { getLanguageCode } from '../../F_Gestion_Langues/Fonction_Traduction';
 import { translations } from './ELECTROFILTER_traduction';
+import useBatchCalcResult from '../../C_Components/useBatchCalcResult';
 
 import ELECTROFILTER_Retro_Rapport from './ELECTROFILTER_Retro_Rapport';
 import '../../index.css';
@@ -59,6 +60,7 @@ const ELECTROFILTER_Parameter_Tab = ({ nodeData, title, onSendData, onClose, cur
       return null;
     }
   });
+  useBatchCalcResult(nodeId, setCalculationResult_ELECTROFILTER);
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showReport, setShowReport] = useState(false);

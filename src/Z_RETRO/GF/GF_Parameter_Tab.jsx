@@ -13,6 +13,7 @@ import '../../index.css';
 
 import { getLanguageCode } from '../../F_Gestion_Langues/Fonction_Traduction';
 import { translations } from './GF_traduction';
+import useBatchCalcResult from '../../C_Components/useBatchCalcResult';
 
 // Constantes pour localStorage (suffixées par nodeId)
 const getStorageKeys = (nodeId) => ({
@@ -231,6 +232,7 @@ const GF_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguag
       return null;
     }
   });
+  useBatchCalcResult(nodeId, setCalculationResult_GF);
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
 
