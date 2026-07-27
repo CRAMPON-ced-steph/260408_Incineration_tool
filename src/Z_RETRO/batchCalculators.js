@@ -72,7 +72,7 @@ export const batchCalcMap = {
       nodeData,
       f(`T_air_decolmatation_BHF_${nodeId}`, '15'),
       f(`Qair_decolmatation_BHF_${nodeId}`, '500'),
-      parseFloat(nodeData?.result?.dataFlow?.T ?? ls(`T_amont_BHF_${nodeId}`, '170')),
+      f(`T_amont_BHF_${nodeId}`, String(nodeData?.result?.dataFlow?.T ?? 170)),
       f(`PDC_aero_BHF_${nodeId}`, '200')
     );
   },
@@ -83,7 +83,7 @@ export const batchCalcMap = {
       nodeData,
       f(`T_air_decolmatation_ELECTROFILTER_${nodeId}`, '15'),
       f(`Qair_decolmatation_ELECTROFILTER_${nodeId}`, '0'),
-      parseFloat(nodeData?.result?.dataFlow?.T ?? ls(`T_amont_ELECTROFILTER_${nodeId}`, '170')),
+      f(`T_amont_ELECTROFILTER_${nodeId}`, String(nodeData?.result?.dataFlow?.T ?? 170)),
       f(`PDC_aero_ELECTROFILTER_${nodeId}`, '100')
     );
   },
@@ -94,7 +94,7 @@ export const batchCalcMap = {
       nodeData,
       f(`T_air_parasite_CYCLONE_${nodeId}`, '15'),
       f(`Qair_parasite_CYCLONE_${nodeId}`, '0'),
-      parseFloat(nodeData?.result?.dataFlow?.T ?? ls(`T_amont_CYCLONE_${nodeId}`, '15')),
+      f(`T_amont_CYCLONE_${nodeId}`, String(nodeData?.result?.dataFlow?.T ?? 15)),
       f(`PDC_aero_CYCLONE_${nodeId}`, '10')
     );
   },
@@ -103,7 +103,7 @@ export const batchCalcMap = {
     if (!nodeData?.result) return null;
     return performCalculation_REACTOR(
       nodeData,
-      parseFloat(nodeData?.result?.dataFlow?.T ?? ls(`T_amont_REACTOR_${nodeId}`, '200')),
+      f(`T_amont_REACTOR_${nodeId}`, String(nodeData?.result?.dataFlow?.T ?? 200)),
       f(`T_air_REACTOR_${nodeId}`, '20'),
       f(`PDC_aero_REACTOR_${nodeId}`, '20'),
       ls(`reagentType_REACTOR_${nodeId}`, 'CAP'),
@@ -122,7 +122,7 @@ export const batchCalcMap = {
       return performCalculation_SCRUBBER_option_TinTout(nodeData, PDC);
     }
     const Teau = f(`Teau_SCRUBBER_${nodeId}`, '15');
-    const Tamont = parseFloat(nodeData?.result?.dataFlow?.T ?? ls(`T_amont_SCRUBBER_${nodeId}`, '50'));
+    const Tamont = f(`T_amont_SCRUBBER_${nodeId}`, String(nodeData?.result?.dataFlow?.T ?? 50));
     if (bilanType === 'T_SUP_TSAT') {
       return performCalculation_SCRUBBER_option_TsupTsat(nodeData, Teau, Tamont, PDC);
     }
@@ -137,7 +137,7 @@ export const batchCalcMap = {
     if (bilanType === 'TEMPERATURE_BALANCE') {
       return performCalculation_QUENCH_option_T(
         nodeData,
-        parseFloat(nodeData?.result?.dataFlow?.T ?? ls(`T_amont_QUENCH_${nodeId}`, '200')),
+        f(`T_amont_QUENCH_${nodeId}`, String(nodeData?.result?.dataFlow?.T ?? 200)),
         Teau, PDC
       );
     }
@@ -163,7 +163,7 @@ export const batchCalcMap = {
     return performCalculation_COOLINGTOWER_option_Qeau(
       nodeData,
       f(`Teau_COOLINGTOWER_${nodeId}`, '15'),
-      parseFloat(nodeData?.result?.dataFlow?.T ?? ls(`T_steam_C_COOLINGTOWER_${nodeId}`, '120')),
+      f(`T_steam_C_COOLINGTOWER_${nodeId}`, String(nodeData?.result?.dataFlow?.T ?? 120)),
       f(`Qeau_kg_h_COOLINGTOWER_${nodeId}`, '0'),
       f(`Qsteam_kg_h_COOLINGTOWER_${nodeId}`, '0'),
       f(`PDC_aero_COOLINGTOWER_${nodeId}`, '20')
@@ -178,7 +178,7 @@ export const batchCalcMap = {
     if (bilanType === 'TEMPERATURE_BALANCE') {
       return performCalculation_WATER_INJECTION_option_T(
         nodeData,
-        parseFloat(nodeData?.result?.dataFlow?.T ?? ls(`T_amont_WATER_INJECTION_${nodeId}`, '200')),
+        f(`T_amont_WATER_INJECTION_${nodeId}`, String(nodeData?.result?.dataFlow?.T ?? 200)),
         Teau, PDC
       );
     }
@@ -193,7 +193,7 @@ export const batchCalcMap = {
       nodeData,
       f(`T_air_parasite_AIRINJECTION_${nodeId}`, '15'),
       f(`Qair_parasite_AIRINJECTION_${nodeId}`, '0'),
-      parseFloat(nodeData?.result?.dataFlow?.T ?? ls(`T_amont_AIRINJECTION_${nodeId}`, '15')),
+      f(`T_amont_AIRINJECTION_${nodeId}`, String(nodeData?.result?.dataFlow?.T ?? 15)),
       f(`PDC_aero_AIRINJECTION_${nodeId}`, '10')
     );
   },
@@ -241,7 +241,7 @@ export const batchCalcMap = {
       f(`T_air_decolmatation_IACT_${nodeId}`, '15'),
       f(`T_air_chauffe_IACT_${nodeId}`, '150'),
       f(`Rendement_echange_IACT_${nodeId}`, '95'),
-      parseFloat(nodeData?.result?.dataFlow?.T ?? ls(`T_amont_IACT_${nodeId}`, '200')),
+      f(`T_amont_IACT_${nodeId}`, String(nodeData?.result?.dataFlow?.T ?? 200)),
       f(`PDC_aero_IACT_${nodeId}`, '10')
     );
   },
