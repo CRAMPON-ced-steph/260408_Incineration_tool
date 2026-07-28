@@ -46,6 +46,9 @@ const EQUIPMENT_ORDER = [
   'COOLINGTOWER', 'IDFAN', 'STACK',
 ];
 
+// ─── Point E color palette (same as LinearGraph) ────────────────────────────
+const POINT_E_COLORS = ['#e53935', '#fb8c00', '#1e88e5', '#43a047', '#8e24aa', '#00897b'];
+
 // ─── Line color palette (cover page + line separators) ───────────────────────
 const LINE_COLORS = [
   { bg: 'rgba(74,144,226,0.15)', border: '#4a90e2', title: '#a0cfff', sep: 'linear-gradient(90deg, #1a3a6b 0%, #2c5aa0 100%)' },
@@ -107,14 +110,15 @@ const CombustionDiagramSection = ({ tr }) => {
         pointBackgroundColor: ['red', 'blue', 'green', 'purple', 'red'],
         pointRadius: 6,
       },
-      {
+      ...pointsE.map((pt, i) => ({
         type: 'scatter',
-        label: tr("pointERetro"),
-        data: pointsE,
-        backgroundColor: 'orange',
+        label: pt.lineName || `${pt.label || 'E'} (${pt.nodeId || '?'})`,
+        data: [{ x: pt.x, y: pt.y }],
+        backgroundColor: POINT_E_COLORS[i % POINT_E_COLORS.length],
         pointRadius: 9,
         pointHoverRadius: 11,
-      },
+        pointStyle: 'rectRot',
+      })),
     ],
   };
 
@@ -174,7 +178,7 @@ const CombustionDiagramSection = ({ tr }) => {
     ...pointsE.map((pt, i) => ({
       pt: pointsE.length > 1 ? `E${i + 1}` : 'E',
       role: `Point de calcul rétro — ${pt.lineName || (pt.label ? `${pt.label}${pt.nodeId ? ` (${pt.nodeId})` : ''}` : '')}`,
-      color: 'orange',
+      color: POINT_E_COLORS[i % POINT_E_COLORS.length],
       d: pt,
     })),
   ];
@@ -203,7 +207,7 @@ const CombustionDiagramSection = ({ tr }) => {
           </thead>
           <tbody>
             {pointRows.map(({ pt, role, color, d }) => (
-              <tr key={pt} style={{ background: pt.startsWith('E') ? '#fff8e8' : '#fff' }}>
+              <tr key={pt} style={{ background: pt.startsWith('E') ? `${color}18` : '#fff' }}>
                 <td style={{ ...diagStyles.td, color, fontWeight: 'bold', textAlign: 'center' }}>{pt}</td>
                 <td style={{ ...diagStyles.td, textAlign: 'left' }}>{role}</td>
                 <td style={diagStyles.td}>{d.x}</td>
