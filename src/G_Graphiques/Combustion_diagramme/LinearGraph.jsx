@@ -59,7 +59,7 @@ const LinearGraph = ({ currentLanguage = 'fr', onClose, nodes = [] }) => {
         try {
           const pt = JSON.parse(stored);
           if (pt.x != null && pt.y != null) {
-            points.push({ ...pt, nodeId: n.id, label: pt.label || n.data.label });
+            points.push({ ...pt, nodeId: n.id, label: pt.label || n.data.label, lineName: n.data?.lineName || null });
           }
         } catch { /* ignore */ }
       }
@@ -117,7 +117,7 @@ const LinearGraph = ({ currentLanguage = 'fr', onClose, nodes = [] }) => {
       },
       ...pointsE.map((pt, i) => ({
         type: 'scatter',
-        label: `${t.pointE} — ${pt.label} (${pt.nodeId})`,
+        label: `${t.pointE} — ${pt.lineName || `${pt.label} (${pt.nodeId})`}`,
         data: [{ x: pt.x, y: pt.y }],
         backgroundColor: POINT_E_COLORS[i % POINT_E_COLORS.length],
         pointRadius: 8,
@@ -308,7 +308,7 @@ const LinearGraph = ({ currentLanguage = 'fr', onClose, nodes = [] }) => {
         {pointsE.map((pt, i) => (
           <div key={pt.nodeId} style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '5px', backgroundColor: `${POINT_E_COLORS[i % POINT_E_COLORS.length]}18` }}>
             <h3 style={{ margin: '0 0 10px 0', color: POINT_E_COLORS[i % POINT_E_COLORS.length] }}>
-              {t.pointE} — {pt.label} ({pt.nodeId})
+              {t.pointE} — {pt.lineName || `${pt.label} (${pt.nodeId})`}
             </h3>
             <div style={{ display: 'flex', gap: '10px', fontSize: '13px' }}>
               <span>{t.xLabel} <b>{pt.x != null ? fmt(pt.x, 1) : pt.x}</b></span>

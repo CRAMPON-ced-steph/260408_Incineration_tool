@@ -173,7 +173,7 @@ const CombustionDiagramSection = ({ tr }) => {
     { pt: 'D', role: 'Débit max — Puissance min', color: 'purple', d: pD },
     ...pointsE.map((pt, i) => ({
       pt: pointsE.length > 1 ? `E${i + 1}` : 'E',
-      role: `Point de calcul rétro${pt.label ? ` — ${pt.label}` : ''}${pt.nodeId ? ` (${pt.nodeId})` : ''}`,
+      role: `Point de calcul rétro — ${pt.lineName || (pt.label ? `${pt.label}${pt.nodeId ? ` (${pt.nodeId})` : ''}` : '')}`,
       color: 'orange',
       d: pt,
     })),

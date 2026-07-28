@@ -196,7 +196,7 @@ const RK_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguag
       });
 
       if (diagramMode === DIAGRAM_MODES.YES) {
-        const pointE = { x: result.MasseDechet || 0, y: result.P_incinerateur_MWH || 0, label: 'RK', nodeId };
+        const pointE = { x: result.MasseDechet || 0, y: result.P_incinerateur_MWH || 0, label: 'RK', nodeId, lineName: nodeData?.lineName || null };
         localStorage.setItem(`pointE_${nodeId}`, JSON.stringify(pointE));
       }
       

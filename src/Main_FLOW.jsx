@@ -519,13 +519,14 @@ function Flow({
         localStorage.setItem(`calcSent_${node.data.label}_${node.id}`, 'true');
 
         // Write pointE for every furnace node that produced a valid result (unconditional in batch mode)
+        const _lineName = node.data?.lineName || null;
         if (node.data.label === 'RK+SCC') {
-          localStorage.setItem(`pointE_${node.id}`, JSON.stringify({ x: result.MasseDechet || 0, y: result.P_incinerateur_MWH || 0, label: 'RK', nodeId: node.id }));
+          localStorage.setItem(`pointE_${node.id}`, JSON.stringify({ x: result.MasseDechet || 0, y: result.P_incinerateur_MWH || 0, label: 'RK', nodeId: node.id, lineName: _lineName }));
         } else if (node.data.label === 'FB') {
-          localStorage.setItem(`pointE_${node.id}`, JSON.stringify({ x: result.MasseDechet || 0, y: result.P_incinerateur_MWH || 0, label: 'FB', nodeId: node.id }));
+          localStorage.setItem(`pointE_${node.id}`, JSON.stringify({ x: result.MasseDechet || 0, y: result.P_incinerateur_MWH || 0, label: 'FB', nodeId: node.id, lineName: _lineName }));
         } else if (node.data.label === 'GF') {
           const gfWasteFlow = parseFloat(localStorage.getItem(`Waste_flow_rate_kg_h_GF_${node.id}`) || '0');
-          localStorage.setItem(`pointE_${node.id}`, JSON.stringify({ x: gfWasteFlow, y: (result.P_incinerateur_kWH || 0) / 1000, label: 'GF', nodeId: node.id }));
+          localStorage.setItem(`pointE_${node.id}`, JSON.stringify({ x: gfWasteFlow, y: (result.P_incinerateur_kWH || 0) / 1000, label: 'GF', nodeId: node.id, lineName: _lineName }));
         }
 
         // Notify any open Parameter_Tab so it can refresh its displayed result immediately

@@ -210,7 +210,7 @@ const FB_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguag
       setCalculationResult_FB(resultWithFlow);
       hasCalculatedOnce.current = true;
       if (diagramMode === DIAGRAM_MODES.YES) {
-        const pointE = { x: result.MasseDechet || 0, y: result.P_incinerateur_MWH || 0, label: 'FB', nodeId };
+        const pointE = { x: result.MasseDechet || 0, y: result.P_incinerateur_MWH || 0, label: 'FB', nodeId, lineName: nodeData?.lineName || null };
         localStorage.setItem(`pointE_${nodeId}`, JSON.stringify(pointE));
       }
       onSendDataRef.current({ result: resultWithFlow, inputData: { Tair_FB_C, Thermal_losses_MW, bilanType, wasteType, Q_boue_kg_h, MS_percent, MV_percent, NCV_kcal_kg } });

@@ -436,7 +436,7 @@ const GF_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguag
       setCalculationResult_GF(result);
       hasCalculatedOnce.current = true;
       if (diagramMode === 'YES') {
-        const pointE = { x: result.Waste_flow_rate_kg_h || 0, y: result.P_incinerateur_MWH || 0, label: 'GF', nodeId };
+        const pointE = { x: result.Waste_flow_rate_kg_h || 0, y: result.P_incinerateur_MWH || 0, label: 'GF', nodeId, lineName: nodeData?.lineName || null };
         localStorage.setItem(`pointE_${nodeId}`, JSON.stringify(pointE));
       }
       if (onSendData) {
