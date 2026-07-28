@@ -518,6 +518,13 @@ function Flow({
         }
         localStorage.setItem(`calcSent_${node.data.label}_${node.id}`, 'true');
 
+        // Write pointE for furnace nodes when diagram mode is enabled (mirrors handleSendData in Parameter_Tabs)
+        if (node.data.label === 'RK+SCC' && localStorage.getItem(`RK_diagramMode_${node.id}`) === 'YES') {
+          localStorage.setItem(`pointE_${node.id}`, JSON.stringify({ x: result.MasseDechet || 0, y: result.P_incinerateur_MWH || 0, label: 'RK', nodeId: node.id }));
+        } else if (node.data.label === 'FB' && localStorage.getItem(`FB_diagramMode_${node.id}`) === 'YES') {
+          localStorage.setItem(`pointE_${node.id}`, JSON.stringify({ x: result.MasseDechet || 0, y: result.P_incinerateur_MWH || 0, label: 'FB', nodeId: node.id }));
+        }
+
         // Notify any open Parameter_Tab so it can refresh its displayed result immediately
         window.dispatchEvent(new CustomEvent(BATCH_CALC_RESULT_EVENT, {
           detail: { nodeId: node.id, result }
