@@ -770,7 +770,8 @@ const RKReportBody = ({ calculationResult, inputParams, tr }) => {
   );
 };
 
-const GasTableSTACK = ({ df }) => {
+const GasTableSTACK = ({ df, tr }) => {
+  const t = tr || ((k) => k);
   const rows = [
     { name:'CO₂', nm3h:df.Qv_CO2_Nm3_h, kgh:df.Qm_CO2_kg_h, hkj:df.H_CO2_kj, pW:df.CO2_humide_pourcent, pD:df.CO2_dry_pourcent },
     { name:'H₂O', nm3h:df.Qv_H2O_Nm3_h, kgh:df.Qm_H2O_kg_h, hkj:df.H_H2O_kj, pW:df.H2O_pourcent,        pD:undefined },
@@ -797,7 +798,7 @@ const GasTableSTACK = ({ df }) => {
           </tr>
         ))}
         <tr style={{ fontWeight:'bold', background:'#eaf0fb' }}>
-          <td style={bodyStyles.tdLabel}>{tr("total")}</td>
+          <td style={bodyStyles.tdLabel}>{t("total")}</td>
           <td style={bodyStyles.td}>{fmt(rows.reduce((s,r)=>s+(parseFloat(r.nm3h)||0),0),0)}</td>
           <td style={bodyStyles.td}>{fmt(rows.reduce((s,r)=>s+(parseFloat(r.kgh)||0),0),0)}</td>
           <td style={bodyStyles.td}>{fmt(rows.reduce((s,r)=>s+(parseFloat(r.hkj)||0),0),0)}</td>
@@ -845,7 +846,7 @@ const STACKReportBody = ({ calculationResult, inputParams, tr }) => {
           </Sub>
         </div>
         <Sub title="Détail composants">
-          <GasTableSTACK df={df} />
+          <GasTableSTACK df={df} tr={tr} />
         </Sub>
       </Section>
       <Section title="3. Bilan enthalpique">
