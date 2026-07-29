@@ -1,8 +1,41 @@
+import React, { useState } from 'react';
 
-import React from 'react';
+const ParameterInput = ({ paramKey, value, handleChange }) => {
+  const [isFocused, setIsFocused] = useState(false);
+  const [localValue, setLocalValue] = useState('');
+
+  const handleFocus = () => {
+    setLocalValue(value === 0 || value == null ? '' : String(value));
+    setIsFocused(true);
+  };
+
+  const handleBlur = () => {
+    setIsFocused(false);
+  };
+
+  const handleInputChange = (e) => {
+    setLocalValue(e.target.value);
+    handleChange(paramKey, Number(e.target.value));
+  };
+
+  return (
+    <input
+      type="number"
+      value={isFocused ? localValue : (value ?? '')}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      onChange={handleInputChange}
+      style={{
+        flex: '0 0 100px',
+        padding: '8px',
+        border: '1px solid #ddd',
+        borderRadius: '4px',
+      }}
+    />
+  );
+};
 
 const Input_bilan = ({ input, handleChange, currentLanguage = 'fr', translations }) => {
-  // Fonction de traduction générique
   const t = (key) => {
     if (!translations) return key;
     return translations[currentLanguage]?.[key] || translations['fr']?.[key] || key;
@@ -29,17 +62,7 @@ const Input_bilan = ({ input, handleChange, currentLanguage = 'fr', translations
           >
             {t(key)}:
           </label>
-          <input
-            type="number"
-            value={value}
-            onChange={(e) => handleChange(key, Number(e.target.value))}
-            style={{
-              flex: '0 0 100px',
-              padding: '8px',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-            }}
-          />
+          <ParameterInput paramKey={key} value={value} handleChange={handleChange} />
         </div>
       ))}
     </div>
