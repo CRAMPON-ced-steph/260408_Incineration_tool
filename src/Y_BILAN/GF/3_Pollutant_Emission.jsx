@@ -162,10 +162,10 @@ const GFPollutantEmission = ({ innerData, setInnerData, currentLanguage = 'fr', 
   // Calcul de la consommation d'ammoniaque
   const calculateAmmoniaConsumption = useCallback(() => {
     if (!SNCR_enabled) return 0;
-    const NOx_to_reduce = Math.max(0, Masse_polluant_NOx_kg_h - NOx_limit_mg_Nm3);
-    const NOx_mass_to_reduce = NOx_to_reduce * (17 / 30) * Stoichiometry;
-    return NOx_mass_to_reduce;
-  }, [SNCR_enabled, Masse_polluant_NOx_kg_h, NOx_limit_mg_Nm3, Stoichiometry]);
+    const NOx_limit_kg_h = Debit_fumees_sec_Nm3_h > 0 ? (NOx_limit_mg_Nm3 * Debit_fumees_sec_Nm3_h) / 1e6 : 0;
+    const NOx_to_reduce_kg_h = Math.max(0, Masse_polluant_NOx_kg_h - NOx_limit_kg_h);
+    return NOx_to_reduce_kg_h * (17 / 30) * Stoichiometry;
+  }, [SNCR_enabled, Masse_polluant_NOx_kg_h, NOx_limit_mg_Nm3, Stoichiometry, Debit_fumees_sec_Nm3_h]);
 
   // Calcul du traitement du mercure
   const calculateHgTreatment = useCallback(() => {
@@ -177,7 +177,8 @@ const GFPollutantEmission = ({ innerData, setInnerData, currentLanguage = 'fr', 
 
   const NH3_consumption_kg_h = calculateAmmoniaConsumption();
   const hg_treatment = calculateHgTreatment();
-  const NOx_to_reduce = SNCR_enabled ? Math.max(0, Masse_polluant_NOx_kg_h - NOx_limit_mg_Nm3) : 0;
+  const NOx_limit_kg_h_sncr = (SNCR_enabled && Debit_fumees_sec_Nm3_h > 0) ? (NOx_limit_mg_Nm3 * Debit_fumees_sec_Nm3_h) / 1e6 : 0;
+  const NOx_to_reduce = SNCR_enabled ? Math.max(0, Masse_polluant_NOx_kg_h - NOx_limit_kg_h_sncr) : 0;
   const NOx_mass_to_reduce = NOx_to_reduce * (17 / 30) * Stoichiometry;
 
   // Masses de polluants d'entrée

@@ -27,7 +27,23 @@ const GFMainPage = ({ nodeData, title, onSendData, onClose, onGoBack, currentLan
 
   // ✅ innerDataRef : ref partagée pour les mutations directes
   // Contient TOUTES les données échangées entre onglets
-  const innerDataRef = useRef({});
+  // Seeded from nodeData.result so tabs (Pollutant) have combustion data without needing
+  // to visit the Combustion tab first each session.
+  const innerDataRef = useRef(null);
+  if (!innerDataRef.current) {
+    const r = nodeData?.result ?? {};
+    innerDataRef.current = {
+      ...(r.FG_OUT_kg_h          ? { FG_OUT_kg_h: r.FG_OUT_kg_h }                           : {}),
+      ...(r.FG_OUT_Nm3_h         ? { FG_OUT_Nm3_h: r.FG_OUT_Nm3_h,
+                                     FG_dry_Nm3_h: r.FG_OUT_Nm3_h.dry || 0,
+                                     FG_wet_Nm3_h: r.FG_OUT_Nm3_h.wet || 0 }                : {}),
+      ...(r.FG_pollutant_OUT_kg_h ? { FG_pollutant_OUT_kg_h: r.FG_pollutant_OUT_kg_h }      : {}),
+      ...(r.O2_calcule != null    ? { O2_calcule: r.O2_calcule }                             : {}),
+      ...(r.Conso_reactifs        ? { Conso_reactifs: r.Conso_reactifs }                     : {}),
+      ...(r.MasseBoueBrute != null ? { MasseBoueBrute: r.MasseBoueBrute,
+                                       BoueBrute_kg_h: r.MasseBoueBrute }                   : {}),
+    };
+  }
 
   const [combustionResults, setCombustionResults] = useState({});
 

@@ -633,8 +633,8 @@ const CombustionTab = ({ innerData = {}, onInnerDataChange, onResultsChange, cur
       wet: (results.FG_kg_h_CO2 || 0) + (results.FG_kg_h_CO || 0) + (results.FG_kg_h_O2exces || 0) + (results.FG_kg_h_N2 || 0) + (results.FG_kg_h_H2O || 0),
     };
     const masses_pollutant_FG_out = {
-      NOx: results.FG_kg_h_NOX, HCl: results.FG_kg_h_HCl, SO2: results.FG_kg_h_SO2reel,
-      N2: results.FG_kg_h_N2, CO2: (results.FG_kg_h_CO2 || 0) + (results.FG_kg_h_CO || 0),
+      NOx: results.FG_kg_h_NOX || 0, HCl: results.FG_kg_h_HCl || 0, SO2: results.FG_kg_h_SO2reel || 0,
+      N2: results.FG_kg_h_N2 || 0, CO2: (results.FG_kg_h_CO2 || 0) + (results.FG_kg_h_CO || 0),
     };
     const FG_CO2_Nm3_h = CO2_kg_m3(masses_FG_out.CO2);
     const FG_H2O_Nm3_h = H2O_kg_m3(masses_FG_out.H2O);
