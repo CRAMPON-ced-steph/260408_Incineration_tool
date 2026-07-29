@@ -77,7 +77,7 @@ const computeOpexCosts = (innerData, tr = (k) => k) => {
   return { elecRows, totalElec_kW, coutElec, co2Elec, conso_air, coutAir, co2Air, eauRows, coutEau, reactifRows, coutReactifs, co2TransportReactifs, energieRows, coutEnergie, co2Energie, coutTransportResidus, co2TransportResidus, coutTransportReactifs, totalCout_h, totalCout_an, totalCO2_kgh, currency, availability };
 };
 
-const OpexSummary = ({ opex, t = k => k }) => {
+const OpexSummary = ({ opex, t = k => k, tr = k => k }) => {
   const { totalElec_kW, coutElec, co2Elec, coutAir, co2Air, coutEau, coutReactifs, co2TransportReactifs, coutEnergie, co2Energie, coutTransportResidus, co2TransportResidus, coutTransportReactifs, totalCout_h, totalCout_an, totalCO2_kgh, currency, availability } = opex;
   if (totalElec_kW === 0 && coutEnergie === 0 && coutEau === 0) return <p style={{ color: '#999', fontSize: 12, padding: '10px 14px' }}>{t('Coûts OPEX non disponibles — ouvrir les onglets Design et Opex.')}</p>;
   return (
@@ -93,7 +93,7 @@ const OpexSummary = ({ opex, t = k => k }) => {
         <div style={{ ...styles.subSection, background: '#f0f5ff', margin: 8, borderRadius: 6 }}>
           <h3 style={{ ...styles.subTitle, color: '#1a3a6b', fontSize: 14 }}>{t('Total coût')}</h3>
           <KV label={`${t('Coût horaire')} [${currency}/h]`} value={fmt(totalCout_h, 2)} />
-          <KV label={`${t('Coût annuel')} (${availability}h) [${currency}/an]`} value={fmt(totalCout_an, 0)} />
+          <KV label={`${t('Coût annuel')} (${availability}h) [${currency}${tr('perYear')}]`} value={fmt(totalCout_an, 0)} />
         </div>
         <div style={{ ...styles.subSection, background: '#f5f0ff', margin: 8, borderRadius: 6 }}>
           <h3 style={{ ...styles.subTitle, color: '#6a1a6b', fontSize: 14 }}>{t('Total CO₂ [kg/h]')}</h3>
@@ -174,7 +174,7 @@ const AIRINJECTION_Report = ({ innerData = {}, currentLanguage = 'fr' }) => {
         </div>
       </Section>
 
-      <Section title={t('4. OPEX — Coûts horaires')}><OpexSummary opex={opex} t={t} /></Section>
+      <Section title={t('4. OPEX — Coûts horaires')}><OpexSummary opex={opex} t={t} tr={tr} /></Section>
       <div style={styles.footer}>{t('Rapport généré automatiquement')} — {new Date().toLocaleDateString()}</div>
     </div>
   );

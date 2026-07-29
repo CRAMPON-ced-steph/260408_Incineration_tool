@@ -99,7 +99,7 @@ const IDFAN_Report = ({ innerData = {}, currentLanguage = 'fr' }) => {
                 <div style={{ ...styles.subSection, background: '#f0f5ff', margin: 8, borderRadius: 6 }}>
                   <h3 style={{ ...styles.subTitle, color: '#1a3a6b', fontSize: 14 }}>{t('totalCost')}</h3>
                   <KV label={`${t('hourlyCost')} [${opex.currency}/h]`} value={fmt(opex.totalCout_h, 2)} />
-                  <KV label={`${t('annualCost')} (${opex.availability}h) [${opex.currency}/an]`} value={fmt(opex.totalCout_an, 0)} />
+                  <KV label={`${t('annualCost')} (${opex.availability}h) [${opex.currency}${tr('perYear')}]`} value={fmt(opex.totalCout_an, 0)} />
                 </div>
                 <div style={{ ...styles.subSection, background: '#f5f0ff', margin: 8, borderRadius: 6 }}>
                   <h3 style={{ ...styles.subTitle, color: '#6a1a6b', fontSize: 14 }}>{t('totalCO2')}</h3>

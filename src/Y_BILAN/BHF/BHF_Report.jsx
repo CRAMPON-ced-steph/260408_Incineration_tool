@@ -183,7 +183,7 @@ const computeOpexCosts = (innerData, tr = (k) => k) => {
 
 // ─── OPEX display section ─────────────────────────────────────────────────────
 
-const OpexCostSection = ({ opex, t }) => {
+const OpexCostSection = ({ opex, t, tr = k => k }) => {
   const {
     elecRows, totalElec_kW, coutElec, co2Elec,
     conso_air, coutAir, co2Air,
@@ -223,7 +223,7 @@ const OpexCostSection = ({ opex, t }) => {
         <div style={{ ...styles.subSection, background: '#f0f5ff', margin: 8, borderRadius: 6 }}>
           <h3 style={{ ...styles.subTitle, color: '#1a3a6b', fontSize: 14 }}>{t('Total coût')}</h3>
           <KV label={`${t('Coût horaire')} [${currency}/h]`} value={fmt(totalCout_h, 2)} />
-          <KV label={`${t('Coût annuel')} (${availability}h) [${currency}/an]`} value={fmt(totalCout_an, 0)} />
+          <KV label={`${t('Coût annuel')} (${availability}h) [${currency}${tr('perYear')}]`} value={fmt(totalCout_an, 0)} />
         </div>
         <div style={{ ...styles.subSection, background: '#f5f0ff', margin: 8, borderRadius: 6 }}>
           <h3 style={{ ...styles.subTitle, color: '#6a1a6b', fontSize: 14 }}>{t('Total CO₂')}</h3>
@@ -412,7 +412,7 @@ const BHF_Report = ({ innerData = {}, currentLanguage = 'fr' }) => {
       </Section>
 
       <Section title={t('4. OPEX — Coûts horaires')}>
-        <OpexCostSection opex={opex} t={t} />
+        <OpexCostSection opex={opex} t={t} tr={tr} />
       </Section>
 
       <div style={styles.footer}>{t('Rapport généré automatiquement')} — {new Date().toLocaleDateString()}</div>

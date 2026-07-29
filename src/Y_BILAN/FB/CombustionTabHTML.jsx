@@ -99,7 +99,7 @@ const CombustionTabHTML = ({
             <input type="number" step="0.1" value={emissions.Exces_air_lit} onChange={(e) => handleEmission('Exces_air_lit', e.target.value)} style={inputStyle} /></div>
           <div><label style={labelStyle}>{t("Excès d'air Combustible d'appoint")} (%)</label>
             <input type="number" step="0.1" value={emissions.Exces_air_combustible} onChange={(e) => handleEmission('Exces_air_combustible', e.target.value)} style={inputStyle} /></div>
-          <div><label style={labelStyle}>{t('O₂% air de combustion lit')}</label>
+          <div><label style={labelStyle}>{t('O₂% volumique sec air combustion lit')}</label>
             <input type="number" step="0.1" value={emissions.O2_pct_air_combustion} onChange={(e) => handleEmission('O2_pct_air_combustion', e.target.value)} style={inputStyle} /></div>
           <div><label style={labelStyle}>{t('Teneur en eau')} (kg H₂O/kg AS)</label>
             <input type="number" step="0.0001" value={emissions.Teneur_en_eau_kgH2O_kgAS} onChange={(e) => handleEmission('Teneur_en_eau_kgH2O_kgAS', e.target.value)} style={inputStyle} /></div>

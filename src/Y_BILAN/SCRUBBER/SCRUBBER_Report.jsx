@@ -51,7 +51,7 @@ const computeOpexCosts = (innerData, tr = (k) => k) => {
   return { totalElec_kW, coutElec, co2Elec, coutAir, co2Air, eauRows, coutEau, reactifRows, coutReactifs, totalCout_h, totalCout_an, totalCO2_kgh, currency, availability };
 };
 
-const OpexSummary = ({ opex, t }) => {
+const OpexSummary = ({ opex, t, tr = k => k }) => {
   const { coutElec, co2Elec, coutAir, co2Air, coutEau, coutReactifs, totalCout_h, totalCout_an, totalCO2_kgh, currency, availability, totalElec_kW } = opex;
   if (totalElec_kW === 0 && coutEau === 0 && coutReactifs === 0) return <p style={{ color: '#999', fontSize: 12, padding: '10px 14px' }}>{t('noOpexData')}</p>;
   return (
@@ -71,7 +71,7 @@ const OpexSummary = ({ opex, t }) => {
         <div style={{ ...styles.subSection, background: '#f0f5ff', margin: 8, borderRadius: 6 }}>
           <h3 style={{ ...styles.subTitle, color: '#1a3a6b', fontSize: 14 }}>{t('totalCost')}</h3>
           <KV label={`${t('hourlyCost')} [${currency}/h]`} value={fmt(totalCout_h, 2)} />
-          <KV label={`${t('annualCost')} (${availability}h) [${currency}/an]`} value={fmt(totalCout_an, 0)} />
+          <KV label={`${t('annualCost')} (${availability}h) [${currency}${tr('perYear')}]`} value={fmt(totalCout_an, 0)} />
         </div>
         <div style={{ ...styles.subSection, background: '#f5f0ff', margin: 8, borderRadius: 6 }}>
           <h3 style={{ ...styles.subTitle, color: '#6a1a6b', fontSize: 14 }}>{t('totalCO2')}</h3>
@@ -151,7 +151,7 @@ const SCRUBBER_Report = ({ innerData = {}, currentLanguage = 'fr' }) => {
         </div>
       </Section>
 
-      <Section title={`5. ${t('opexHourlyCosts')}`}><OpexSummary opex={opex} t={t} /></Section>
+      <Section title={`5. ${t('opexHourlyCosts')}`}><OpexSummary opex={opex} t={t} tr={tr} /></Section>
 
       <div style={styles.footer}>{t('autoReport')} — {new Date().toLocaleDateString()}</div>
     </div>

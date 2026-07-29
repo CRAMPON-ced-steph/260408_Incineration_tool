@@ -17,7 +17,7 @@ const useTranslation = (currentLanguage = 'fr') => {
 
 import {
   cp_dt_h2o, fh_MS_kW, fh_MM_kW, Hfvoute_kW, TempSortieFumees,
-  Masse_Air_Instrumentation, Mole_Excess_O2, Mole_Excess_O2_air_varia,
+  Masse_Air_Instrumentation,
   MoleNOx, Mole_CO, Mole_H2, cp_air, Masse_Air_Comb_gaz_Func, MasseAir_e, Vol_Air_e,
   FractionMassiqueC, FractionMassiqueH, FractionMassiqueO, FractionMassiqueN, FractionMassiqueS, FractionMassiqueCl
 } from '../../A_Transverse_fonction/bilan_fct_FB';
@@ -92,6 +92,15 @@ const DEFAULT_THERMAL = {
 const lsGet = (key, def) => { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch { return def; } };
 const lsSet = (key, val) => { try { localStorage.setItem(key, JSON.stringify(val)); } catch { /* noop */ } };
 
+// Conversion O2% volumique sec → O2% massique sec (hypothèse air sec = O2 + N2)
+function o2VolToO2Mass(o2Vol) {
+  const M_O2 = 32;
+  const M_N2 = 28.014;
+  const o2 = Math.max(0, Math.min(100, o2Vol || 0));
+  const totalMass = o2 * M_O2 + (100 - o2) * M_N2;
+  return totalMass > 0 ? (o2 * M_O2 / totalMass) * 100 : 23.14;
+}
+
 // ============================================================
 // CALCUL ITÉRATIF — FONCTION PURE
 // ============================================================
@@ -110,6 +119,7 @@ function runIterativeCalc({
   densite_combustible = 0.87,
   airComposition,
   forceGazZero = false,
+  O2_pct_vol = 21,
 }) {
   const MAX_ITER = forceGazZero ? 1 : 20;
   const TOLERANCE = 0.1;
@@ -122,6 +132,9 @@ function runIterativeCalc({
   const airInstru = airComposition?.air_instrumentation || DEFAULT_AIR_COMP_ROW;
   const airSec = airComposition?.air_secondaire || DEFAULT_AIR_COMP_ROW;
   const airTert = airComposition?.air_tertiaire || DEFAULT_AIR_COMP_ROW;
+
+  // Fraction massique O2 dans l'air de combustion (dérivée de O2% volumique sec)
+  const o2MassFrac = o2VolToO2Mass(O2_pct_vol) / 100;
 
   for (let iter = 0; iter < MAX_ITER; iter++) {
     const Mgaz = {
@@ -151,9 +164,9 @@ function runIterativeCalc({
     const Vair_balayage = Maire_balayage / 1.293;
 
 
-    const Maire_sec_comb_boue = MasseAir_e(Mboue.C, Mboue.H, Mboue.S, Mboue.O, Exces_air_lit, 21).MasseAir_e || 0;
-    const Vair_sec_comb_boue = Vol_Air_e(Mboue.C, Mboue.H, Mboue.S, Mboue.O, Exces_air_lit, 21) || 0;
-    const Vair_sec_comb_gaz = Vol_Air_e(Mgaz.C, Mgaz.H, Mgaz.S, Mgaz.O, Exces_air_combustible, 21) || 0;
+    const Maire_sec_comb_boue = MasseAir_e(Mboue.C, Mboue.H, Mboue.S, Mboue.O, Exces_air_lit, O2_pct_vol).MasseAir_e || 0;
+    const Vair_sec_comb_boue = Vol_Air_e(Mboue.C, Mboue.H, Mboue.S, Mboue.O, Exces_air_lit, O2_pct_vol) || 0;
+    const Vair_sec_comb_gaz = Vol_Air_e(Mgaz.C, Mgaz.H, Mgaz.S, Mgaz.O, Exces_air_combustible, O2_pct_vol) || 0;
 
     const Vair_sec_comb_tot = Vair_sec_comb_boue + Vair_sec_comb_gaz;
 
@@ -171,8 +184,8 @@ function runIterativeCalc({
     // --- Moles boues ---
     const MB_C = (Mboue.C / 12.01) * 1000;
     const MB_H = ((Mboue.H / 1.008 + (2 * Debit_eau) / 18.015) * 1000);
-    const MB_O = (Mboue.O / 16 + Debit_eau / 18.015 + ((Maire_sec_comb_boue / 4.310055 + Maire_balayage / 4.32) / 16)) * 1000;
-    const MB_N = ((Mboue.N + (Maire_sec_comb_boue * (1 - 1 / 4.310055) + Maire_balayage * (1 - 1 / 4.32)))) * 1000 / 14.007;
+    const MB_O = (Mboue.O / 16 + Debit_eau / 18.015 + ((Maire_sec_comb_boue + Maire_balayage) * o2MassFrac / 16)) * 1000;
+    const MB_N = ((Mboue.N + (Maire_sec_comb_boue + Maire_balayage) * (1 - o2MassFrac)) * 1000) / 14.007;
     const MB_S = (Mboue.S / 32.066) * 1000;
     const MB_Cl = (Mboue.Cl / 35.45) * 1000;
 
@@ -183,8 +196,8 @@ function runIterativeCalc({
     // --- Moles gaz ---
     const MG_C = (Mgaz.C / 12.01) * 1000;
     const MG_H = ((Mgaz.H / 1.008 + (2 * Mhum_comb_gaz) / 18.015) * 1000);
-    const MG_O = ((Mgaz.O / 16 + Mhum_comb_gaz / 18.015 + Maire_sec_comb_gaz / 4.310055 / 16) * 1000);
-    const MG_N = ((Mgaz.N + Maire_sec_comb_gaz * (1 - 1 / 4.310055)) * 1000) / 14.007;
+    const MG_O = ((Mgaz.O / 16 + Mhum_comb_gaz / 18.015 + Maire_sec_comb_gaz * o2MassFrac / 16) * 1000);
+    const MG_N = ((Mgaz.N + Maire_sec_comb_gaz * (1 - o2MassFrac)) * 1000) / 14.007;
     const MG_S = (Mgaz.S / 32.066) * 1000;
     const MG_Cl = (Mgaz.Cl / 35.45) * 1000;
 
@@ -213,7 +226,7 @@ function runIterativeCalc({
     const MAirTert_O = (Masse_air_tertiaire_kg_h * (airTert.O2_pct / 100) / 16) * 1000;
     const MAirTert_N = (Masse_air_tertiaire_kg_h * (airTert.N2_pct / 100) / 14.007) * 1000;
 
-    const MolesO2excGaz = ((Maire_sec_comb_gaz * (1 - 1 / (1 + Exces_air_combustible / 100))) * (1 / 4.310055) * 1000) / 32;
+    const MolesO2excGaz = ((Maire_sec_comb_gaz * (1 - 1 / (1 + Exces_air_combustible / 100))) * o2MassFrac * 1000) / 32;
 
     const MF_C = MB_C + MG_C;
     const MF_H = MB_H + MG_H + MAirSec_H + MAirTert_H;
@@ -225,10 +238,10 @@ function runIterativeCalc({
     const MF_CO2 = (MF_C * Math.sqrt(Math.max(MF_O2, 0))) / (0.05 + Math.sqrt(Math.max(MF_O2, 0)));
     const MF_CO = MF_C - MF_CO2;
 
-    const MolesO2excBoue = Mole_Excess_O2(Exces_air_lit, Maire_sec_comb_boue) || 0;
-    const MoleO2excesAirInstrumentation = Mole_Excess_O2_air_varia(Maire_balayage) || 0;
-    const MoleO2excesAirSecondaire = Mole_Excess_O2_air_varia(Masse_air_secondaire_kg_h) || 0;
-    const MoleO2excesAirTertiaire = Mole_Excess_O2_air_varia(Masse_air_tertiaire_kg_h) || 0;
+    const MolesO2excBoue = (Maire_sec_comb_boue * (1 - 1 / (1 + Exces_air_lit / 100)) * o2MassFrac * 1000) / 32;
+    const MoleO2excesAirInstrumentation = (Maire_balayage * o2MassFrac * 1000) / 32;
+    const MoleO2excesAirSecondaire = (Masse_air_secondaire_kg_h * (airSec.O2_pct / 100) * 1000) / 32;
+    const MoleO2excesAirTertiaire = (Masse_air_tertiaire_kg_h * (airTert.O2_pct / 100) * 1000) / 32;
 
     const MF_O2exc_primary = MolesO2excGaz + MolesO2excBoue + MoleO2excesAirInstrumentation;
     const MF_O2exc = MF_O2exc_primary + MoleO2excesAirSecondaire + MoleO2excesAirTertiaire;
@@ -518,6 +531,20 @@ const CombustionTab = ({ innerData = {}, onInnerDataChange, onResultsChange, cur
   useEffect(() => { lsSet(`thermalParams_FB_${nodeId}`, thermalParams); }, [thermalParams]);
   useEffect(() => { lsSet(`airComposition_FB_${nodeId}`, airComposition); }, [airComposition]);
 
+  // Impose O2% massique sec (dérivé de O2% volumique sec) dans les 3 premiers flux d'air
+  useEffect(() => {
+    const o2Mass = o2VolToO2Mass(emissions.O2_pct_air_combustion ?? DEFAULT_EMISSIONS.O2_pct_air_combustion);
+    setAirComposition(prev => {
+      const next = { ...prev };
+      for (const key of ['air_combustion_boue', 'air_combustion_gaz', 'air_instrumentation']) {
+        const row = prev[key] || DEFAULT_AIR_COMP_ROW;
+        const n2Mass = Math.max(0, 100 - (row.CO2_pct || 0) - o2Mass - (row.SO2_pct || 0) - (row.Cl_pct || 0));
+        next[key] = { ...row, O2_pct: o2Mass, N2_pct: n2Mass };
+      }
+      return next;
+    });
+  }, [emissions.O2_pct_air_combustion]);
+
   // ---- Sync boue depuis innerData ----
   useEffect(() => {
     setEmissions((prev) => {
@@ -575,6 +602,7 @@ const CombustionTab = ({ innerData = {}, onInnerDataChange, onResultsChange, cur
         densite_combustible: Number(emissions.densite_combustible) || 0.87,
         airComposition,
         forceGazZero: !useGazAppoint,
+        O2_pct_vol: emissions.O2_pct_air_combustion ?? DEFAULT_EMISSIONS.O2_pct_air_combustion,
       });
     } catch (err) { console.error('Erreur calcul combustion:', err); return {}; }
   }, [emissions, thermalParams, composition, airComposition, useGazAppoint,
@@ -851,7 +879,7 @@ const CombustionTab = ({ innerData = {}, onInnerDataChange, onResultsChange, cur
             <input type="number" step="0.1" value={emissions.Exces_air_lit ?? DEFAULT_EMISSIONS.Exces_air_lit} onChange={(e) => handleEmission('Exces_air_lit', e.target.value)} style={inputStyle} /></div>
           <div><label style={labelStyle}>{t("Excès d'air Combustible d'appoint")} (%)</label>
             <input type="number" step="0.1" value={emissions.Exces_air_combustible ?? DEFAULT_EMISSIONS.Exces_air_combustible} onChange={(e) => handleEmission('Exces_air_combustible', e.target.value)} style={inputStyle} /></div>
-          <div><label style={labelStyle}>{t('O₂% air de combustion lit')}</label>
+          <div><label style={labelStyle}>{t('O₂% volumique sec air combustion lit')}</label>
             <input type="number" step="0.1" value={emissions.O2_pct_air_combustion ?? DEFAULT_EMISSIONS.O2_pct_air_combustion} onChange={(e) => handleEmission('O2_pct_air_combustion', e.target.value)} style={inputStyle} /></div>
           <div><label style={labelStyle}>{t('Teneur en eau')} (kg H₂O/kg AS)</label>
             <input type="number" step="0.0001" value={emissions.Teneur_en_eau_kgH2O_kgAS ?? DEFAULT_EMISSIONS.Teneur_en_eau_kgH2O_kgAS} onChange={(e) => handleEmission('Teneur_en_eau_kgH2O_kgAS', e.target.value)} style={inputStyle} /></div>
@@ -906,8 +934,8 @@ const CombustionTab = ({ innerData = {}, onInnerDataChange, onResultsChange, cur
               <tr>
                 <th style={{ ...TH, textAlign: 'left', width: '180px' }}>Flux d'air</th>
                 <th style={TH}>Masse sèche (kg/h)</th>
-                <th style={TH}>O₂% sec</th>
-                <th style={TH}>N₂% sec</th>
+                <th style={TH}>O₂% mass. sec</th>
+                <th style={TH}>N₂% mass. sec</th>
                 <th style={TH}>CO₂ (kg/h)</th>
                 <th style={TH}>H₂O (kg/h)</th>
                 <th style={TH}>O₂ (kg/h)</th>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getLanguageCode } from '../F_Gestion_Langues/Fonction_Traduction';
 
 // Définition des couleurs
 const COLORS = {
@@ -154,7 +155,8 @@ function DropdownMenu({
       }
     };
     
-    return translations[currentLanguage]?.[key] || translations['en']?.[key] || key;
+    const lang = getLanguageCode(currentLanguage);
+    return translations[lang]?.[key] || translations['en']?.[key] || key;
   };
 
   const languages = [

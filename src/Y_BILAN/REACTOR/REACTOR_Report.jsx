@@ -74,7 +74,7 @@ const computeOpexCosts = (innerData, tr = (k) => k) => {
   return { elecRows, totalElec_kW, coutElec, co2Elec, coutAir, co2Air, eauRows, coutEau, reactifRows, coutReactifs, co2TransportReactifs, energieRows, coutEnergie, co2Energie, coutTransportResidus, co2TransportResidus, coutTransportReactifs, totalCout_h, totalCout_an, totalCO2_kgh, currency, availability };
 };
 
-const OpexSummary = ({ opex, t }) => {
+const OpexSummary = ({ opex, t, tr = k => k }) => {
   const { totalElec_kW, coutElec, co2Elec, coutAir, co2Air, coutEau, coutReactifs, co2TransportReactifs, coutEnergie, co2Energie, coutTransportResidus, co2TransportResidus, coutTransportReactifs, totalCout_h, totalCout_an, totalCO2_kgh, currency, availability } = opex;
   if (totalElec_kW === 0 && coutEnergie === 0 && coutEau === 0) return <p style={{ color: '#999', fontSize: 12, padding: '10px 14px' }}>{t('rpt_opex_unavailable')}</p>;
   return (
@@ -90,7 +90,7 @@ const OpexSummary = ({ opex, t }) => {
         <div style={{ ...styles.subSection, background: '#f0f5ff', margin: 8, borderRadius: 6 }}>
           <h3 style={{ ...styles.subTitle, color: '#1a3a6b', fontSize: 14 }}>{t('rpt_total_cout')}</h3>
           <KV label={`${t('rpt_cout_horaire')} [${currency}/h]`} value={fmt(totalCout_h, 2)} />
-          <KV label={`${t('rpt_cout_annuel')} (${availability}h) [${currency}/an]`} value={fmt(totalCout_an, 0)} />
+          <KV label={`${t('rpt_cout_annuel')} (${availability}h) [${currency}${tr('perYear')}]`} value={fmt(totalCout_an, 0)} />
         </div>
         <div style={{ ...styles.subSection, background: '#f5f0ff', margin: 8, borderRadius: 6 }}>
           <h3 style={{ ...styles.subTitle, color: '#6a1a6b', fontSize: 14 }}>{t('rpt_total_co2_kgh')}</h3>
@@ -177,7 +177,7 @@ const REACTOR_Report = ({ innerData = {}, currentLanguage = 'fr' }) => {
         </div>
       </Section>
 
-      <Section title={t('rpt_section_opex')}><OpexSummary opex={opex} t={t} /></Section>
+      <Section title={t('rpt_section_opex')}><OpexSummary opex={opex} t={t} tr={tr} /></Section>
       <div style={styles.footer}>{t('rpt_footer')} — {new Date().toLocaleDateString()}</div>
     </div>
   );

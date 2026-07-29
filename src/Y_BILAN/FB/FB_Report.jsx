@@ -195,7 +195,7 @@ const OpexCostSection = ({ opex, tr = (k) => k }) => {
   if (noData) {
     return (
       <p style={{ color: '#999', fontSize: 12, padding: '10px 14px' }}>
-        Coûts OPEX non disponibles — ouvrir les onglets Design et OPEX pour les calculer.
+        {tr("opexNotAvailable")}
       </p>
     );
   }
@@ -206,13 +206,13 @@ const OpexCostSection = ({ opex, tr = (k) => k }) => {
       <div style={{ ...styles.subSection, paddingBottom: 4 }}>
         <div style={styles.tagRow}>
           {[
-            { label: `Électricité [${currency}/h]`,        val: coutElec,             color: '#4a90e2' },
-            { label: `Air comprimé [${currency}/h]`,       val: coutAir,              color: '#17a2b8' },
-            { label: `Eau [${currency}/h]`,                val: coutEau,              color: '#2ecc71' },
-            { label: `Réactifs [${currency}/h]`,           val: coutReactifs,         color: '#e74c3c' },
-            { label: `Énergie fossile [${currency}/h]`,    val: coutEnergie,          color: '#f39c12' },
-            { label: `Transport résidus [${currency}/h]`,  val: coutTransportResidus, color: '#8e44ad' },
-            { label: `Transport réactifs [${currency}/h]`, val: coutTransportReactifs,color: '#9b59b6' },
+            { label: `${tr("electricity")} [${currency}/h]`,          val: coutElec,              color: '#4a90e2' },
+            { label: `${tr("compressedAir")} [${currency}/h]`,        val: coutAir,               color: '#17a2b8' },
+            { label: `${tr("water")} [${currency}/h]`,                val: coutEau,               color: '#2ecc71' },
+            { label: `${tr("reagents")} [${currency}/h]`,             val: coutReactifs,          color: '#e74c3c' },
+            { label: `${tr("fossilEnergy")} [${currency}/h]`,         val: coutEnergie,           color: '#f39c12' },
+            { label: `${tr("transportResiduesShort")} [${currency}/h]`, val: coutTransportResidus, color: '#8e44ad' },
+            { label: `${tr("transportReagentsShort")} [${currency}/h]`, val: coutTransportReactifs,color: '#9b59b6' },
           ].map(({ label, val, color }) => (
             <div key={label} style={{ ...styles.tag, borderLeft: `4px solid ${color}`, minWidth: 140 }}>
               <span style={styles.tagLabel}>{label}</span>
@@ -226,17 +226,17 @@ const OpexCostSection = ({ opex, tr = (k) => k }) => {
       <div style={styles.twoCol}>
         <div style={{ ...styles.subSection, background: '#f0f5ff', margin: 8, borderRadius: 6 }}>
           <h3 style={{ ...styles.subTitle, color: '#1a3a6b', fontSize: 14 }}>{tr("totalCost")}</h3>
-          <KV label={`Coût horaire [${currency}/h]`}                    value={fmt(totalCout_h, 2)} />
-          <KV label={`Coût annuel (${availability}h) [${currency}/an]`} value={fmt(totalCout_an, 0)} />
+          <KV label={`${tr("hourlyCost")} [${currency}/h]`}                       value={fmt(totalCout_h, 2)} />
+          <KV label={`${tr("annualCost")} (${availability}h) [${currency}${tr("perYear")}]`} value={fmt(totalCout_an, 0)} />
         </div>
         <div style={{ ...styles.subSection, background: '#f5f0ff', margin: 8, borderRadius: 6 }}>
           <h3 style={{ ...styles.subTitle, color: '#6a1a6b', fontSize: 14 }}>{tr("totalCO2")}</h3>
-          <KV label="CO₂ électricité [kg/h]"         value={fmt(co2Elec, 3)} />
-          <KV label="CO₂ air comprimé [kg/h]"        value={fmt(co2Air, 3)} />
-          <KV label="CO₂ énergie fossile [kg/h]"     value={fmt(co2Energie, 3)} />
-          <KV label="CO₂ transport réactifs [kg/h]"  value={fmt(co2TransportReactifs, 3)} />
-          <KV label="CO₂ transport résidus [kg/h]"   value={fmt(co2TransportResidus, 3)} />
-          <KV label="Total CO₂ [kg/h]"               value={fmt(totalCO2_kgh, 2)} />
+          <KV label={`${tr("co2Prefix")} ${tr("electricity")} [kg/h]`}           value={fmt(co2Elec, 3)} />
+          <KV label={`${tr("co2Prefix")} ${tr("compressedAir")} [kg/h]`}         value={fmt(co2Air, 3)} />
+          <KV label={`${tr("co2Prefix")} ${tr("fossilEnergy")} [kg/h]`}          value={fmt(co2Energie, 3)} />
+          <KV label={`${tr("co2Prefix")} ${tr("transportReagentsShort")} [kg/h]`} value={fmt(co2TransportReactifs, 3)} />
+          <KV label={`${tr("co2Prefix")} ${tr("transportResiduesShort")} [kg/h]`} value={fmt(co2TransportResidus, 3)} />
+          <KV label={`${tr("totalCO2")} [kg/h]`}                                value={fmt(totalCO2_kgh, 2)} />
         </div>
       </div>
 
@@ -610,23 +610,23 @@ const FB_Report = ({ innerData = {}, currentLanguage = 'fr' }) => {
           <SubSection title={t('Fonctionnement')}>
             <KV label={t('Nombre de jours par semaine')} value={fmt(daysPerWeek, 0)} unit="j/sem" />
             <KV label={t('Nombre d\'heures par jour')}   value={fmt(hoursPerDay, 0)} unit="h/j"   />
-            <KV label="Total"                            value={fmt(totalHoursPerWeek, 0)} unit="h/sem" />
+            <KV label={tr("total")}                          value={fmt(totalHoursPerWeek, 0)} unit="h/sem" />
           </SubSection>
           <SubSection title={t('Caractéristiques des Boues')}>
             <KV label={t('Type de boue')}          value={sludgeType}                />
             <KV label={t('Siccité')}               value={fmt(MS_pourcent, 1)}  unit="%" />
             <KV label="MV"                         value={fmt(MV_pourcent, 1)}  unit="%" />
             <KV label={t('Débit MS')}              value={fmt(MS_kg_h, 0)}      unit="kg MS/h" />
-            <KV label="Débit boue brute"           value={fmt(MasseBoueBrute, 0)} unit="kg/h" />
-            <KV label="Débit MV"                   value={fmt(MV_kg_h, 0)}      unit="kg MV/h" />
-            <KV label="Eau extraite"               value={fmt(EauExtraite_kg_h, 0)} unit="kg/h" />
-            <KV label="Cendres (MM)"               value={fmt(MM_kg_h, 0)}      unit="kg/h" />
+            <KV label={t('rawSludgeFlow')}         value={fmt(MasseBoueBrute, 0)} unit="kg/h" />
+            <KV label={t('mvFlowLabel')}           value={fmt(MV_kg_h, 0)}      unit="kg MV/h" />
+            <KV label={t('Eau extraite')}          value={fmt(EauExtraite_kg_h, 0)} unit="kg/h" />
+            <KV label={t('mineralAshMM')}          value={fmt(MM_kg_h, 0)}      unit="kg/h" />
           </SubSection>
         </div>
 
         {/* CHONS + PCI */}
         <div style={styles.twoCol}>
-          <SubSection title="Composition CHONS (% MV)">
+          <SubSection title={`${t('Composition CHONS')} (% MV)`}>
             <div style={styles.tagRow}>
               {[
                 { sym: 'C',  val: C_percent  },
@@ -643,7 +643,7 @@ const FB_Report = ({ innerData = {}, currentLanguage = 'fr' }) => {
               ))}
             </div>
           </SubSection>
-          <SubSection title="PCI / PCS">
+          <SubSection title={tr("pciPcsTitle")}>
             <KV label="PCI [kJ/kg MV]"    value={fmt(pciKJkgMV, 0)}   />
             <KV label="PCI [kcal/kg MV]"  value={fmt(PCIKCALKGMV, 0)} />
             <KV label="PCI [kcal/kg boue]"value={fmt(pciKcalkg, 0)}   />
@@ -654,7 +654,7 @@ const FB_Report = ({ innerData = {}, currentLanguage = 'fr' }) => {
         </div>
 
         {/* Métaux lourds */}
-        <SubSection title="Métaux lourds">
+        <SubSection title={tr("heavyMetalsLabel")}>
           <div style={styles.tableTitle}>{tr("teneursMgKgMS")}</div>
           <table style={styles.table}>
             <thead>
@@ -698,59 +698,59 @@ const FB_Report = ({ innerData = {}, currentLanguage = 'fr' }) => {
 
         {/* Air de combustion + Paramètres combustion */}
         <div style={styles.twoCol}>
-          <SubSection title="Air de combustion">
-            <KV label="Masse air sec total [kg/h]"          value={fmt(Masse_air_sec_kg_h, 0)}           />
-            <KV label="Débit air total [Nm³/h]"             value={fmt(Q_air_comb_tot_Nm3_h, 0)}         />
-            <KV label="Dont : air combustible [Nm³/h]"      value={fmt(Volume_air_combustible_total, 0)} />
-            <KV label="Dont : air de balayage [Nm³/h]"      value={fmt(Volume_air_balayage, 0)}          />
-            <KV label="T° air fluidisation av. préchauffage [°C]" value={fmt(Temp_air_fluidisation, 0)}  />
-            <KV label="T° air ap. préchauffage (lit) [°C]"  value={fmt(Tair_ap_prechauffe_C, 0)}         />
-            <KV label="T° air soufflante [°C]"              value={fmt(Temp_air_soufflante_C, 0)}        />
-            <KV label="Eau dans l'air comburant [kg/h]"     value={fmt(Meau_air_comburant, 2)}           />
+          <SubSection title={tr("subCombAir")}>
+            <KV label={tr("dryAirMassKgh")}          value={fmt(Masse_air_sec_kg_h, 0)}           />
+            <KV label={tr("totalAirFlowNm3h")}       value={fmt(Q_air_comb_tot_Nm3_h, 0)}         />
+            <KV label={tr("combustionAirNm3h")}      value={fmt(Volume_air_combustible_total, 0)} />
+            <KV label={tr("sweepAirNm3h")}           value={fmt(Volume_air_balayage, 0)}          />
+            <KV label={tr("fluidAirPreHeatC")}       value={fmt(Temp_air_fluidisation, 0)}        />
+            <KV label={tr("preheatedBedAirC")}       value={fmt(Tair_ap_prechauffe_C, 0)}         />
+            <KV label={tr("blowerAirTempCLabel")}    value={fmt(Temp_air_soufflante_C, 0)}        />
+            <KV label={tr("waterInCombAirKgh")}      value={fmt(Meau_air_comburant, 2)}           />
           </SubSection>
 
-          <SubSection title="Paramètres de combustion">
-            <KV label="Excès d'air global [%]"              value={fmt(Exces_air, 1)}                    />
-            <KV label="Excès d'air lit [%]"                 value={fmt(Exces_air_lit, 1)}                />
-            <KV label="Excès d'air combustible [%]"         value={fmt(Exces_air_combustible, 1)}        />
-            <KV label="O₂ calculé (sec) [%]"               value={fmt((O2_calcule || 0) * 100, 2)}      />
-            <KV label="Débit gaz naturel [kg/h]"            value={fmt(Q_gaz_kg_h, 2)}                  />
-            <KV label="Débit gaz naturel [Nm³/h]"           value={fmt(Q_gaz_Nm3_h, 2)}                 />
+          <SubSection title={tr("subCombParams")}>
+            <KV label={tr("globalExcessAirPct")}     value={fmt(Exces_air, 1)}                    />
+            <KV label={tr("bedExcessAirPct")}        value={fmt(Exces_air_lit, 1)}                />
+            <KV label={tr("fuelExcessAirPct")}       value={fmt(Exces_air_combustible, 1)}        />
+            <KV label={tr("o2CalcDryPct")}           value={fmt((O2_calcule || 0) * 100, 2)}      />
+            <KV label={tr("natGasFlowKgh")}          value={fmt(Q_gaz_kg_h, 2)}                  />
+            <KV label={tr("natGasFlowNm3h")}         value={fmt(Q_gaz_Nm3_h, 2)}                 />
           </SubSection>
         </div>
 
         {/* Fumées voûte + Paramètres thermiques */}
         <div style={styles.twoCol}>
-          <SubSection title="Fumées sortie voûte">
-            <KV label="T° fumées voûte [°C]"                value={fmt(Temp_fumee_voute_C, 0)}           />
-            <KV label="T° fumées ap. HX [°C]"              value={fmt(Tf_voute_ap_HX_C, 0)}             />
-            <KV label="Débit fumées humides [Nm³/h]"        value={fmt(FG_wet_Nm3_h, 0)}                 />
-            <KV label="Débit fumées sèches [Nm³/h]"         value={fmt(FG_dry_Nm3_h, 0)}                 />
-            <KV label="Densité fumées [kg/Nm³]"             value={fmt(Rho_FG_kg_Nm3, 4)}               />
+          <SubSection title={tr("subFlueGasVault")}>
+            <KV label={tr("vaultFGTempC")}           value={fmt(Temp_fumee_voute_C, 0)}           />
+            <KV label={tr("fgAfterHxTempC")}         value={fmt(Tf_voute_ap_HX_C, 0)}             />
+            <KV label={tr("wetFGFlowNm3h")}          value={fmt(FG_wet_Nm3_h, 0)}                 />
+            <KV label={tr("dryFGFlowNm3h")}          value={fmt(FG_dry_Nm3_h, 0)}                 />
+            <KV label={tr("fgDensityKgNm3")}         value={fmt(Rho_FG_kg_Nm3, 4)}               />
           </SubSection>
 
-          <SubSection title="Paramètres thermiques">
-            <KV label="Rendement HX [%]"                    value={fmt(Rdt_HX, 1)}                       />
-            <KV label="Enthalpie fumées voûte [kW]"         value={fmt(Hf_voute_kW, 1)}                  />
-            <KV label="Enthalpie fumées ap. HX [kW]"        value={fmt(Hf_voute_ap_HX_kW, 1)}            />
-            <KV label="Chaleur récupérée air [kW]"          value={fmt(Hair_ap_prechauffage_kW, 1)}       />
+          <SubSection title={tr("subThermalParams")}>
+            <KV label={tr("hxEffPct")}               value={fmt(Rdt_HX, 1)}                       />
+            <KV label={tr("vaultFGEnthKW")}          value={fmt(Hf_voute_kW, 1)}                  />
+            <KV label={tr("fgAfterHxEnthKW")}        value={fmt(Hf_voute_ap_HX_kW, 1)}            />
+            <KV label={tr("recoveredAirHeatKW")}     value={fmt(Hair_ap_prechauffage_kW, 1)}       />
           </SubSection>
         </div>
 
         {/* Résultat de convergence + Gaz sortie four */}
         <div style={styles.twoCol}>
-          <SubSection title="Résultat de convergence">
-            <KV label="Débit gaz naturel convergé [kg/h]"   value={fmt(Q_gaz_kg_h, 3)}            />
-            <KV label="Débit gaz naturel convergé [Nm³/h]"  value={fmt(Q_gaz_Nm3_h, 3)}           />
-            <KV label="O₂ calculé (sec) [%]"               value={fmt((O2_calcule || 0) * 100, 2)} />
-            <KV label="T° sortie HX [°C]"                   value={fmt(T_OUT, 0)}                  />
-            <KV label="Pression sortie HX [mmCE]"           value={fmt(P_out_mmCE)}                />
+          <SubSection title={tr("subConvergence")}>
+            <KV label={tr("convergedNatGasKgh")}     value={fmt(Q_gaz_kg_h, 3)}            />
+            <KV label={tr("convergedNatGasNm3h")}    value={fmt(Q_gaz_Nm3_h, 3)}           />
+            <KV label={tr("o2CalcDryPct")}           value={fmt((O2_calcule || 0) * 100, 2)} />
+            <KV label={tr("hxOutTempC")}             value={fmt(T_OUT, 0)}                  />
+            <KV label={tr("hxOutPressMmCE")}         value={fmt(P_out_mmCE)}                />
           </SubSection>
 
-          <SubSection title="Gaz sortie four">
-            <KV label="Débit humide total [kg/h]"           value={fmt(FG_wet_total, 0)}           />
-            <KV label="Débit sec [Nm³/h]"                   value={fmt(FG_OUT_Nm3_h.dry, 0)}       />
-            <KV label="Débit humide [Nm³/h]"                value={fmt(FG_OUT_Nm3_h.wet, 0)}       />
+          <SubSection title={tr("subFurnaceOutlet")}>
+            <KV label={tr("totalWetFlowKghLabel")}   value={fmt(FG_wet_total, 0)}           />
+            <KV label={tr("dryFlowNm3hLabel")}       value={fmt(FG_OUT_Nm3_h.dry, 0)}       />
+            <KV label={tr("wetFlowNm3hLabel")}       value={fmt(FG_OUT_Nm3_h.wet, 0)}       />
             <GasTable
               data={{
                 'kg/h':   FG_OUT_kg_h,
@@ -767,7 +767,7 @@ const FB_Report = ({ innerData = {}, currentLanguage = 'fr' }) => {
         </div>
 
         {/* Bilan énergétique simplifié */}
-        <SubSection title="Bilan énergétique simplifié (kW)">
+        <SubSection title={tr("subEnergyBalance")}>
           <table style={styles.table}>
             <thead>
               <tr style={{ backgroundColor: '#D4B5A0' }}>
@@ -805,7 +805,7 @@ const FB_Report = ({ innerData = {}, currentLanguage = 'fr' }) => {
               </tr>
               <tr style={{ opacity: 0.8 }}>
                 <td style={{ ...styles.tdLabel, fontStyle: 'italic', backgroundColor: '#f8f8f8' }}>
-                  Résidu (H_out − H_in) — doit être ≈ 0
+                  {tr("residualNote")}
                 </td>
                 <td style={{ ...styles.td, backgroundColor: '#f8f8f8' }}>—</td>
                 <td style={{
@@ -825,20 +825,20 @@ const FB_Report = ({ innerData = {}, currentLanguage = 'fr' }) => {
       </Section>
 
       {/* ── SECTION 3 : Émissions polluantes ───────────────────────────────── */}
-      <Section title={`3. ${t('Polluant')} — Émissions polluantes`}>
-        <SubSection title="Gaz en entrée [kg/h]">
+      <Section title={`3. ${t('Polluant')} — ${tr("pollutantEmissions")}`}>
+        <SubSection title={tr("subGasIn")}>
           <PollutantTable masses={PollutantInput} />
         </SubSection>
-        <SubSection title="Gaz en sortie [kg/h]">
+        <SubSection title={tr("subGasOut")}>
           <PollutantTable masses={PollutantOutput} />
         </SubSection>
         <div style={styles.twoCol}>
-          <SubSection title="Résidus solides">
-            <KV label="Cendres de foyer (sec) [kg/h]"  value={fmt(Residus.DryBottomAsh_kg_h)} />
-            <KV label="Cendres de foyer (hum.) [kg/h]" value={fmt(Residus.WetBottomAsh_kg_h)} />
-            <KV label="Cendres volantes [kg/h]"        value={fmt(Residus.FlyAsh_kg_h)}       />
+          <SubSection title={tr("subSolidResidues")}>
+            <KV label={tr("bottomAshDry")}  value={fmt(Residus.DryBottomAsh_kg_h)} />
+            <KV label={tr("bottomAshWet")}  value={fmt(Residus.WetBottomAsh_kg_h)} />
+            <KV label={tr("flyAshKghLabel")} value={fmt(Residus.FlyAsh_kg_h)}       />
           </SubSection>
-          <SubSection title="Consommation réactifs de traitement">
+          <SubSection title={tr("reagentConsumption")}>
             {reactifDisplay.length > 0
               ? reactifDisplay.map(({ label, value }) => (
                   <KV key={label} label={label} value={fmt(value, 3)} />
@@ -850,107 +850,107 @@ const FB_Report = ({ innerData = {}, currentLanguage = 'fr' }) => {
       </Section>
 
       {/* ── SECTION 4 : Dimensionnement ────────────────────────────────────── */}
-      <Section title="4. Dimensionnement">
+      <Section title={`4. ${t('Dimensionnement')}`}>
 
         <SubSection title={`${t('Voûte')} — ${t('Résumé Final')} ${t('Dimensionnement Réacteur')}`}>
           {Modele === '—' && NbrTuyeresActifs === 0 ? (
             <p style={{ color: '#888', fontSize: 11, margin: '6px 0' }}>
-              Données voûte non disponibles — ouvrir l'onglet Voûte.
+              {tr("vaultDataNotAvail")}
             </p>
           ) : (
             <div style={{ ...styles.twoCol, gap: 24 }}>
               <div>
-                <KV label={t('Modèle')}                                   value={Modele}                              />
-                <KV label="Nombre de fours"                               value={fmt(NombreFour, 0)}                  />
-                <KV label="Ø freeboard [m]"                               value={fmt(DiametreFreeboard, 3)}           />
-                <KV label="Ø voûte [m]"                                   value={fmt(DiametreVoute, 3)}               />
-                <KV label="Surface voûte [m²]"                            value={fmt(SurfaceVoute_m2, 4)}             />
-                <KV label="Vitesse freeboard [m/s]"                       value={fmt(VitesseFreeboard, 3)}            />
-                <KV label="Vitesse voûte iter. 2 [m/s]"                   value={fmt(VitesseVoute2_ms, 4)}            />
-                <KV label="Pression finale freeboard [mmCE]"              value={fmt(PressionFreeboard, 2)}           />
+                <KV label={t('Modèle')}                    value={Modele}                              />
+                <KV label={tr("numberOfFurnaces")}         value={fmt(NombreFour, 0)}                  />
+                <KV label={tr("freeBoardDiamM")}           value={fmt(DiametreFreeboard, 3)}           />
+                <KV label={tr("vaultDiamM")}               value={fmt(DiametreVoute, 3)}               />
+                <KV label={tr("vaultAreaM2Label")}         value={fmt(SurfaceVoute_m2, 4)}             />
+                <KV label={tr("freeBoardVelMs")}           value={fmt(VitesseFreeboard, 3)}            />
+                <KV label={tr("vaultVel2Ms")}              value={fmt(VitesseVoute2_ms, 4)}            />
+                <KV label={tr("finalFreeBoardPressMmCE")}  value={fmt(PressionFreeboard, 2)}           />
               </div>
               <div>
-                <KV label="Nb tuyères actives"                            value={fmt(NbrTuyeresActifs, 0)}            />
-                <KV label="Nb trous / tuyère"                             value={fmt(NbTrousParTuyere, 0)}            />
-                <KV label="Vitesse réelle tuyère [m/s]"                   value={fmt(VitesseTuyere_ms, 1)}            />
-                <KV label="Charge MS théorique [kg MS/h/m²]"             value={fmt(ChargMS_kg_h_m2, 2)}            />
-                <KV label="Charge MV théorique [kg MV/h/m²]"             value={fmt(ChargMV_kg_h_m2, 2)}            />
-                <KV label={`Charge eau théorique [kg eau/h/m²]${ChargEau_kg_h_m2 > 540 ? ' ⚠' : ''}`}
-                                                                          value={fmt(ChargEau_kg_h_m2, 2)}
+                <KV label={tr("activeNozzles")}            value={fmt(NbrTuyeresActifs, 0)}            />
+                <KV label={tr("holesPerNozzle")}           value={fmt(NbTrousParTuyere, 0)}            />
+                <KV label={tr("nozzleVelMs")}              value={fmt(VitesseTuyere_ms, 1)}            />
+                <KV label={tr("dsMassLoadKgh")}            value={fmt(ChargMS_kg_h_m2, 2)}            />
+                <KV label={tr("vmMassLoadKgh")}            value={fmt(ChargMV_kg_h_m2, 2)}            />
+                <KV label={`${tr("waterLoadKgh")}${ChargEau_kg_h_m2 > 540 ? ' ⚠' : ''}`}
+                                                           value={fmt(ChargEau_kg_h_m2, 2)}
                 />
-                <KV label="Capacité thermique du four [kW]"               value={fmt(CapaciteThermique_kW, 1)}        />
-                <KV label="Densité thermique du four [kW/m²]"             value={fmt(DensiteThermique_kW_m2, 1)}      />
+                <KV label={tr("furnaceThermalCapKW")}      value={fmt(CapaciteThermique_kW, 1)}        />
+                <KV label={tr("furnaceThermalDensKWm2")}   value={fmt(DensiteThermique_kW_m2, 1)}      />
               </div>
             </div>
           )}
         </SubSection>
 
-        <SubSection title="HX côté fumées">
+        <SubSection title={tr("subHxFlueGas")}>
           <div style={{ ...styles.twoCol, gap: 32 }}>
             <div>
-              <KV label="T° fumées voûte [°C]"             value={fmt(Temp_fumee_voute_C, 0)}      />
-              <KV label="Débit fumées humides [Nm³/h]"     value={fmt(FG_wet_Nm3_h, 0)}            />
-              <KV label="Pression freeboard [mmCE]"        value={fmt(P_freeboard_mmCE, 0)}        />
-              <KV label="Débit fumées entrée HX [m³/h]"    value={fmt(Q_FG_wet_entree_m3_h, 0)}   />
-              <KV label="Enthalpie fumées entrée [kW]"     value={fmt(Hf_voute_kW, 1)}             />
+              <KV label={tr("vaultFGTempC")}           value={fmt(Temp_fumee_voute_C, 0)}      />
+              <KV label={tr("wetFGFlowNm3h")}          value={fmt(FG_wet_Nm3_h, 0)}            />
+              <KV label={tr("freeBoardPressMmCE")}     value={fmt(P_freeboard_mmCE, 0)}        />
+              <KV label={tr("fgInletHxM3h")}           value={fmt(Q_FG_wet_entree_m3_h, 0)}   />
+              <KV label={tr("fgInletEnthalpyKW")}      value={fmt(Hf_voute_kW, 1)}             />
             </div>
             <div>
-              <KV label="T° fumées sortie HX [°C]"         value={fmt(Tf_voute_ap_HX_C, 0)}       />
-              <KV label="Pression sortie HX fumées [mmCE]" value={fmt(P_sortie_HX_fg_mmCE, 0)}    />
-              <KV label="Débit fumées sortie HX [m³/h]"   value={fmt(Q_FG_wet_sortie_m3_h, 0)}   />
-              <KV label="Enthalpie fumées sortie [kW]"     value={fmt(Hf_voute_ap_HX_kW, 1)}      />
+              <KV label={tr("hxFGOutTempC")}           value={fmt(Tf_voute_ap_HX_C, 0)}       />
+              <KV label={tr("hxFGOutPressMmCE")}       value={fmt(P_sortie_HX_fg_mmCE, 0)}    />
+              <KV label={tr("fgOutletHxM3h")}          value={fmt(Q_FG_wet_sortie_m3_h, 0)}   />
+              <KV label={tr("fgOutletEnthalpyKW")}     value={fmt(Hf_voute_ap_HX_kW, 1)}      />
             </div>
           </div>
         </SubSection>
 
-        <SubSection title="HX côté air">
+        <SubSection title={tr("subHxAir")}>
           <div style={{ ...styles.twoCol, gap: 32 }}>
             <div>
-              <KV label="T° air soufflante [°C]"           value={fmt(Temp_air_soufflante_C, 0)}  />
-              <KV label="Débit air [Nm³/h]"                value={fmt(Q_air_comb_tot_Nm3_h, 0)}   />
-              <KV label="PDC HX côté air [mmCE]"           value={fmt(PDC_HX_cote_air_mmCE, 1)}   />
-              <KV label="Pression entrée HX air [mmCE]"    value={fmt(P_cote_air_entree_mmCE, 0)} />
-              <KV label="Débit air entrée HX [m³/h]"       value={fmt(Q_air_entree_HX_m3_h, 0)}   />
-              <KV label="Enthalpie air entrée [kW]"        value={fmt(H_air_soufflante_kW, 1)}    />
+              <KV label={tr("blowerAirTempCLabel")}    value={fmt(Temp_air_soufflante_C, 0)}  />
+              <KV label={tr("totalAirFlowNm3h")}       value={fmt(Q_air_comb_tot_Nm3_h, 0)}   />
+              <KV label={tr("hxAirPdcMmCE")}           value={fmt(PDC_HX_cote_air_mmCE, 1)}   />
+              <KV label={tr("hxAirInPressMmCE")}       value={fmt(P_cote_air_entree_mmCE, 0)} />
+              <KV label={tr("airInHxM3h")}             value={fmt(Q_air_entree_HX_m3_h, 0)}   />
+              <KV label={tr("airInEnthalpyKW")}        value={fmt(H_air_soufflante_kW, 1)}    />
             </div>
             <div>
-              <KV label="T° air ap. préchauffe [°C]"       value={fmt(Tair_ap_prechauffe_C, 0)}   />
-              <KV label="Débit air sortie HX [m³/h]"       value={fmt(Q_air_sortie_HX_m3_h, 0)}   />
-              <KV label="Enthalpie air sortie [kW]"        value={fmt(Hair_ap_prechauffage_kW, 1)} />
+              <KV label={tr("preheatedAirTempC")}      value={fmt(Tair_ap_prechauffe_C, 0)}   />
+              <KV label={tr("airOutHxM3h")}            value={fmt(Q_air_sortie_HX_m3_h, 0)}   />
+              <KV label={tr("airOutEnthalpyKW")}       value={fmt(Hair_ap_prechauffage_kW, 1)} />
             </div>
           </div>
         </SubSection>
 
-        <SubSection title="Dimensionnement de l'échangeur">
+        <SubSection title={tr("subHxSizing")}>
           <div style={{ ...styles.twoCol, gap: 32 }}>
             <div>
-              <KV label="Rendement HX [%]"                 value={fmt(Rdt_HX, 1)}                             />
-              <KV label="Q chaleur cédée fumées [kW]"      value={fmt(Hf_voute_kW - Hf_voute_ap_HX_kW, 1)}   />
-              <KV label="Q chaleur reçue air [kW]"         value={fmt(Hair_ap_prechauffage_kW - H_air_soufflante_kW, 1)} />
-              <KV label="DTLM [K]"                         value={fmt(DTLM_HX, 2)}                            />
-              <KV label="Facteur UA [W/K]"                 value={fmt(Facteur_UA, 0)}                         />
+              <KV label={tr("hxEffPct")}               value={fmt(Rdt_HX, 1)}                             />
+              <KV label={tr("heatFromFGKW")}           value={fmt(Hf_voute_kW - Hf_voute_ap_HX_kW, 1)}   />
+              <KV label={tr("heatToAirKW")}            value={fmt(Hair_ap_prechauffage_kW - H_air_soufflante_kW, 1)} />
+              <KV label={tr("dtlmK")}                  value={fmt(DTLM_HX, 2)}                            />
+              <KV label={tr("uaFactorWK")}             value={fmt(Facteur_UA, 0)}                         />
             </div>
             <div>
-              <KV label="Surface d'échange [m²]"           value={fmt(S_echange_m2, 2)}                       />
-              <KV label="Section calandre [m²]"            value={fmt(Section_calandre_m2, 4)}                />
-              <KV label="Hext [kCal/m².°C]"                value={fmt(Coeff_Hext_HX, 4)}                     />
-              <KV label="Hint [kCal/m².°C]"                value={fmt(coeff_Hint_HX, 4)}                     />
-              <KV label="U encrassé [kCal/m².°C]"          value={fmt(FactUEncrasse_HX, 4)}                   />
+              <KV label={tr("hxAreaM2")}               value={fmt(S_echange_m2, 2)}                       />
+              <KV label={tr("shellSectionM2")}         value={fmt(Section_calandre_m2, 4)}                />
+              <KV label="Hext [kCal/m².°C]"            value={fmt(Coeff_Hext_HX, 4)}                     />
+              <KV label="Hint [kCal/m².°C]"            value={fmt(coeff_Hint_HX, 4)}                     />
+              <KV label={tr("uFouledKcal")}            value={fmt(FactUEncrasse_HX, 4)}                   />
             </div>
           </div>
         </SubSection>
 
-        <SubSection title="Ventilateur">
+        <SubSection title={tr("subFan")}>
           <div style={{ ...styles.twoCol, gap: 32 }}>
             <div>
-              <KV label="Débit air à pulser [Nm³/h]"       value={fmt(Q_air_pulser_Nm3_h, 0)}             />
-              <KV label="Pression ventilateur [mmCE]"      value={fmt(P_cote_air_entree_mmCE, 0)}         />
-              <KV label="T° air soufflante [°C]"           value={fmt(Temp_air_soufflante_C, 0)}          />
+              <KV label={tr("airToPulseNm3h")}         value={fmt(Q_air_pulser_Nm3_h, 0)}             />
+              <KV label={tr("fanPressMmCE")}           value={fmt(P_cote_air_entree_mmCE, 0)}         />
+              <KV label={tr("blowerAirTempCLabel")}    value={fmt(Temp_air_soufflante_C, 0)}          />
             </div>
             <div>
-              <KV label="Débit ventilateur [m³/h]"         value={fmt(Q_air_ventilateur_m3_h, 0)}         />
-              <KV label="Rendement ventilateur [%]"        value={fmt(Rendement_ventilateur_HX * 100, 1)} />
-              <KV label="Puissance électrique [kW]"        value={fmt(Puissance_elec_ventilateur_kW, 1)}  />
+              <KV label={tr("fanFlowM3hLabel")}        value={fmt(Q_air_ventilateur_m3_h, 0)}         />
+              <KV label={tr("fanEffPctLabel")}         value={fmt(Rendement_ventilateur_HX * 100, 1)} />
+              <KV label={tr("elecPowerKWLabel")}       value={fmt(Puissance_elec_ventilateur_kW, 1)}  />
             </div>
           </div>
         </SubSection>
@@ -958,7 +958,7 @@ const FB_Report = ({ innerData = {}, currentLanguage = 'fr' }) => {
       </Section>
 
       {/* ── SECTION 5 : OPEX ───────────────────────────────────────────────── */}
-      <Section title={`5. ${t('OPEX')} — Coûts horaires`}>
+      <Section title={`5. ${t('OPEX')} — ${tr("hourlyCostsSuffix")}`}>
         <OpexCostSection opex={opex} tr={tr} />
       </Section>
 

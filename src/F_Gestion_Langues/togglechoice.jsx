@@ -4,19 +4,12 @@ const Toggle10Choices = ({ currentLanguage, onLanguageChange }) => {
   // Supprimé l'état local - on utilise maintenant les props
   const [showOptions, setShowOptions] = useState(true);
   
-  const options = [
-    'francais',
-    'english',
+  const options = ['fr', 'en', 'es', 'de', 'it', 'pt', 'zh', 'ja', 'ru', 'ar'];
 
-    'español',
-    'deutsch',
-    'italiano',
-    'português',
-    '中文',
-    '日本語',
-    'русский',
-    'العربية',
-  ];
+  const displayLabels = {
+    fr: 'francais', en: 'english', es: 'español', de: 'deutsch', it: 'italiano',
+    pt: 'português', zh: '中文', ja: '日本語', ru: 'русский', ar: 'العربية',
+  };
   
   const colors = [
     '#4CAF50', // Vert
@@ -62,7 +55,7 @@ const Toggle10Choices = ({ currentLanguage, onLanguageChange }) => {
       onClick: toggleMode,
       top: -30,
       left: 0,
-      label: currentLanguage, // Utilisez la prop au lieu de l'état local
+      label: displayLabels[currentLanguage] || currentLanguage,
       backgroundColor: colors[currentIndex] || colors[0], // Fallback au cas où
     };
   };
@@ -126,19 +119,17 @@ const Toggle10Choices = ({ currentLanguage, onLanguageChange }) => {
                   padding: '4px 12px',
                   borderRadius: '4px',
                   fontSize: '14px',
-                  // Utilisez currentLanguage pour la comparaison
-                  backgroundColor: option === currentLanguage ? colors[index] : '#e5e7eb',
+                    backgroundColor: option === currentLanguage ? colors[index] : '#e5e7eb',
                   color: option === currentLanguage ? 'white' : '#374151',
                   cursor: 'pointer'
                 }}
                 onClick={() => {
-                  // Permettre le clic direct sur les options
                   if (onLanguageChange) {
                     onLanguageChange(option);
                   }
                 }}
               >
-                {option}
+                {displayLabels[option] || option}
               </div>
             ))}
           </div>

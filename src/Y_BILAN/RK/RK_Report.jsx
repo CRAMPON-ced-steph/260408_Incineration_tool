@@ -456,7 +456,7 @@ const OpexCostSection = ({ opex, tr }) => {
         <div style={{ ...styles.subSection, background: '#f0f5ff', margin: 8, borderRadius: 6 }}>
           <h3 style={{ ...styles.subTitle, color: '#1a3a6b', fontSize: 14 }}>{tr('totalCost')}</h3>
           <KV label={`${tr('hourlyCost')} [${currency}/h]`} value={fmt(totalCout_h, 2)} />
-          <KV label={`${tr('annualCost')} (${availability}h) [${currency}/an]`} value={fmt(totalCout_an, 0)} />
+          <KV label={`${tr('annualCost')} (${availability}h) [${currency}${tr('perYear')}]`} value={fmt(totalCout_an, 0)} />
         </div>
         <div style={{ ...styles.subSection, background: '#f5f0ff', margin: 8, borderRadius: 6 }}>
           <h3 style={{ ...styles.subTitle, color: '#6a1a6b', fontSize: 14 }}>{tr('totalCO2')}</h3>

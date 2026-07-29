@@ -89,6 +89,9 @@ export const translations = {
     'Matière volatile': 'Matière volatile',
     'Matière minérale': 'Matière minérale',
     'Eau extraite': 'Eau extraite',
+    rawOMFlow: 'Débit OM brut',
+    mvFlowLabel: 'Débit MV',
+    mineralAshMM: 'Cendres (MM)',
 
     // ────────────────────────────────────────────────────────
     // OM TAB - CHONS COMPOSITION
@@ -545,6 +548,9 @@ export const translations = {
     'Matière volatile': 'Volatile Matter',
     'Matière minérale': 'Mineral Matter',
     'Eau extraite': 'Water Extracted',
+    rawOMFlow: 'Raw OM flow',
+    mvFlowLabel: 'VM flow',
+    mineralAshMM: 'Mineral ash (MM)',
 
     // ────────────────────────────────────────────────────────
     // OM TAB - CHONS COMPOSITION
