@@ -494,10 +494,25 @@ function Flow({
       // Read latest nodeData from local snapshot (always up-to-date)
       const nodeData = currentNodes.find(n => n.id === node.id)?.data || node.data;
 
-      // Auto-détection WHB pour RK+SCC : synchroniser localStorage avant le calcul batch
+      // Auto-détection WHB pour RK+SCC : vérifier uniquement la MÊME ligne (groupe connecté)
       if (node.data.label === 'RK+SCC') {
-        const hasWHB = currentNodes.some(n => n.data?.label === 'WHB');
-        localStorage.setItem(`bilanType_whb_RK_${node.id}`, hasWHB ? 'WITH_WHB' : 'WITHOUT_WHB');
+        const adj = new Map(currentNodes.map(n => [n.id, []]));
+        for (const e of currentEdges) {
+          if (adj.has(e.source) && adj.has(e.target)) {
+            adj.get(e.source).push(e.target);
+            adj.get(e.target).push(e.source);
+          }
+        }
+        const visited = new Set();
+        const bfsQ = [node.id];
+        while (bfsQ.length) {
+          const id = bfsQ.shift();
+          if (visited.has(id)) continue;
+          visited.add(id);
+          for (const next of (adj.get(id) || [])) bfsQ.push(next);
+        }
+        const lineHasWHB = [...visited].some(id => currentNodes.find(n => n.id === id)?.data?.label === 'WHB');
+        localStorage.setItem(`bilanType_whb_RK_${node.id}`, lineHasWHB ? 'WITH_WHB' : 'WITHOUT_WHB');
       }
 
       let result = null;
