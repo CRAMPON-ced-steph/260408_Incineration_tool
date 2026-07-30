@@ -67,11 +67,12 @@ const LineTable = ({ lineNodes }) => {
 
   const nodesWithData = lineNodes.filter(n => n.data?.result?.dataFlow);
   const merged = nodesWithData.map(n => {
+    const lineIndex = lineNodes.indexOf(n);
     const isFurnace = FURNACE_LABELS.includes(n.data?.label);
     const displayData = isFurnace ? getFurnaceDisplayData(n) : swapTValues(n.data.result.dataFlow);
-    return { nodeId: n.id, nodeName: n.data.label, ...displayData };
+    return { nodeId: n.id, nodeName: n.data.label, lineIndex, ...displayData };
   });
-  const rawKeys = [...new Set(merged.flatMap(Object.keys))].filter(k => k !== 'nodeId' && k !== 'nodeName');
+  const rawKeys = [...new Set(merged.flatMap(Object.keys))].filter(k => k !== 'nodeId' && k !== 'nodeName' && k !== 'lineIndex');
   const PRIORITY_KEYS = ['P_incin [MW]', 'Q_déchets [kg/h]', 'T_in', 'T', 'P_mmCE'];
   const allKeys = [
     ...PRIORITY_KEYS.filter(k => rawKeys.includes(k)),
@@ -89,7 +90,7 @@ const LineTable = ({ lineNodes }) => {
           <th style={{ padding: '8px', backgroundColor: '#f4f4f4', border: '1px solid #ddd', position: 'sticky', top: 0 }}>Parameter</th>
           {merged.map((data, i) => (
             <th key={i} style={{ padding: '8px', backgroundColor: '#f4f4f4', border: '1px solid #ddd', position: 'sticky', top: 0 }}>
-              {i === 0 ? data.nodeName : `${data.nodeName} (L${i})`}
+              {data.lineIndex === 0 ? data.nodeName : `${data.nodeName} (L${data.lineIndex})`}
             </th>
           ))}
         </tr>
