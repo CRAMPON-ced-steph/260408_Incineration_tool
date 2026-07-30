@@ -256,7 +256,7 @@ function Flow({
           const remainingEdges = acc.filter((edge) => !connectedEdges.includes(edge));
           const createdEdges = incomers.flatMap(({ id: source }) =>
             outgoers.map(({ id: target }) => ({
-              id: `${source}->${target}`,
+              id: `reactflow__edge-${source}-${target}`,
               source,
               target,
             }))
@@ -334,7 +334,7 @@ function Flow({
           return [
             ...prevEdges,
             {
-              id: `${headNode.id}-${newNode.id}`,
+              id: `reactflow__edge-${headNode.id}-${newNode.id}`,
               source: headNode.id,
               target: newNode.id,
               label: (chainLength + 1).toString(),
