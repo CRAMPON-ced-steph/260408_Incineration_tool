@@ -163,6 +163,7 @@ const  Teau_alim = parseFloat(T_eau_alimentation_C) || 0;
   };
 
   const dataFlow = {
+    T_in: Taval_WHB,
     T,
     Qv_wet_Nm3_h,
     O2_dry_pourcent,
