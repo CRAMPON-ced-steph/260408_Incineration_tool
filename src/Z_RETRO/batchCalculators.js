@@ -281,9 +281,10 @@ export const batchCalcMap = {
   'GF': (nodeData, nodeId) => {
     if (!nodeData?.result) return null;
     const receivedDataFlow = nodeData?.result?.dataFlow || {};
+    const Waste_flow_rate_kg_h = f(`Waste_flow_rate_kg_h_GF_${nodeId}`, '1000');
     const r = performCalculation_GF(
       nodeData,
-      f(`Waste_flow_rate_kg_h_GF_${nodeId}`, '1000'),
+      Waste_flow_rate_kg_h,
       f(`Pressure_losse_mmCE_GF_${nodeId}`, '100'),
       f(`Combustion_air_flowrate_Nm3_h_GF_${nodeId}`, '10000'),
       f(`Measured_air_temperature_C_GF_${nodeId}`, '20'),
@@ -310,6 +311,6 @@ export const batchCalcMap = {
       f(`Q_air_ingress_Nm3_h_GF_${nodeId}`, '0'),
       f(`T_air_ingress_C_GF_${nodeId}`, '20')
     );
-    return r ? { ...r, dataFlow: receivedDataFlow } : null;
+    return r ? { ...r, Waste_flow_rate_kg_h, dataFlow: receivedDataFlow } : null;
   },
 };

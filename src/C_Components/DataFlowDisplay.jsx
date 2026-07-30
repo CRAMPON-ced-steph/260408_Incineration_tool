@@ -45,16 +45,32 @@ const HIGHLIGHT_COLORS = [
   { bg: '#ffccc7', border: '#f5222d' }, // rouge
 ];
 
+const swapTValues = (df) => {
+  if (!df || !('T' in df) || !('T_in' in df)) return { ...df };
+  return { ...df, T: df.T_in, T_in: df.T };
+};
+
+const getFurnaceDisplayData = (n) => {
+  const r = n.data.result;
+  const p_mw = n.data?.label === 'GF'
+    ? (r?.P_incinerateur_kWH != null ? r.P_incinerateur_kWH / 1000 : undefined)
+    : r?.P_incinerateur_MWH;
+  return {
+    'P_incin [MW]': p_mw,
+    'Q_déchets [kg/h]': r?.MasseDechet ?? r?.Waste_flow_rate_kg_h,
+  };
+};
+
 const LineTable = ({ lineNodes }) => {
   const [highlighted, setHighlighted] = useState({});
   const toggleHighlight = (key) => setHighlighted(prev => ({ ...prev, [key]: !prev[key] }));
 
   const nodesWithData = lineNodes.filter(n => n.data?.result?.dataFlow);
-  const merged = nodesWithData.map(n => ({
-    nodeId: n.id,
-    nodeName: n.data.label,
-    ...n.data.result.dataFlow,
-  }));
+  const merged = nodesWithData.map(n => {
+    const isFurnace = FURNACE_LABELS.includes(n.data?.label);
+    const displayData = isFurnace ? getFurnaceDisplayData(n) : swapTValues(n.data.result.dataFlow);
+    return { nodeId: n.id, nodeName: n.data.label, ...displayData };
+  });
   const allKeys = [...new Set(merged.flatMap(Object.keys))].filter(k => k !== 'nodeId' && k !== 'nodeName');
 
   if (merged.length === 0) {

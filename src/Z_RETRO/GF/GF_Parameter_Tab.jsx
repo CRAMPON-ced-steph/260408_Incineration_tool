@@ -440,7 +440,7 @@ const GF_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguag
         localStorage.setItem(`pointE_${nodeId}`, JSON.stringify(pointE));
       }
       if (onSendData) {
-        onSendData({ result, inputData: { Waste_flow_rate_kg_h, Pressure_losse_mmCE, Combustion_air_flowrate_Nm3_h, Measured_air_temperature_C, Q_feed_water_kg_h, T_feed_water_C, Blowdown_pourcent } });
+        onSendData({ result: { ...result, Waste_flow_rate_kg_h: validatedInputs.Waste_flow_rate_kg_h }, inputData: { Waste_flow_rate_kg_h, Pressure_losse_mmCE, Combustion_air_flowrate_Nm3_h, Measured_air_temperature_C, Q_feed_water_kg_h, T_feed_water_C, Blowdown_pourcent } });
       }
 
     } catch (error) {
