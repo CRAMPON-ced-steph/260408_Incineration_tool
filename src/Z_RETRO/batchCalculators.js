@@ -254,11 +254,14 @@ export const batchCalcMap = {
     const NCV     = f(`NCV_kcal_kg_RK_${nodeId}`, '2200');
     const Masse   = f(`Masse_dechet_kg_h_RK_${nodeId}`, '5000');
 
+    const receivedDataFlow = nodeData?.result?.dataFlow || {};
     if (bilanType_whb === 'WITH_WHB') {
       if (!nodeData?.result?.data_Air_WHB) return null; // WHB data required
-      return performCalculation_RK_with_WHB(nodeData, Tair, Thermal, NCV, Masse, bilanType_NCV_Masse);
+      const r = performCalculation_RK_with_WHB(nodeData, Tair, Thermal, NCV, Masse, bilanType_NCV_Masse);
+      return r ? { ...r, dataFlow: receivedDataFlow } : null;
     }
-    return performCalculation_RK(nodeData, Tair, Thermal, NCV, Masse, bilanType_NCV_Masse);
+    const r = performCalculation_RK(nodeData, Tair, Thermal, NCV, Masse, bilanType_NCV_Masse);
+    return r ? { ...r, dataFlow: receivedDataFlow } : null;
   },
 
   'FB': (nodeData, nodeId) => {
@@ -267,16 +270,18 @@ export const batchCalcMap = {
     const Thermal   = f(`Thermal_losses_MW_FB_${nodeId}`, '1');
     const wasteType = ls(`wasteType_FB_${nodeId}`, 'PRIMAIRE');
     const MV        = f(`MV_percent_FB_${nodeId}`, '70');
+    const receivedDataFlow = nodeData?.result?.dataFlow || {};
 
-    if (bilanType === 'DRY SOLIDS') {
-      return performCalculation_FB_MS(nodeData, Tair, Thermal, f(`Q_boue_kg_h_FB_${nodeId}`, '1000'), wasteType, MV);
-    }
-    return performCalculation_FB_Qboue(nodeData, Tair, Thermal, wasteType, f(`MS_percent_FB_${nodeId}`, '25'), MV);
+    const r = bilanType === 'DRY SOLIDS'
+      ? performCalculation_FB_MS(nodeData, Tair, Thermal, f(`Q_boue_kg_h_FB_${nodeId}`, '1000'), wasteType, MV)
+      : performCalculation_FB_Qboue(nodeData, Tair, Thermal, wasteType, f(`MS_percent_FB_${nodeId}`, '25'), MV);
+    return r ? { ...r, dataFlow: receivedDataFlow } : null;
   },
 
   'GF': (nodeData, nodeId) => {
     if (!nodeData?.result) return null;
-    return performCalculation_GF(
+    const receivedDataFlow = nodeData?.result?.dataFlow || {};
+    const r = performCalculation_GF(
       nodeData,
       f(`Waste_flow_rate_kg_h_GF_${nodeId}`, '1000'),
       f(`Pressure_losse_mmCE_GF_${nodeId}`, '100'),
@@ -305,5 +310,6 @@ export const batchCalcMap = {
       f(`Q_air_ingress_Nm3_h_GF_${nodeId}`, '0'),
       f(`T_air_ingress_C_GF_${nodeId}`, '20')
     );
+    return r ? { ...r, dataFlow: receivedDataFlow } : null;
   },
 };

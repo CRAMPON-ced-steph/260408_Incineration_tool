@@ -68,7 +68,7 @@ const LineTable = ({ lineNodes }) => {
           <th style={{ padding: '8px', backgroundColor: '#f4f4f4', border: '1px solid #ddd', position: 'sticky', top: 0 }}>Parameter</th>
           {merged.map((data, i) => (
             <th key={i} style={{ padding: '8px', backgroundColor: '#f4f4f4', border: '1px solid #ddd', position: 'sticky', top: 0 }}>
-              {data.nodeName} ({data.nodeId})
+              {i === 0 ? data.nodeName : `${data.nodeName} (L${i})`}
             </th>
           ))}
         </tr>
