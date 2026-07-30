@@ -71,7 +71,12 @@ const LineTable = ({ lineNodes }) => {
     const displayData = isFurnace ? getFurnaceDisplayData(n) : swapTValues(n.data.result.dataFlow);
     return { nodeId: n.id, nodeName: n.data.label, ...displayData };
   });
-  const allKeys = [...new Set(merged.flatMap(Object.keys))].filter(k => k !== 'nodeId' && k !== 'nodeName');
+  const rawKeys = [...new Set(merged.flatMap(Object.keys))].filter(k => k !== 'nodeId' && k !== 'nodeName');
+  const tIdx = rawKeys.indexOf('T');
+  const tInIdx = rawKeys.indexOf('T_in');
+  const allKeys = (tIdx !== -1 && tInIdx !== -1 && tInIdx !== tIdx + 1)
+    ? (() => { const k = rawKeys.filter(x => x !== 'T_in'); k.splice(tIdx + 1, 0, 'T_in'); return k; })()
+    : rawKeys;
 
   if (merged.length === 0) {
     return <div style={{ padding: '20px', color: '#888', fontStyle: 'italic' }}>Aucune donnée disponible pour cette ligne.</div>;
