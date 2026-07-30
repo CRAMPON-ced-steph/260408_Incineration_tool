@@ -607,6 +607,7 @@ function Flow({
         onClose={() => setSelectedNode(null)}
         currentLanguage={currentLanguage}
         allNodes={nodes}
+        edges={edges}
       />
     );
   };

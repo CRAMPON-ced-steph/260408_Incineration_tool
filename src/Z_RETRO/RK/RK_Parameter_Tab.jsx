@@ -42,7 +42,7 @@ const DEFAULT_VALUES = {
   diagramMode: DIAGRAM_MODES.NO
 };
 
-const RK_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguage, autoTrigger = false, allNodes, nodeId }) => {
+const RK_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguage, autoTrigger = false, allNodes, edges, nodeId }) => {
   // États principaux
   const [Tair_RK_C, setTair_RK_C] = useState(() =>
     localStorage.getItem(`Tair_RK_C_${nodeId}`) || DEFAULT_VALUES.Tair_RK_C
@@ -118,15 +118,32 @@ const RK_Parameter_Tab = ({ nodeData, title, onSendData, onClose, currentLanguag
     }
   }, [calculationResult_RK]);
 
-  // Détection automatique du mode WHB selon la présence d'un noeud WHB sur le canvas
+  // Détection automatique du mode WHB selon la présence d'un noeud WHB sur la MÊME ligne
   useEffect(() => {
-    if (!allNodes) return;
-    const hasWHB = allNodes.some(n => n.data?.label === 'WHB');
-    const expected = hasWHB ? CALCULATION_MODES.WITH_WHB : CALCULATION_MODES.WITHOUT_WHB;
+    if (!allNodes || !edges) return;
+    // BFS pour trouver tous les nœuds du même groupe connecté que le nœud courant
+    const adj = new Map(allNodes.map(n => [n.id, []]));
+    for (const e of edges) {
+      if (adj.has(e.source) && adj.has(e.target)) {
+        adj.get(e.source).push(e.target);
+        adj.get(e.target).push(e.source);
+      }
+    }
+    const visited = new Set();
+    const queue = [nodeId];
+    while (queue.length) {
+      const id = queue.shift();
+      if (visited.has(id)) continue;
+      visited.add(id);
+      for (const next of (adj.get(id) || [])) queue.push(next);
+    }
+    const nodeMap = new Map(allNodes.map(n => [n.id, n]));
+    const lineHasWHB = [...visited].some(id => nodeMap.get(id)?.data?.label === 'WHB');
+    const expected = lineHasWHB ? CALCULATION_MODES.WITH_WHB : CALCULATION_MODES.WITHOUT_WHB;
     if (bilanType_whb !== expected) {
       setBilanType_whb(expected);
     }
-  }, [allNodes]);
+  }, [allNodes, edges, nodeId]);
 
   // Validation des entrées
   const validateInputs = useCallback(() => {
