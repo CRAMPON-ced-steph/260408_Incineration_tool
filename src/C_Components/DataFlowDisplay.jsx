@@ -72,11 +72,11 @@ const LineTable = ({ lineNodes }) => {
     return { nodeId: n.id, nodeName: n.data.label, ...displayData };
   });
   const rawKeys = [...new Set(merged.flatMap(Object.keys))].filter(k => k !== 'nodeId' && k !== 'nodeName');
-  const tIdx = rawKeys.indexOf('T');
-  const tInIdx = rawKeys.indexOf('T_in');
-  const allKeys = (tIdx !== -1 && tInIdx !== -1 && tInIdx !== tIdx + 1)
-    ? (() => { const k = rawKeys.filter(x => x !== 'T_in'); k.splice(tIdx + 1, 0, 'T_in'); return k; })()
-    : rawKeys;
+  const PRIORITY_KEYS = ['P_incin [MW]', 'Q_déchets [kg/h]', 'T_in', 'T', 'P_mmCE'];
+  const allKeys = [
+    ...PRIORITY_KEYS.filter(k => rawKeys.includes(k)),
+    ...rawKeys.filter(k => !PRIORITY_KEYS.includes(k)),
+  ];
 
   if (merged.length === 0) {
     return <div style={{ padding: '20px', color: '#888', fontStyle: 'italic' }}>Aucune donnée disponible pour cette ligne.</div>;
