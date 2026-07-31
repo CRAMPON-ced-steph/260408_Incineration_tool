@@ -4,6 +4,7 @@ import { CO2_kg_m3, H2O_kg_m3, O2_kg_m3, N2_kg_m3 } from '../../A_Transverse_fon
 import { getLanguageCode } from '../../F_Gestion_Langues/Fonction_Traduction';
 import { makeReportT } from '../../D_BILAN_Rapports/report_traduction';
 import { translations } from './SCRUBBER_traduction';
+import { tlTranslations } from './TourLavage_traduction';
 import { fmt } from '../../A_Transverse_fonction/formatNumber';
 const Section = ({ title, children }) => <div style={styles.section}><h2 style={styles.sectionTitle}>{title}</h2>{children}</div>;
 const SubSection = ({ title, children }) => <div style={styles.subSection}>{title && <h3 style={styles.subTitle}>{title}</h3>}{children}</div>;
@@ -86,7 +87,12 @@ const OpexSummary = ({ opex, t, tr = k => k }) => {
 const SCRUBBER_Report = ({ innerData = {}, currentLanguage = 'fr' }) => {
   const languageCode = getLanguageCode(currentLanguage);
   const tr = makeReportT(currentLanguage);
-  const t = (key) => translations[languageCode]?.[key] || translations['fr']?.[key] || key;
+  const t = (key) =>
+    tlTranslations[languageCode]?.[key] ||
+    tlTranslations['fr']?.[key] ||
+    translations[languageCode]?.[key] ||
+    translations['fr']?.[key] ||
+    key;
   const T_OUT = innerData.T_OUT || 0;
   const O2_calcule = innerData.O2_calcule || 0;
   const FG_OUT_kg_h = innerData.FG_OUT_kg_h || {};
@@ -98,6 +104,11 @@ const SCRUBBER_Report = ({ innerData = {}, currentLanguage = 'fr' }) => {
   const PInput = innerData.PInput || {};
   const Poutput = innerData.Poutput || {};
   const opex = computeOpexCosts(innerData, tr);
+
+  // Résultats de la tour de lavage (nouveau moteur Pyrofluid)
+  const TL = innerData.TL || null;
+  const TLin = innerData.TL_inputs || {};
+  const FG_scrubber = innerData.FG_scrubber_out_kg_h || {};
 
   return (
     <div style={styles.container}>
@@ -123,35 +134,64 @@ const SCRUBBER_Report = ({ innerData = {}, currentLanguage = 'fr' }) => {
         <SubSection title={t('gasOutlet')}><PollutantTable masses={Poutput} /></SubSection>
       </Section>
 
-      <Section title={`3. ${t('acidScrubberTitle')}`}>
-        <div style={styles.twoCol}>
-          <SubSection title={t('performances')}>
-            <KV label={t('outletGasTemp')} value={fmt(innerData.T_FG_out_acid, 1)} unit="°C" />
-            <KV label={t('hclEfficiencyPct')} value={fmt(innerData.FG_HCl_efficiency, 1)} />
-          </SubSection>
-          <SubSection title={t('inputParameters')}>
-            <KV label={t('hclInlet')} value={fmt(PInput?.HCl)} />
-            <KV label={t('hclOutlet')} value={fmt(Poutput?.HCl)} />
-          </SubSection>
-        </div>
+      {/* Sections 3+4 (laveur acide / laveur basique) fusionnées : tour de lavage Pyrofluid */}
+      <Section title={`3. ${t('TL_report_section')}`}>
+        {!TL ? (
+          <p style={{ color: '#999', fontSize: 12, padding: '10px 14px' }}>—</p>
+        ) : (
+          <>
+            <div style={styles.twoCol}>
+              <SubSection title={t('TL_report_performances')}>
+                <KV label={t('TL_temperature')} value={fmt(TL.tAbs, 1)} unit="°C" />
+                <KV label={t('TL_efficiency_hcl')} value={fmt(TL.effHCl, 1)} unit="%" />
+                <KV label={t('TL_efficiency_so2')} value={fmt(TL.effSO2, 1)} unit="%" />
+                <KV label={t('TL_so2_dry_11')} value={fmt(TL.cibleSO2, 1)} unit="mg/Nm³" />
+                <KV label={t('TL_hcl_dry_11')} value={fmt(TL.cibleHCl, 1)} unit="mg/Nm³" />
+                <KV label={t('TL_flow_SO2')} value={fmt(TL.masSO2s)} unit="kg/h" />
+                <KV label={t('TL_flow_HCl')} value={fmt(TL.masHCls)} unit="kg/h" />
+              </SubSection>
+              <SubSection title={t('TL_report_design')}>
+                <KV label={t('TL_selected_diameter')} value={fmt(TLin.diamRetenu, 2)} unit="m" />
+                <KV label={t('TL_computed_diameter')} value={fmt(TL.diamCalc, 2)} unit="m" />
+                <KV label={t('TL_packing_height_total')} value={fmt(TL.hGarnRetenue, 2)} unit="m" />
+                <KV label={t('TL_flooding_rate')} value={fmt(TL.tauxEngor, 1)} unit="%" />
+                <KV label={t('TL_wetting_rate')} value={fmt(TL.tauxMouil, 2)} unit="m³/(m²·h)" />
+                <KV label={t('TL_packing_dp')} value={fmt(TL.dPGarn, 1)} unit="mmCE" />
+                <KV label={t('TL_demister_diameter')} value={fmt(TL.diamDeves, 1)} unit="m" />
+                <KV label={t('TL_demister_dp')} value={fmt(TL.dPDeves, 1)} unit="mmCE" />
+              </SubSection>
+            </div>
+            <div style={styles.twoCol}>
+              <SubSection title={t('TL_report_balances')}>
+                <KV label={t('TL_spray_flow')} value={fmt(TLin.debArrosage, 0)} unit="kg/h" />
+                <KV label={t('TL_makeup_water')} value={fmt(TL.appointAbs)} unit="kg/h" />
+                <KV label={t('TL_total_purge')} value={fmt(TL.purgeTotale)} unit="kg/h" />
+                <KV label={t('TL_naoh_nominal')} value={fmt(TL.masNaOHTot)} unit="kg/h" />
+                <KV label={t('TL_naoh_nominal_vol')} value={fmt(TL.volNaOHTot)} unit="l/h" />
+                <KV label={t('TL_naoh_maxi')} value={fmt(TL.masNaOHMaxi)} unit="kg/h" />
+              </SubSection>
+              <SubSection title={t('TL_report_condenser')}>
+                {TLin.sousRef && TL.cond ? (
+                  <>
+                    <KV label={t('TL_condenser_outlet_temp')} value={fmt(TL.cond.Tc, 1)} unit="°C" />
+                    <KV label={t('TL_condenser_height')} value={fmt(TL.hauteurCond, 2)} unit="m" />
+                    <KV label={t('TL_condensate_flow')} value={fmt(TL.cond.condensat, 0)} unit="kg/h" />
+                    <KV label={t('TL_cooling_water_flow')} value={fmt(TL.cond.eauRefroid, 0)} unit="kg/h" />
+                    <KV label={t('TL_condenser_duty')} value={fmt(TL.cond.deltaEnt * 1.163e-3, 0)} unit="kW" />
+                  </>
+                ) : (
+                  <KV label={t('TL_use_subcooling')} value={t('TL_no')} />
+                )}
+              </SubSection>
+            </div>
+            <SubSection title={t('TL_section_outlet')}>
+              <GasTable data={{ 'kg/h': { CO2: FG_scrubber.CO2, H2O: FG_scrubber.H2O, O2: FG_scrubber.O2, N2: FG_scrubber.N2 } }} t={tr} />
+            </SubSection>
+          </>
+        )}
       </Section>
 
-      <Section title={`4. ${t('basicScrubberTitle')}`}>
-        <div style={styles.twoCol}>
-          <SubSection title={t('performances')}>
-            <KV label={t('so2EfficiencyPct')} value={fmt(innerData.SO2_efficiency, 1)} />
-            <KV label={t('so2Removed')} value={fmt(innerData.SO2_removed_load)} />
-            <KV label={t('reagentConsumption')} value={fmt(innerData.SO2_consumption)} />
-          </SubSection>
-          <SubSection title={t('columnDesign')}>
-            <KV label={t('columnDiameter')} value={fmt(innerData.column_diameter, 2)} />
-            <KV label={t('packingVolume')} value={fmt(innerData.packing_volume, 2)} />
-            <KV label={t('washSolutionFlow')} value={fmt(innerData.wash_solution_flow, 2)} />
-          </SubSection>
-        </div>
-      </Section>
-
-      <Section title={`5. ${t('opexHourlyCosts')}`}><OpexSummary opex={opex} t={t} tr={tr} /></Section>
+      <Section title={`4. ${t('opexHourlyCosts')}`}><OpexSummary opex={opex} t={t} tr={tr} /></Section>
 
       <div style={styles.footer}>{t('autoReport')} — {new Date().toLocaleDateString()}</div>
     </div>

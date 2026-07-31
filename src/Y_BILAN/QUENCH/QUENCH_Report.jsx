@@ -4,13 +4,13 @@ import { CO2_kg_m3, H2O_kg_m3, O2_kg_m3, N2_kg_m3 } from '../../A_Transverse_fon
 import { getLanguageCode } from '../../F_Gestion_Langues/Fonction_Traduction';
 import { makeReportT } from '../../D_BILAN_Rapports/report_traduction';
 import { translations } from './QUENCH_traduction';
+import { qdTranslations } from './QUENCH_Design_traduction';
 import { fmt } from '../../A_Transverse_fonction/formatNumber';
 const Section = ({ title, children }) => <div style={styles.section}><h2 style={styles.sectionTitle}>{title}</h2>{children}</div>;
 const SubSection = ({ title, children }) => <div style={styles.subSection}>{title && <h3 style={styles.subTitle}>{title}</h3>}{children}</div>;
 const KV = ({ label, value, unit = '' }) => <div style={styles.kvRow}><span style={styles.kvLabel}>{label}</span><span style={styles.kvValue}>{value}{unit ? <span style={styles.kvUnit}> {unit}</span> : null}</span></div>;
 
-const GasTable = ({ data = {}, t = (k) => k }) => {
-  const gases = ['CO2', 'H2O', 'O2', 'N2'];
+const GasTable = ({ data = {}, t = (k) => k, gases = ['CO2', 'H2O', 'O2', 'N2'] }) => {
   return (
     <table style={styles.table}>
       <thead><tr><th style={styles.th}></th>{gases.map(g => <th key={g} style={styles.th}>{g}</th>)}<th style={styles.th}>{t("total")}</th></tr></thead>
@@ -104,7 +104,12 @@ const OpexSummary = ({ opex, t }) => {
 const QUENCH_Report = ({ innerData = {}, currentLanguage = 'fr' }) => {
   const languageCode = getLanguageCode(currentLanguage);
   const tr = makeReportT(currentLanguage);
-  const t = (key) => translations[languageCode]?.[key] || translations['fr']?.[key] || key;
+  const t = (key) =>
+    qdTranslations[languageCode]?.[key] ||
+    qdTranslations['fr']?.[key] ||
+    translations[languageCode]?.[key] ||
+    translations['fr']?.[key] ||
+    key;
 
   const T_OUT = innerData.T_OUT || 0;
   const O2_calcule = innerData.O2_calcule || 0;
@@ -130,6 +135,10 @@ const QUENCH_Report = ({ innerData = {}, currentLanguage = 'fr' }) => {
     { label: t('CAP [kg/h]'), value: innerData.Conso_CAP_kg },
   ].filter(r => parseFloat(r.value) > 0);
   const opex = computeOpexCosts(innerData, tr);
+
+  // Résultats du calcul Pyrofluid (nouvel onglet Design)
+  const QD = innerData.QD || null;
+  const QDin = innerData.QD_inputs || {};
 
   return (
     <div style={styles.container}>
@@ -163,6 +172,50 @@ const QUENCH_Report = ({ innerData = {}, currentLanguage = 'fr' }) => {
       </Section>
 
       <Section title={t('3. Design')}>
+        {QD && (
+          <>
+            <div style={styles.twoCol}>
+              <SubSection title={t('QD_report_saturation')}>
+                <KV label={t('QD_ts')} value={fmt(QD.ts, 2)} unit="°C" />
+                <KV label={t('QD_eau_evaporee')} value={fmt(QD.debMasEvap, 0)} unit="kg/h" />
+                <KV label={t('QD_zsat')} value={fmt(QD.zsat, 2)} unit="m" />
+                <KV label={t('QD_vitesse_colonne')} value={fmt(QD.vitesse, 2)} unit="m/s" />
+                <KV label={t('QD_vitesse_cone')} value={fmt(QD.vPassage, 2)} unit="m/s" />
+                <KV label={t('QD_diam_cone_retenu')} value={fmt(QD.diamCone, 0)} unit="mm" />
+                <KV label={t('QD_pventuri')} value={fmt(QD.pVenturi, 1)} unit="mmCE" />
+                <KV label={t('Quench diameter [m]')} value={fmt(QDin.diamQuench, 2)} unit="m" />
+              </SubSection>
+              <SubSection title={t('QD_report_sortie')}>
+                <KV label={t('QD_temp_sortie')} value={fmt(QD.tempSortie, 2)} unit="°C" />
+                <KV label={t('QD_eff_hcl')} value={fmt(QD.effHCl, 1)} unit="%" />
+                <KV label={t('QD_hcl_sec')} value={fmt(QD.concHClSec, 1)} unit="mg/Nm³" />
+                <KV label={t('QD_so2_sec')} value={fmt(QD.concSO2Sec, 1)} unit="mg/Nm³" />
+                <KV label={t('QD_ro_epuree')} value={fmt(QD.roEpuree, 3)} unit="kg/m³" />
+                <GasTable
+                  data={{ 'kg/h': QD.masEp }}
+                  t={tr}
+                  gases={['CO2', 'H2O', 'O2', 'N2', 'SO2', 'HCl']}
+                />
+              </SubSection>
+            </div>
+            <SubSection title={t('QD_report_bilans')}>
+              <div style={styles.twoCol}>
+                <div>
+                  <KV label={t('QD_appoint')} value={fmt(QD.debMasEauAppoint, 0)} unit="kg/h" />
+                  <KV label={t('QD_arrosage')} value={fmt(QD.debMasLiqAr, 0)} unit="kg/h" />
+                  <KV label={t('QD_recirc')} value={fmt(QD.debMasTotalRecirc, 0)} unit="kg/h" />
+                  <KV label={t('QD_purge')} value={fmt(QD.debMasTotalPurge, 0)} unit="kg/h" />
+                </div>
+                <div>
+                  <KV label={t('QD_conc_hcl_rec')} value={fmt(QD.concHClRec, 4)} unit="%" />
+                  <KV label={t('QD_conc_hcl_ar')} value={fmt(QD.concHClAr, 4)} unit="%" />
+                  <KV label={t('QD_ph_arrosage')} value={QD.pH !== null && QD.concHClAr > 0 ? fmt(QD.pH, 2) : '!!!!!'} />
+                  <KV label={t('QD_ph_recirc')} value={QD.pHRec !== null ? fmt(QD.pHRec, 2) : '!!!!!'} />
+                </div>
+              </div>
+            </SubSection>
+          </>
+        )}
         <div style={styles.twoCol}>
           <SubSection title={t('Consommations électriques')}>
             {elecRows.length > 0 ? <ElecTable rows={elecRows} t={t} /> : <span style={{ color: '#999', fontSize: 12 }}>{t('Données non disponibles (ouvrir l\'onglet Design)')}</span>}

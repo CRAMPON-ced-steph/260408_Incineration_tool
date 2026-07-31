@@ -222,6 +222,7 @@ export const translations = {
     'Air comprime par cycle [Nm3/cycle]': 'Air comprimé par cycle [Nm3/cycle]',
     'Conso élec air comprimé [kW]': 'Conso élec air comprimé [kW]',
     'conso elec vis de transport [kW]': 'Consommation électrique vis de transport [kW]',
+    'rapport': 'Rapport',
   },
 
   en: {
@@ -447,6 +448,7 @@ export const translations = {
     'Air comprime par cycle [Nm3/cycle]': 'Compressed air per cycle [Nm3/cycle]',
     'Conso élec air comprimé [kW]': 'Compressed air electrical consumption [kW]',
     'conso elec vis de transport [kW]': 'Transport screw electrical consumption [kW]',
+    'rapport': 'Report',
   },
 
 
@@ -673,6 +675,7 @@ export const translations = {
     'Air comprime par cycle [Nm3/cycle]': 'Druckluft pro Zyklus [Nm³/Zyklus]',
     'Conso élec air comprimé [kW]': 'Stromverbrauch Druckluft [kW]',
     'conso elec vis de transport [kW]': 'Stromverbrauch Transportschraube [kW]',
+    'rapport': 'Bericht',
   },
 
   it: {
@@ -898,6 +901,7 @@ export const translations = {
     'Air comprime par cycle [Nm3/cycle]': 'Aria compressa per ciclo [Nm³/ciclo]',
     'Conso élec air comprimé [kW]': 'Consumo elettrico aria compressa [kW]',
     'conso elec vis de transport [kW]': 'Consumo elettrico coclea di trasporto [kW]',
+    'rapport': 'Rapporto',
   },
 
   pt: {
@@ -1123,6 +1127,7 @@ export const translations = {
     'Air comprime par cycle [Nm3/cycle]': 'Ar comprimido por ciclo [Nm³/ciclo]',
     'Conso élec air comprimé [kW]': 'Consumo elétrico de ar comprimido [kW]',
     'conso elec vis de transport [kW]': 'Consumo elétrico do parafuso de transporte [kW]',
+    'rapport': 'Relatório',
   },
 
   es: {
@@ -1348,6 +1353,7 @@ export const translations = {
     'Air comprime par cycle [Nm3/cycle]': 'Aire comprimido por ciclo [Nm³/ciclo]',
     'Conso élec air comprimé [kW]': 'Consumo eléctrico de aire comprimido [kW]',
     'conso elec vis de transport [kW]': 'Consumo eléctrico del tornillo de transporte [kW]',
+    'rapport': 'Informe',
   },
 
   zh: {
@@ -1573,6 +1579,7 @@ export const translations = {
     'Air comprime par cycle [Nm3/cycle]': '每个循环的压缩空气 [Nm³/循环]',
     'Conso élec air comprimé [kW]': '压缩空气电消耗 [kW]',
     'conso elec vis de transport [kW]': '运输螺杆电消耗 [kW]',
+    'rapport': '报告',
   },
 
   ja: {
@@ -1798,6 +1805,7 @@ export const translations = {
     'Air comprime par cycle [Nm3/cycle]': 'サイクルあたりの圧縮空気 [Nm³/サイクル]',
     'Conso élec air comprimé [kW]': '圧縮空気電力消費 [kW]',
     'conso elec vis de transport [kW]': '搬送スクリュー電力消費 [kW]',
+    'rapport': 'レポート',
   },
 
   ru: {
@@ -2023,6 +2031,7 @@ export const translations = {
     'Air comprime par cycle [Nm3/cycle]': 'Сжатый воздух на цикл [Nm³/цикл]',
     'Conso élec air comprimé [kW]': 'Электрическое потребление сжатого воздуха [кВт]',
     'conso elec vis de transport [kW]': 'Электрическое потребление транспортного винта [кВт]',
+    'rapport': 'Отчёт',
   },
 
   ar: {
@@ -2248,6 +2257,7 @@ export const translations = {
     'Air comprime par cycle [Nm3/cycle]': 'الهواء المضغوط في الدورة [Nm³/دورة]',
     'Conso élec air comprimé [kW]': 'الاستهلاك الكهربائي للهواء المضغوط [كيلوواط]',
     'conso elec vis de transport [kW]': 'الاستهلاك الكهربائي لنقل المسمار [كيلوواط]',
+    'rapport': 'تقرير',
   }
 
 

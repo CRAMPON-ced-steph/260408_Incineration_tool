@@ -12,30 +12,12 @@ import { translations } from './QUENCH_traduction';
 
 const QUENCHMainPage = ({ nodeData, title, onSendData, onClose, onGoBack, currentLanguage = 'fr', nodeId }) => {
 
-  // ✅ FIX: Normaliser le code de langue
-  const normalizeLanguageCode = (lang) => {
-    if (!lang) return 'fr';
-    const baseLang = lang.split('-')[0].toLowerCase(); // 'en-US' -> 'en'
-    return baseLang === 'en' || baseLang === 'fr' ? baseLang : 'fr';
-  };
+  const languageCode = getLanguageCode(currentLanguage);
 
-  const languageCode = normalizeLanguageCode(currentLanguage);
-
-  // ✅ FIX: Fonction de traduction robuste
   const t = (key) => {
     if (!key) return '';
-
-    // Vérifier si la clé existe dans la langue courante
-    if (translations[languageCode] && translations[languageCode][key]) {
-      return translations[languageCode][key];
-    }
-
-    // Fallback vers le français
-    if (translations['fr'] && translations['fr'][key]) {
-      return translations['fr'][key];
-    }
-
-    // Si rien n'est trouvé, retourner la clé elle-même
+    if (translations[languageCode]?.[key]) return translations[languageCode][key];
+    if (translations['fr']?.[key]) return translations['fr'][key];
     return key;
   };
 
@@ -57,15 +39,16 @@ const QUENCHMainPage = ({ nodeData, title, onSendData, onClose, onGoBack, curren
       content: <QUENCHFlueGasPollutantEmission innerData={innerData} setInnerData={setInnerData} currentLanguage={currentLanguage} nodeId={nodeId} />
     },
     {
+      // Design réécrit : calcul Pyrofluid (ClassQuench) — reçoit aussi la composition amont
       name: t('Design'),
-      content: <QUENCHDesign innerData={innerData} setInnerData={setInnerData} upstreamT_IN={T_IN_upstream} currentLanguage={currentLanguage} nodeId={nodeId} />
+      content: <QUENCHDesign innerData={innerData} setInnerData={setInnerData} upstreamT_IN={T_IN_upstream} upstreamFG_IN={FG_IN_upstream} currentLanguage={currentLanguage} nodeId={nodeId} />
     },
     {
       name: t('Opex'),
       content: <QUENCHOpex innerData={innerData} setInnerData={setInnerData} currentLanguage={currentLanguage} nodeId={nodeId} />
     },
     {
-      name: 'Rapport',
+      name: t('rapport'),
       content: <QUENCH_Report innerData={innerData} nodeId={nodeId} currentLanguage={currentLanguage} />
     },
   ];
@@ -86,6 +69,11 @@ const QUENCHMainPage = ({ nodeData, title, onSendData, onClose, onGoBack, curren
         ResidusOutput: innerData['Residus'] || {},
         MasseDechet: innerData['masse'] || 0,
         P_OUT: innerData['P_out_mmCE'] || 0,
+        // Sortie quench calculée (moteur Pyrofluid) — entrée de la tour de lavage aval
+        FG_quench_out_kg_h: innerData['FG_quench_out_kg_h'],
+        T_quench_out: innerData['T_quench_out'],
+        recup_Ts: innerData['recup_Ts'],
+        RoEpuree: innerData['RoEpuree'],
         activeNodes_Elec: innerData['activeNodes_Elec'] || [],
         activeNodes_Eau: innerData['activeNodes_Eau'] || [],
         activeNodes_Reactifs: innerData['activeNodes_Reactifs'] || [],

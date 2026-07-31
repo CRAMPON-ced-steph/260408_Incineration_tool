@@ -1,18 +1,24 @@
 import React, { useState } from 'react';
 import SCRUBBERFlueGasParameters from './2_SCRUBBER_Flue_gas_ML';
 import SCRUBBERFlueGasPollutantEmission from './3_SCRUBBER_Pollutant_Emission_ML';
-import HClScrubberCalculator from './Laveur_acid';
-import SO2ScrubberCalculator from './Laveur_basique';
+import TourLavageCalculator from './4_SCRUBBER_TourLavage';
 import SCRUBBEROpex from './5_SCRUBBER_Opex';
 import SCRUBBER_Report from './SCRUBBER_Report';
 import { getLanguageCode } from '../../F_Gestion_Langues/Fonction_Traduction';
 import { translations } from './SCRUBBER_traduction';
+import { tlTranslations } from './TourLavage_traduction';
 import '../../index.css';
 
 const SCRUBBERMainPage = ({ nodeData, title, onSendData, onClose, onGoBack, currentLanguage = 'fr', nodeId }) => {
   const languageCode = getLanguageCode(currentLanguage);
   const t = (key) => {
-    return translations[languageCode]?.[key] || translations['fr']?.[key] || key;
+    return (
+      tlTranslations[languageCode]?.[key] ||
+      tlTranslations['fr']?.[key] ||
+      translations[languageCode]?.[key] ||
+      translations['fr']?.[key] ||
+      key
+    );
   };
 
   const [innerData, setInnerData] = useState(nodeData.result);
@@ -28,12 +34,9 @@ const SCRUBBERMainPage = ({ nodeData, title, onSendData, onClose, onGoBack, curr
       content: <SCRUBBERFlueGasPollutantEmission innerData={innerData} setInnerData={setInnerData} currentLanguage={currentLanguage} nodeId={nodeId} />
     },
     {
-      name: t('Scrubber acide'),
-      content: <HClScrubberCalculator innerData={innerData} setInnerData={setInnerData} currentLanguage={currentLanguage} nodeId={nodeId} />
-    },
-    {
-      name: t('Scrubber basique'),
-      content: <SO2ScrubberCalculator innerData={innerData} setInnerData={setInnerData} currentLanguage={currentLanguage} nodeId={nodeId} />
+      // Remplace les anciens onglets « Scrubber acide » + « Scrubber basique »
+      name: t('TL_report_section'),
+      content: <TourLavageCalculator innerData={innerData} setInnerData={setInnerData} currentLanguage={currentLanguage} nodeId={nodeId} />
     },
     {
       name: t('Opex'),
@@ -59,6 +62,9 @@ const SCRUBBERMainPage = ({ nodeData, title, onSendData, onClose, onGoBack, curr
         PollutantOutput: innerData['Poutput'],
         ResidusOutput: innerData['Residus'],
         MasseDechet: innerData['masse'],
+        // Fumées épurées par la tour de lavage (vers le node aval)
+        FG_scrubber_out_kg_h: innerData['FG_scrubber_out_kg_h'],
+        T_scrubber_out: innerData['T_scrubber_out'],
         activeNodes_Elec: innerData['activeNodes_Elec'],
         activeNodes_Eau: innerData['activeNodes_Eau'],
         activeNodes_Reactifs: innerData['activeNodes_Reactifs'],
