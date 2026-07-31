@@ -70,7 +70,7 @@ export const performCalculation_SCRUBBER_option_TsupTsat = (nodeData, Teau, T_am
   const P_mmCE      = P_out_mmCE - PDC_aero;
   const Qv_wet_m3_h = coeff_Nm3_to_m3(P_mmCE, T) * Qv_wet_Nm3_h;
 
-  const Qeau_condensee_kg_h_tot = Qeau_condensee_kg_h + Qeau;
+  const Qeau_condensee_kg_h_tot = Qeau_condensee_kg_h ; // finalement j'enlève le +Qeau
 
   const dataSCRUBBER = {
     'Q eau saturation [kg/h]': Qeau,
