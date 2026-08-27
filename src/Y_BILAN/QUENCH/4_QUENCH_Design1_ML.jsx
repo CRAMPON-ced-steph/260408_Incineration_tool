@@ -254,24 +254,46 @@ const QSection = ({ title, results, children, t }) => (
   </div>
 );
 
-const QInField = ({ label, value, onChange, step = '0.01', disabled = false, t }) => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', opacity: disabled ? 0.4 : 1 }}>
-    <label style={{ flex: 1, minWidth: '250px', textAlign: 'right', fontWeight: '500', color: '#333' }}>
-      {t(label)} :
-    </label>
-    <input
-      type="number"
-      value={value}
-      step={step}
-      disabled={disabled}
-      onChange={(e) => onChange(parseValue(e.target.value))}
-      style={{
-        flex: '0 0 150px', padding: '8px', border: '1px solid #7cc7d8', borderRadius: '4px',
-        fontSize: '14px', textAlign: 'right', backgroundColor: disabled ? '#eee' : '#e0f7fa', fontFamily: 'monospace',
-      }}
-    />
-  </div>
-);
+const QInField = ({ label, value, onChange, step = '0.01', disabled = false, t }) => {
+  const [display, setDisplay] = useState(() => value !== undefined && value !== null ? String(value) : '');
+  const focused = useRef(false);
+
+  useEffect(() => {
+    if (!focused.current) {
+      setDisplay(value !== undefined && value !== null ? String(value) : '');
+    }
+  }, [value]);
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', opacity: disabled ? 0.4 : 1 }}>
+      <label style={{ flex: 1, minWidth: '250px', textAlign: 'right', fontWeight: '500', color: '#333' }}>
+        {t(label)} :
+      </label>
+      <input
+        type="number"
+        value={display}
+        step={step}
+        disabled={disabled}
+        onFocus={() => { focused.current = true; }}
+        onBlur={() => {
+          focused.current = false;
+          const n = parseFloat(display);
+          const norm = isNaN(n) ? 0 : n;
+          setDisplay(isNaN(n) ? '0' : String(n));
+          onChange(norm);
+        }}
+        onChange={(e) => {
+          setDisplay(e.target.value);
+          onChange(parseValue(e.target.value));
+        }}
+        style={{
+          flex: '0 0 150px', padding: '8px', border: '1px solid #7cc7d8', borderRadius: '4px',
+          fontSize: '14px', textAlign: 'right', backgroundColor: disabled ? '#eee' : '#e0f7fa', fontFamily: 'monospace',
+        }}
+      />
+    </div>
+  );
+};
 
 // ═══════════════════════════════════════════════════════════════════
 // COMPOSANT

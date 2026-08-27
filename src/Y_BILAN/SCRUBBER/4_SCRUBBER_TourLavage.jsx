@@ -315,26 +315,48 @@ const TLSection = ({ title, children }) => (
   </div>
 );
 
-const InField = ({ label, unit, step = '0.01', disabled = false, value, onChange, t }) => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, opacity: disabled ? 0.4 : 1 }}>
-    <label style={{ flex: 1, minWidth: 180, textAlign: 'right', fontWeight: 500, color: '#333', fontSize: 13 }}>
-      {t(label)} :
-    </label>
-    <input
-      type="number"
-      step={step}
-      value={value}
-      disabled={disabled}
-      onChange={(e) => onChange(e.target.value)}
-      style={{
-        flex: '0 0 120px', padding: '5px 8px', textAlign: 'right',
-        border: '1px solid #7cc7d8', borderRadius: 4, backgroundColor: disabled ? '#eee' : '#e0f7fa',
-        fontFamily: 'monospace',
-      }}
-    />
-    <span style={{ flex: '0 0 70px', fontSize: 11, color: '#888' }}>{unit}</span>
-  </div>
-);
+const InField = ({ label, unit, step = '0.01', disabled = false, value, onChange, t }) => {
+  const [display, setDisplay] = useState(() => value !== undefined && value !== null ? String(value) : '');
+  const focused = useRef(false);
+
+  useEffect(() => {
+    if (!focused.current) {
+      setDisplay(value !== undefined && value !== null ? String(value) : '');
+    }
+  }, [value]);
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, opacity: disabled ? 0.4 : 1 }}>
+      <label style={{ flex: 1, minWidth: 180, textAlign: 'right', fontWeight: 500, color: '#333', fontSize: 13 }}>
+        {t(label)} :
+      </label>
+      <input
+        type="number"
+        step={step}
+        value={display}
+        disabled={disabled}
+        onFocus={() => { focused.current = true; }}
+        onBlur={() => {
+          focused.current = false;
+          const n = parseFloat(display);
+          const norm = isNaN(n) ? '0' : String(n);
+          setDisplay(norm);
+          onChange(norm);
+        }}
+        onChange={(e) => {
+          setDisplay(e.target.value);
+          onChange(e.target.value);
+        }}
+        style={{
+          flex: '0 0 120px', padding: '5px 8px', textAlign: 'right',
+          border: '1px solid #7cc7d8', borderRadius: 4, backgroundColor: disabled ? '#eee' : '#e0f7fa',
+          fontFamily: 'monospace',
+        }}
+      />
+      <span style={{ flex: '0 0 70px', fontSize: 11, color: '#888' }}>{unit}</span>
+    </div>
+  );
+};
 
 const OutField = ({ label, value, unit, d = 2, warn = false, hint, disabled = false, t }) => (
   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, opacity: disabled ? 0.4 : 1 }}>
