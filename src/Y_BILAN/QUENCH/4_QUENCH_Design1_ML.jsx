@@ -236,16 +236,55 @@ export function calculQuench(inp) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// COMPOSANTS UI — définis au niveau module pour avoir des références
+// stables entre renders et éviter la perte de focus sur les inputs.
+// ═══════════════════════════════════════════════════════════════════
+const QSection = ({ title, results, children, t }) => (
+  <div style={{ marginBottom: '30px', padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
+    <h3 style={{ marginTop: 0, borderBottom: '2px solid #4a90e2', paddingBottom: '10px' }}>{title}</h3>
+    <div style={{ display: 'grid', gap: '15px' }}>
+      {children}
+      {results && results.length > 0 && (
+        <>
+          <h4 style={{ marginTop: '15px', marginBottom: '10px' }}>{t('Résultats')}</h4>
+          <TableGeneric elements={results} />
+        </>
+      )}
+    </div>
+  </div>
+);
+
+const QInField = ({ label, value, onChange, step = '0.01', disabled = false, t }) => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', opacity: disabled ? 0.4 : 1 }}>
+    <label style={{ flex: 1, minWidth: '250px', textAlign: 'right', fontWeight: '500', color: '#333' }}>
+      {t(label)} :
+    </label>
+    <input
+      type="number"
+      value={value}
+      step={step}
+      disabled={disabled}
+      onChange={(e) => onChange(parseValue(e.target.value))}
+      style={{
+        flex: '0 0 150px', padding: '8px', border: '1px solid #7cc7d8', borderRadius: '4px',
+        fontSize: '14px', textAlign: 'right', backgroundColor: disabled ? '#eee' : '#e0f7fa', fontFamily: 'monospace',
+      }}
+    />
+  </div>
+);
+
+// ═══════════════════════════════════════════════════════════════════
 // COMPOSANT
 // ═══════════════════════════════════════════════════════════════════
-const QUENCHDesign = ({ innerData, setInnerData, upstreamT_IN, upstreamFG_IN, currentLanguage = 'fr', nodeId }) => {
+const QUENCHDesign = ({ innerData, setInnerData, upstreamT_IN, upstreamFG_IN, currentLanguage = 'fr' }) => {
   const languageCode = getLanguageCode(currentLanguage);
-  const t = (key) =>
+  const t = useCallback((key) =>
     qdTranslations[languageCode]?.[key] ||
     qdTranslations['fr']?.[key] ||
     translations[languageCode]?.[key] ||
     translations['fr']?.[key] ||
-    key;
+    key,
+  [languageCode]);
 
   const getInitialValue = (paramName, defaultValue) => {
     return innerData?.[paramName] !== undefined ? innerData[paramName] : defaultValue;
@@ -408,48 +447,13 @@ const QUENCHDesign = ({ innerData, setInnerData, upstreamT_IN, upstreamFG_IN, cu
     if (!r.converge) warnings.push(t('QD_warn_convergence'));
   }
 
-  // ═══════ UI (pattern du node) ═══════
-  const Section = ({ title, results, children }) => (
-    <div style={{ marginBottom: '30px', padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
-      <h3 style={{ marginTop: 0, borderBottom: '2px solid #4a90e2', paddingBottom: '10px' }}>{title}</h3>
-      <div style={{ display: 'grid', gap: '15px' }}>
-        {children}
-        {results && results.length > 0 && (
-          <>
-            <h4 style={{ marginTop: '15px', marginBottom: '10px' }}>{t('Résultats')}</h4>
-            <TableGeneric elements={results} />
-          </>
-        )}
-      </div>
-    </div>
-  );
-
-  const In = ({ label, value, onChange, step = '0.01', disabled = false }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', opacity: disabled ? 0.4 : 1 }}>
-      <label style={{ flex: 1, minWidth: '250px', textAlign: 'right', fontWeight: '500', color: '#333' }}>
-        {t(label)} :
-      </label>
-      <input
-        type="number"
-        value={value}
-        step={step}
-        disabled={disabled}
-        onChange={(e) => onChange(parseValue(e.target.value))}
-        style={{
-          flex: '0 0 150px', padding: '8px', border: '1px solid #7cc7d8', borderRadius: '4px',
-          fontSize: '14px', textAlign: 'right', backgroundColor: disabled ? '#eee' : '#e0f7fa', fontFamily: 'monospace',
-        }}
-      />
-    </div>
-  );
-
   const outEl = (label, value, unit = '', d = 2, warn = false) => ({
     text: t(label) + (unit ? ` [${unit}]` : ''),
     value: (warn ? '🔴 ' : '') + fmt(value, d),
   });
 
-  const setF = (k) => (v) => setFumees((s) => ({ ...s, [k]: v }));
-  const setQ = (k) => (v) => setQuenchParams((s) => ({ ...s, [k]: v }));
+  const setF = useCallback((k) => (v) => setFumees((s) => ({ ...s, [k]: v })), []);
+  const setQ = useCallback((k) => (v) => setQuenchParams((s) => ({ ...s, [k]: v })), []);
 
   // ─── Tables de résultats ───
   const elements_PDC = [{ text: t('Pression de sortie [mmCE]'), value: fmt(P_out_mmCE, 2) }];
@@ -540,33 +544,33 @@ const QUENCHDesign = ({ innerData, setInnerData, upstreamT_IN, upstreamFG_IN, cu
       )}
 
       {/* PDC aéraulique (structure conservée + option ΔP venturi calculée) */}
-      <Section title={t('Pertes de charge aéraulique')} results={elements_PDC}>
-        <In label="Pression aéraulique [mmCE]" value={PDC_calcul['Pression aéraulique [mmCE]']}
-          onChange={(v) => setPDC_calcul((s) => ({ ...s, 'Pression aéraulique [mmCE]': v }))} />
+      <QSection title={t('Pertes de charge aéraulique')} results={elements_PDC} t={t}>
+        <QInField label="Pression aéraulique [mmCE]" value={PDC_calcul['Pression aéraulique [mmCE]']}
+          onChange={(v) => setPDC_calcul((s) => ({ ...s, 'Pression aéraulique [mmCE]': v }))} t={t} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <label style={{ flex: 1, minWidth: '250px', textAlign: 'right', fontWeight: '500', color: '#333' }}>
             {t('QD_use_pventuri')} :
           </label>
           <input type="checkbox" checked={usePventuri} onChange={(e) => setUsePventuri(e.target.checked)} />
         </div>
-        <In label="PDC [mmCE]" value={usePventuri && r && !r.erreurTs ? r.pVenturi.toFixed(2) : PDC_calcul['PDC [mmCE]']}
-          onChange={(v) => setPDC_calcul((s) => ({ ...s, 'PDC [mmCE]': v }))} disabled={usePventuri} />
-      </Section>
+        <QInField label="PDC [mmCE]" value={usePventuri && r && !r.erreurTs ? r.pVenturi.toFixed(2) : PDC_calcul['PDC [mmCE]']}
+          onChange={(v) => setPDC_calcul((s) => ({ ...s, 'PDC [mmCE]': v }))} disabled={usePventuri} t={t} />
+      </QSection>
 
       {/* Fumées en entrée */}
-      <Section title={t('QD_section_entree')} results={elementsEntree}>
-        <In label="QD_flow_CO2" value={fumees.mCO2} onChange={setF('mCO2')} />
-        <In label="QD_flow_H2O" value={fumees.mH2O} onChange={setF('mH2O')} />
-        <In label="QD_flow_N2" value={fumees.mN2} onChange={setF('mN2')} />
-        <In label="QD_flow_O2" value={fumees.mO2} onChange={setF('mO2')} />
-        <In label="QD_flow_SO2" value={fumees.mSO2} onChange={setF('mSO2')} />
-        <In label="QD_flow_HCl" value={fumees.mHCl} onChange={setF('mHCl')} />
-        <In label="QD_temperature" value={fumees.tempFumees} onChange={setF('tempFumees')} />
-        <In label="QD_depression" value={fumees.pTotal} onChange={setF('pTotal')} />
-      </Section>
+      <QSection title={t('QD_section_entree')} results={elementsEntree} t={t}>
+        <QInField label="QD_flow_CO2" value={fumees.mCO2} onChange={setF('mCO2')} t={t} />
+        <QInField label="QD_flow_H2O" value={fumees.mH2O} onChange={setF('mH2O')} t={t} />
+        <QInField label="QD_flow_N2" value={fumees.mN2} onChange={setF('mN2')} t={t} />
+        <QInField label="QD_flow_O2" value={fumees.mO2} onChange={setF('mO2')} t={t} />
+        <QInField label="QD_flow_SO2" value={fumees.mSO2} onChange={setF('mSO2')} t={t} />
+        <QInField label="QD_flow_HCl" value={fumees.mHCl} onChange={setF('mHCl')} t={t} />
+        <QInField label="QD_temperature" value={fumees.tempFumees} onChange={setF('tempFumees')} t={t} />
+        <QInField label="QD_depression" value={fumees.pTotal} onChange={setF('pTotal')} t={t} />
+      </QSection>
 
       {/* Dimensionnement du Quench */}
-      <Section title={t('Dimensionnement du Quench')} results={elementsSaturation}>
+      <QSection title={t('Dimensionnement du Quench')} results={elementsSaturation} t={t}>
         <div style={{ display: 'flex', gap: '30px', marginBottom: '10px' }}>
           <div style={{ flex: 1 }}>
             <img src={reactImage} alt="Quench" style={{ width: '100%', maxWidth: '300px', objectFit: 'contain' }} />
@@ -592,13 +596,13 @@ const QUENCHDesign = ({ innerData, setInnerData, upstreamT_IN, upstreamFG_IN, cu
               </label>
               <input type="checkbox" checked={quenchParams.chkCone} onChange={(e) => setQ('chkCone')(e.target.checked)} />
             </div>
-            <In label="QD_diam_cone" value={quenchParams.chkCone ? quenchParams.diamCone : (DIAM_CONE_AUTO[quenchParams.diamQuench] || 0)}
-              onChange={setQ('diamCone')} disabled={!quenchParams.chkCone} step="5" />
-            <In label="QD_temp_eau_appoint" value={quenchParams.tempEauAp} onChange={setQ('tempEauAp')} step="1" />
-            <In label="QD_eff_venturi" value={quenchParams.effVenturi} onChange={setQ('effVenturi')} step="0.05" />
-            <In label="QD_diam_gouttes" value={quenchParams.diamGouttes} onChange={setQ('diamGouttes')} step="10" />
-            <In label="QD_const_nusselt" value={quenchParams.constNusselt} onChange={setQ('constNusselt')} step="1" />
-            <In label="QD_coef_haut_sat" value={quenchParams.coefHautSat} onChange={setQ('coefHautSat')} step="0.1" />
+            <QInField label="QD_diam_cone" value={quenchParams.chkCone ? quenchParams.diamCone : (DIAM_CONE_AUTO[quenchParams.diamQuench] || 0)}
+              onChange={setQ('diamCone')} disabled={!quenchParams.chkCone} step="5" t={t} />
+            <QInField label="QD_temp_eau_appoint" value={quenchParams.tempEauAp} onChange={setQ('tempEauAp')} step="1" t={t} />
+            <QInField label="QD_eff_venturi" value={quenchParams.effVenturi} onChange={setQ('effVenturi')} step="0.05" t={t} />
+            <QInField label="QD_diam_gouttes" value={quenchParams.diamGouttes} onChange={setQ('diamGouttes')} step="10" t={t} />
+            <QInField label="QD_const_nusselt" value={quenchParams.constNusselt} onChange={setQ('constNusselt')} step="1" t={t} />
+            <QInField label="QD_coef_haut_sat" value={quenchParams.coefHautSat} onChange={setQ('coefHautSat')} step="0.1" t={t} />
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <label style={{ flex: 1, minWidth: '250px', textAlign: 'right', fontWeight: '500', color: '#333' }}>
                 {t("Type d'eau")} :
@@ -615,21 +619,21 @@ const QUENCHDesign = ({ innerData, setInnerData, upstreamT_IN, upstreamFG_IN, cu
             </div>
           </div>
         </div>
-      </Section>
+      </QSection>
 
       {/* Fumées en sortie */}
-      <Section title={t('QD_section_sortie')} results={elementsSortie} />
+      <QSection title={t('QD_section_sortie')} results={elementsSortie} t={t} />
 
       {/* Bilans eau & recirculation */}
-      <Section title={t('QD_section_bilans')} results={elementsBilans} />
+      <QSection title={t('QD_section_bilans')} results={elementsBilans} t={t} />
 
       {/* Consommation électrique de la pompe (inchangé) */}
-      <Section title={t('Consommation électrique de la pompe')} results={elements_conso_pompe}>
-        <In label="Puissance pompe [kW]" value={Puissance_pompe_kW}
-          onChange={(v) => setParametres_conso_Elec((s) => ({ ...s, 'Puissance pompe [kW]': Math.max(1, Math.min(500, v)) }))} step="1" />
-        <In label="Rendement pompe [%]" value={Rendement_pompe}
-          onChange={(v) => setParametres_conso_Elec((s) => ({ ...s, 'Rendement pompe [%]': Math.max(30, Math.min(95, v)) }))} step="1" />
-      </Section>
+      <QSection title={t('Consommation électrique de la pompe')} results={elements_conso_pompe} t={t}>
+        <QInField label="Puissance pompe [kW]" value={Puissance_pompe_kW}
+          onChange={(v) => setParametres_conso_Elec((s) => ({ ...s, 'Puissance pompe [kW]': Math.max(1, Math.min(500, v)) }))} step="1" t={t} />
+        <QInField label="Rendement pompe [%]" value={Rendement_pompe}
+          onChange={(v) => setParametres_conso_Elec((s) => ({ ...s, 'Rendement pompe [%]': Math.max(30, Math.min(95, v)) }))} step="1" t={t} />
+      </QSection>
 
       {/* Résumé */}
       {r && !r.erreurTs && (
