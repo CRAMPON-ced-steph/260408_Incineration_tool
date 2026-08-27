@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { T_ref, P_ref } from '../../A_Transverse_fonction/constantes';
 import cycloneImage from '/src/B_Images/cyclone_img.png';
 import TableGeneric from '../../C_Components/Tableau_generique';
@@ -8,6 +8,66 @@ import { translations } from './AIRINJECTION_traduction';
 import '../../index.css';
 
 import { fmt } from '../../A_Transverse_fonction/formatNumber';
+
+// ─── Composants UI au niveau module (références stables → pas de perte de focus) ───
+const Section = ({ title, results, children, t }) => (
+  <div style={{ marginBottom: '30px', padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
+    <h3 style={{ marginTop: 0, borderBottom: '2px solid #4a90e2', paddingBottom: '10px' }}>{title}</h3>
+    <div style={{ display: 'grid', gap: '15px' }}>
+      {children}
+      {results && results.length > 0 && (
+        <>
+          <h4 style={{ marginTop: '15px', marginBottom: '10px' }}>{t('Results')}</h4>
+          <TableGeneric elements={results} />
+        </>
+      )}
+    </div>
+  </div>
+);
+
+const ParameterInput = ({ translationKey, value, onChange, type = 'number', options = null, min = null, max = null, t }) => {
+  const [display, setDisplay] = useState(() => value !== undefined && value !== null ? String(value) : '');
+  const focused = useRef(false);
+
+  useEffect(() => {
+    if (!focused.current) {
+      setDisplay(value !== undefined && value !== null ? String(value) : '');
+    }
+  }, [value]);
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <label style={{ flex: 1, minWidth: '200px', textAlign: 'right', fontWeight: '500', color: '#333' }}>
+        {t(translationKey)}:
+      </label>
+      {options ? (
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          style={{ flex: '0 0 150px', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
+        >
+          {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+        </select>
+      ) : (
+        <input
+          type={type}
+          value={display}
+          onChange={(e) => { setDisplay(e.target.value); onChange(e.target.value); }}
+          onFocus={() => { focused.current = true; }}
+          onBlur={() => {
+            focused.current = false;
+            const n = parseFloat(display);
+            setDisplay(isNaN(n) ? (value !== undefined && value !== null ? String(value) : '0') : String(n));
+          }}
+          min={min}
+          max={max}
+          style={{ flex: '0 0 150px', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
+        />
+      )}
+    </div>
+  );
+};
+
 const AIRINJECTIONDesign = ({ innerData, setInnerData, currentLanguage = 'fr' }) => {
   const languageCode = getLanguageCode(currentLanguage);
   const t = (key) => {
@@ -73,7 +133,6 @@ const AIRINJECTIONDesign = ({ innerData, setInnerData, currentLanguage = 'fr' })
     const volumeFlowRate = flueGasFlow * (temperature + T_ref) / T_ref;
     const FlueGasFlow_m3_h = flueGasFlow * (T_ref + temperature) / T_ref;
 
-    // Iterative algorithm to find optimal diameter
     let D = 0.1;
     let Velocity_section_m_s = 0;
     let L_vortex_m = 0;
@@ -142,12 +201,10 @@ const AIRINJECTIONDesign = ({ innerData, setInnerData, currentLanguage = 'fr' })
 
   const headLosses = calculateHeadLosses();
 
-  // Calculate pressures
   const P_in_mmCE = innerData?.P_OUT || 0;
   const PDC_mmCE = headLosses.PDC * 0.1020408163265306;
   const P_out_mmCE = P_in_mmCE - PDC_mmCE;
 
-  // Handle input changes
   const handleChange = (name, value) => {
     const numericValue = parseFloat(value);
     if (!isNaN(numericValue)) {
@@ -164,7 +221,6 @@ const AIRINJECTIONDesign = ({ innerData, setInnerData, currentLanguage = 'fr' })
     setParameters_airinjection(defaultParameters_airinjection);
   }, []);
 
-  // Data for display
   const modelData = tableData.reduce((acc, row) => {
     acc[row.param] = parseFloat(row[selectedModel]) || '-';
     return acc;
@@ -190,7 +246,6 @@ const AIRINJECTIONDesign = ({ innerData, setInnerData, currentLanguage = 'fr' })
     { text: t('Pout [mmCE]'), value: (P_out_mmCE != null ? fmt(P_out_mmCE, 2) : '') || '0' },
   ];
 
-  // Update innerData
   useEffect(() => {
     if (setInnerData && headLosses.PDC !== undefined) {
       setInnerData(prevData => ({
@@ -211,103 +266,21 @@ const AIRINJECTIONDesign = ({ innerData, setInnerData, currentLanguage = 'fr' })
     }
   }, [setInnerData, headLosses.PDC, P_out_mmCE, PDC_mmCE, t]);
 
-  // Reusable Components
-  const Section = ({ title, results, children }) => (
-    <div style={{
-      marginBottom: '30px',
-      padding: '20px',
-      backgroundColor: '#f9f9f9',
-      borderRadius: '8px'
-    }}>
-      <h3 style={{
-        marginTop: 0,
-        borderBottom: '2px solid #4a90e2',
-        paddingBottom: '10px'
-      }}>
-        {title}
-      </h3>
-      <div style={{ display: 'grid', gap: '15px' }}>
-        {children}
-        {results && results.length > 0 && (
-          <>
-            <h4 style={{ marginTop: '15px', marginBottom: '10px' }}>
-              {t('Results')}
-            </h4>
-            <TableGeneric elements={results} />
-          </>
-        )}
-      </div>
-    </div>
-  );
-
-  const ParameterInput = ({ translationKey, value, onChange, type = 'number', options = null, min = null, max = null }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-      <label style={{
-        flex: 1,
-        minWidth: '200px',
-        textAlign: 'right',
-        fontWeight: '500',
-        color: '#333',
-      }}>
-        {t(translationKey)}:
-      </label>
-      {options ? (
-        <select
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          style={{
-            flex: '0 0 150px',
-            padding: '8px',
-            border: '1px solid #ddd',
-            borderRadius: '4px'
-          }}
-        >
-          {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-        </select>
-      ) : (
-        <input
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          min={min}
-          max={max}
-          style={{
-            flex: '0 0 150px',
-            padding: '8px',
-            border: '1px solid #ddd',
-            borderRadius: '4px'
-          }}
-        />
-      )}
-    </div>
-  );
-
   return (
     <div className="cadre_pour_onglet">
       {/* Model Selection and Cyclone Parameters */}
-      <Section title={t('Cyclone Model Selection')}>
+      <Section title={t('Cyclone Model Selection')} t={t}>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
           <div style={{ flex: '0 0 300px' }}>
-            <img
-              src={cycloneImage}
-              alt="Cyclone Diagram"
-              style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
-            />
+            <img src={cycloneImage} alt="Cyclone Diagram" style={{ width: '100%', height: 'auto', borderRadius: '8px' }} />
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ marginBottom: '15px' }}>
-              <label style={{ fontWeight: 'bold', marginRight: '10px' }}>
-                {t('Select Model')}:
-              </label>
+              <label style={{ fontWeight: 'bold', marginRight: '10px' }}>{t('Select Model')}:</label>
               <select
                 value={selectedModel}
                 onChange={(e) => setSelectedModel(e.target.value)}
-                style={{
-                  padding: '8px',
-                  borderRadius: '4px',
-                  border: '1px solid #ddd',
-                  minWidth: '150px'
-                }}
+                style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ddd', minWidth: '150px' }}
               >
                 {['LAPPLE', 'SWIFT', 'PETERSON', 'ZENZ', 'STAIRMAND', 'SWIFT_HE'].map(model => (
                   <option key={model} value={model}>{model}</option>
@@ -321,64 +294,36 @@ const AIRINJECTIONDesign = ({ innerData, setInnerData, currentLanguage = 'fr' })
       </Section>
 
       {/* Input Parameters */}
-      <Section title={t('Input Parameters')}>
+      <Section title={t('Input Parameters')} t={t}>
         <button
           onClick={clearMemory}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#ff6b6b',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontWeight: 'bold',
-            marginBottom: '15px'
-          }}
+          style={{ padding: '8px 16px', backgroundColor: '#ff6b6b', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', marginBottom: '15px' }}
         >
           {t('Clear parameters')}
         </button>
-
         <div style={{ display: 'grid', gap: '12px' }}>
-          <ParameterInput
-            translationKey="Flue Gas Flow [Nm3/h]"
-            value={FlueGasFlow_Nm3_h}
-            onChange={(v) => handleChange('FlueGasFlow_Nm3_h', v)}
-          />
-          <ParameterInput
-            translationKey="Temperature Flue Gas [°C]"
-            value={Tempe_flue_gas_C}
-            onChange={(v) => handleChange('Tempe_flue_gas_C', v)}
-          />
-          <ParameterInput
-            translationKey="Velocity Target [m/s]"
-            value={VelocityTarget}
-            onChange={(v) => handleChange('VelocityTarget', v)}
-            min="10"
-            max="25"
-          />
+          <ParameterInput translationKey="Flue Gas Flow [Nm3/h]" value={FlueGasFlow_Nm3_h}
+            onChange={(v) => handleChange('FlueGasFlow_Nm3_h', v)} t={t} />
+          <ParameterInput translationKey="Temperature Flue Gas [°C]" value={Tempe_flue_gas_C}
+            onChange={(v) => handleChange('Tempe_flue_gas_C', v)} t={t} />
+          <ParameterInput translationKey="Velocity Target [m/s]" value={VelocityTarget}
+            onChange={(v) => handleChange('VelocityTarget', v)} min="10" max="25" t={t} />
         </div>
       </Section>
 
       {/* Calculated Constants */}
-      <Section title={t('Calculated Dimensions')}>
+      <Section title={t('Calculated Dimensions')} t={t}>
         <TableGeneric elements={constantsForTable} />
       </Section>
 
       {/* Pressure Drop Model */}
-      <Section title={t('Pressure Drop Calculation')}>
+      <Section title={t('Pressure Drop Calculation')} t={t}>
         <div style={{ marginBottom: '15px' }}>
-          <label style={{ fontWeight: 'bold', marginRight: '10px' }}>
-            {t('Pressure Drop Model')}:
-          </label>
+          <label style={{ fontWeight: 'bold', marginRight: '10px' }}>{t('Pressure Drop Model')}:</label>
           <select
             value={selectedPdcModel}
             onChange={(e) => setSelectedPdcModel(e.target.value)}
-            style={{
-              padding: '8px',
-              borderRadius: '4px',
-              border: '1px solid #ddd',
-              minWidth: '200px'
-            }}
+            style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ddd', minWidth: '200px' }}
           >
             <option value="Casal and Martinez">Casal and Martinez</option>
             <option value="Shepherd and Lappel">Shepherd and Lappel</option>
@@ -388,20 +333,9 @@ const AIRINJECTIONDesign = ({ innerData, setInnerData, currentLanguage = 'fr' })
       </Section>
 
       {/* Summary */}
-      <div style={{
-        padding: '20px',
-        maxWidth: '1000px',
-        margin: '0 auto',
-        backgroundColor: '#e8f4f8',
-        borderRadius: '8px'
-      }}>
+      <div style={{ padding: '20px', maxWidth: '1000px', margin: '0 auto', backgroundColor: '#e8f4f8', borderRadius: '8px' }}>
         <h3>{t('Summary of Main Parameters')}</h3>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '15px',
-          marginBottom: '20px'
-        }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
           <p><strong>{t('Model')}:</strong> {selectedModel}</p>
           <p><strong>{t('Cyclone Diameter [m]')}:</strong> {(constants.D != null ? fmt(constants.D, 3) : '')} m</p>
           <p><strong>{t('Velocity Section [m/s]')}:</strong> {(constants.velocitySection != null ? fmt(constants.velocitySection, 2) : '')} m/s</p>

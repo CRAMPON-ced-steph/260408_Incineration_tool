@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import TableGeneric from '../../C_Components/Tableau_generique';
 import { getOpexData } from '../../A_Transverse_fonction/opexDataService';
 import DENOXimage from '../../B_Images/DENOX_img.png';
@@ -6,6 +6,67 @@ import { getLanguageCode } from '../../F_Gestion_Langues/Fonction_Traduction';
 import { translations } from './DENOX_traduction';
 
 import { fmt } from '../../A_Transverse_fonction/formatNumber';
+
+// ─── Composants UI au niveau module (références stables → pas de perte de focus) ───
+const Section = ({ title, results, children, t }) => (
+  <div style={{ marginBottom: '30px', padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
+    <h3 style={{ marginTop: 0, borderBottom: '2px solid #4a90e2', paddingBottom: '10px' }}>
+      {title}
+    </h3>
+    <div style={{ display: 'grid', gap: '15px' }}>
+      {children}
+      {results && results.length > 0 && (
+        <>
+          <h4 style={{ marginTop: '15px', marginBottom: '10px' }}>{t('Résultats')}</h4>
+          <TableGeneric elements={results} />
+        </>
+      )}
+    </div>
+  </div>
+);
+
+const ParameterInput = ({ translationKey, value, onChange, type = 'number', options = null, disabled = false, t }) => {
+  const [display, setDisplay] = useState(() => value !== undefined && value !== null ? String(value) : '');
+  const focused = useRef(false);
+
+  useEffect(() => {
+    if (!focused.current) {
+      setDisplay(value !== undefined && value !== null ? String(value) : '');
+    }
+  }, [value]);
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <label style={{ flex: 1, minWidth: '200px', textAlign: 'right', fontWeight: '500', color: '#333' }}>
+        {t(translationKey)}:
+      </label>
+      {options ? (
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          style={{ flex: '0 0 150px', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
+        >
+          {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+        </select>
+      ) : (
+        <input
+          type={type}
+          value={display}
+          onChange={(e) => { setDisplay(e.target.value); onChange(e.target.value); }}
+          onFocus={() => { focused.current = true; }}
+          onBlur={() => {
+            focused.current = false;
+            const n = parseFloat(display);
+            setDisplay(isNaN(n) ? (value !== undefined && value !== null ? String(value) : '0') : String(n));
+          }}
+          disabled={disabled}
+          style={{ flex: '0 0 150px', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
+        />
+      )}
+    </div>
+  );
+};
+
 const DENOXDesign = ({ innerData, setInnerData, currentLanguage = 'fr' }) => {
   const getInitialValue = (paramName, defaultValue) => {
     return innerData?.[paramName] !== undefined ? innerData[paramName] : defaultValue;
@@ -100,7 +161,7 @@ const DENOXDesign = ({ innerData, setInnerData, currentLanguage = 'fr' }) => {
         const hauteurTotale = nombreCouches * 0.08;
         const largeurReacteur = Math.ceil(Math.sqrt(plaquesParCouche)) * 1.0;
         const longueurReacteur = Math.ceil(plaquesParCouche / Math.ceil(Math.sqrt(plaquesParCouche))) * 1.0;
-        
+
         return {
           'Nombre de plaques': nombrePlaques,
           'Nombre de couches': nombreCouches,
@@ -116,7 +177,7 @@ const DENOXDesign = ({ innerData, setInnerData, currentLanguage = 'fr' }) => {
         const nombreElements = Math.ceil(volumeCatalyseur / volumeElement);
         const elementsParRangee = Math.ceil(Math.sqrt(nombreElements));
         const nombreRangees = Math.ceil(nombreElements / elementsParRangee);
-        
+
         return {
           'Nombre d\'éléments': nombreElements,
           'Éléments par rangée': elementsParRangee,
@@ -135,7 +196,7 @@ const DENOXDesign = ({ innerData, setInnerData, currentLanguage = 'fr' }) => {
         const sectionLitRecalculee = volumeLitTotal / hauteurLit;
         const diametreLit = Math.sqrt(4 * sectionLitRecalculee / Math.PI);
         const masseCatalyseur = volumeCatalyseur * 600;
-        
+
         return {
           'Volume lit total [m³]': fmt(volumeLitTotal, 2),
           'Hauteur du lit [m]': fmt(hauteurLit, 2),
@@ -220,52 +281,10 @@ const DENOXDesign = ({ innerData, setInnerData, currentLanguage = 'fr' }) => {
     }
   }, [perteCharge, debitGaz, consoAmmoniaque, pressionSortie, setInnerData]);
 
-  const Section = ({ title, results, children }) => (
-    <div style={{ marginBottom: '30px', padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
-      <h3 style={{ marginTop: 0, borderBottom: '2px solid #4a90e2', paddingBottom: '10px' }}>
-        {title}
-      </h3>
-      <div style={{ display: 'grid', gap: '15px' }}>
-        {children}
-        {results && results.length > 0 && (
-          <>
-            <h4 style={{ marginTop: '15px', marginBottom: '10px' }}>{t('Résultats')}</h4>
-            <TableGeneric elements={results} />
-          </>
-        )}
-      </div>
-    </div>
-  );
-
-  const ParameterInput = ({ translationKey, value, onChange, type = 'number', options = null, disabled = false }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-      <label style={{ flex: 1, minWidth: '200px', textAlign: 'right', fontWeight: '500', color: '#333' }}>
-        {t(translationKey)}:
-      </label>
-      {options ? (
-        <select
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          style={{ flex: '0 0 150px', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-        >
-          {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-        </select>
-      ) : (
-        <input
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          disabled={disabled}
-          style={{ flex: '0 0 150px', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-        />
-      )}
-    </div>
-  );
-
   return (
     <div className="cadre_pour_onglet">
       {/* Sélection de technologie */}
-      <Section title={t('Technologie SCR')}>
+      <Section title={t('Technologie SCR')} t={t}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <label style={{ flex: 1, minWidth: '200px', textAlign: 'right', fontWeight: '500', color: '#333' }}>
             {t('Technologie SCR')}:
@@ -292,36 +311,39 @@ const DENOXDesign = ({ innerData, setInnerData, currentLanguage = 'fr' }) => {
       </div>
 
       {/* Paramètres SCR */}
-      <Section title={t('Paramètres SCR')}>
+      <Section title={t('Paramètres SCR')} t={t}>
         {Object.entries(parametresSCR).map(([key, value]) => (
           <ParameterInput
             key={key}
             translationKey={key}
             value={value}
             onChange={(v) => handleSCRChange(key, v)}
+            t={t}
           />
         ))}
       </Section>
 
       {/* Paramètres FAM */}
-      <Section title={t('Paramètres FAM')}>
+      <Section title={t('Paramètres FAM')} t={t}>
         {Object.entries(parametresFAM).map(([key, value]) => (
           <ParameterInput
             key={key}
             translationKey={key}
             value={value}
             onChange={(v) => handleFAMChange(key, v)}
+            t={t}
           />
         ))}
       </Section>
 
       {/* Résultats généraux */}
-      <Section title={t('Paramètres Calculés Généraux')} results={elementsGeneral} />
+      <Section title={t('Paramètres Calculés Généraux')} results={elementsGeneral} t={t} />
 
       {/* Dimensionnement spécifique */}
-      <Section 
-        title={t('Dimensionnement Spécifique')} 
+      <Section
+        title={t('Dimensionnement Spécifique')}
         results={elementsSpecifiques}
+        t={t}
       />
 
       {/* Résumé */}

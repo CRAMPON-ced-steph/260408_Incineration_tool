@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { T_ref } from '../../A_Transverse_fonction/constantes';
 import TableGeneric from '../../C_Components/Tableau_generique';
 import { coeff_Nm3_to_m3 } from '../../A_Transverse_fonction/conv_calculation';
@@ -8,6 +8,68 @@ import { getLanguageCode } from '../../F_Gestion_Langues/Fonction_Traduction';
 import { translations } from './WATER_INJECTION_traduction';
 
 import { fmt } from '../../A_Transverse_fonction/formatNumber';
+
+// ─── Composants UI au niveau module (références stables → pas de perte de focus) ───
+const Section = ({ title, results, children, t }) => (
+  <div style={{ marginBottom: '30px', padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
+    <h3 style={{ marginTop: 0, borderBottom: '2px solid #4a90e2', paddingBottom: '10px' }}>
+      {title}
+    </h3>
+    <div style={{ display: 'grid', gap: '15px' }}>
+      {children}
+      {results && results.length > 0 && (
+        <>
+          <h4 style={{ marginTop: '15px', marginBottom: '10px' }}>{t('Résultats')}</h4>
+          <TableGeneric elements={results} />
+        </>
+      )}
+    </div>
+  </div>
+);
+
+const ParameterInput = ({ translationKey, value, onChange, type = 'number', options = null, disabled = false, step = '1', t }) => {
+  const [display, setDisplay] = useState(() => value !== undefined && value !== null ? String(value) : '');
+  const focused = useRef(false);
+
+  useEffect(() => {
+    if (!focused.current) {
+      setDisplay(value !== undefined && value !== null ? String(value) : '');
+    }
+  }, [value]);
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <label style={{ flex: 1, minWidth: '250px', textAlign: 'right', fontWeight: '500', color: '#333' }}>
+        {t(translationKey)}:
+      </label>
+      {options ? (
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          style={{ flex: '0 0 150px', padding: '8px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '14px' }}
+        >
+          {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+        </select>
+      ) : (
+        <input
+          type={type}
+          value={display}
+          onChange={(e) => { setDisplay(e.target.value); onChange(e.target.value); }}
+          onFocus={() => { focused.current = true; }}
+          onBlur={() => {
+            focused.current = false;
+            const n = parseFloat(display);
+            setDisplay(isNaN(n) ? (value !== undefined && value !== null ? String(value) : '0') : String(n));
+          }}
+          disabled={disabled}
+          step={step}
+          style={{ flex: '0 0 150px', padding: '8px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '14px' }}
+        />
+      )}
+    </div>
+  );
+};
+
 const WATER_INJECTIONDesign = ({ innerData, setInnerData, upstreamT_IN, currentLanguage = 'fr' }) => {
   const languageCode = getLanguageCode(currentLanguage);
   const t = (key) => {
@@ -142,16 +204,12 @@ const WATER_INJECTIONDesign = ({ innerData, setInnerData, upstreamT_IN, currentL
     };
   };
 
-  // Loi D² : temps d'évaporation d'une gouttelette dans un gaz chaud
-  // K_evap = 8 × λ(T_moy) × (T_moy − T_ébullition) / (ρ_eau × L_vap)
-  // t_evap = SMD² / K_evap
-  // H_min  = V_gaz × t_evap × facteur_sécurité
   const calculateQuenchHeight = (vGas, dSMD, T_in_C, T_out_C) => {
     const T_mean   = (T_in_C + T_out_C) / 2;
-    const lambda   = 0.024 + 7e-5 * T_mean;  // W/m·K, conductivité fumées (linéaire en T)
-    const rho_eau  = 960;                      // kg/m³ eau ~80°C
-    const L_vap    = 2257e3;                   // J/kg chaleur latente vaporisation
-    const T_boil   = 100;                      // °C point d'ébullition
+    const lambda   = 0.024 + 7e-5 * T_mean;
+    const rho_eau  = 960;
+    const L_vap    = 2257e3;
+    const T_boil   = 100;
     const delta_T  = Math.max(1, T_mean - T_boil);
 
     const K_evap   = (8 * lambda * delta_T) / (rho_eau * L_vap);
@@ -198,23 +256,6 @@ const WATER_INJECTIONDesign = ({ innerData, setInnerData, upstreamT_IN, currentL
     }
   };
 
-  const handleSpinnerChange = (parameterName, increment) => {
-    setDesign_parameters((prevData) => {
-      const currentValue = parseFloat(prevData[parameterName]) || 0;
-      let newValue;
-
-      if (parameterName === 'Quench diameter [m]') {
-        newValue = Math.max(0.1, Math.min(10, currentValue + increment));
-        newValue = Math.round(newValue * 10) / 10;
-      } else if (parameterName === 'Pression pulverisation [bar]') {
-        newValue = Math.max(0.5, Math.min(20, currentValue + increment));
-        newValue = Math.round(newValue * 2) / 2;
-      }
-
-      return { ...prevData, [parameterName]: newValue };
-    });
-  };
-
   const clearMemory = useCallback(() => {
     setPDC_calcul({ 'Pression aéraulique [mmCE]': 0, 'PDC [mmCE]': 150 });
     setDesign_parameters({ 'Quench diameter [m]': 1.5, 'Pression pulverisation [bar]': 3, 'Type de buse': 'cone creux', 'Type d\'eau': 'eau potable' });
@@ -250,116 +291,11 @@ const WATER_INJECTIONDesign = ({ innerData, setInnerData, upstreamT_IN, currentL
     }
   }, [Conso_elec_pompe_reelle_kW, Puissance_pompe_kW, Rendement_pompe, Eau_add, waterType, P_out_mmCE, DiameterQuench, P_pulverisation, nozzleType, PDC_mmCE, setInnerData, t]);
 
-  // UI Components
-  const Section = ({ title, results, children }) => (
-    <div style={{ marginBottom: '30px', padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
-      <h3 style={{ marginTop: 0, borderBottom: '2px solid #4a90e2', paddingBottom: '10px' }}>
-        {title}
-      </h3>
-      <div style={{ display: 'grid', gap: '15px' }}>
-        {children}
-        {results && results.length > 0 && (
-          <>
-            <h4 style={{ marginTop: '15px', marginBottom: '10px' }}>{t('Résultats')}</h4>
-            <TableGeneric elements={results} />
-          </>
-        )}
-      </div>
-    </div>
-  );
-
-  const ParameterInput = ({ translationKey, value, onChange, type = 'number', options = null, disabled = false, step = '1' }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-      <label style={{ flex: 1, minWidth: '250px', textAlign: 'right', fontWeight: '500', color: '#333' }}>
-        {t(translationKey)}:
-      </label>
-      {options ? (
-        <select
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          style={{ flex: '0 0 150px', padding: '8px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '14px' }}
-        >
-          {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-        </select>
-      ) : (
-        <input
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          disabled={disabled}
-          step={step}
-          style={{ flex: '0 0 150px', padding: '8px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '14px' }}
-        />
-      )}
-    </div>
-  );
-
-  const ParameterInputWithSpinner = ({ translationKey, value, onChange, increment }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-      <label style={{ flex: 1, minWidth: '250px', textAlign: 'right', fontWeight: '500', color: '#333' }}>
-        {t(translationKey)}:
-      </label>
-      <div style={{ display: 'flex', gap: '8px', flex: '0 0 150px' }}>
-        <button
-          onClick={() => handleSpinnerChange(translationKey, -increment)}
-          style={{ padding: '6px 12px', backgroundColor: '#f5f5f5', border: '1px solid #ddd', borderRadius: '4px', cursor: 'pointer' }}
-        >
-          −
-        </button>
-        <input
-          type="number"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          style={{ flex: 1, padding: '8px', border: '1px solid #ddd', borderRadius: '4px', textAlign: 'center', fontSize: '14px' }}
-        />
-        <button
-          onClick={() => handleSpinnerChange(translationKey, increment)}
-          style={{ padding: '6px 12px', backgroundColor: '#f5f5f5', border: '1px solid #ddd', borderRadius: '4px', cursor: 'pointer' }}
-        >
-          +
-        </button>
-      </div>
-    </div>
-  );
-
   // Elements for tables
-  const elements_PDC = [{ text: t('Pression de sortie [mmCE]'), value: P_out_mmCE.toFixed(2) }];
-
   const elements_conso_pompe = [
     { text: t('Puissance pompe nominale [kW]'), value: fmt(Puissance_pompe_kW, 2) },
     { text: t('Rendement pompe [%]'), value: fmt(Rendement_pompe, 1) },
     { text: t('Consommation réelle [kW]'), value: fmt(Conso_elec_pompe_reelle_kW, 2) },
-  ];
-
-  const elementsGeneric = [
-    { text: t('Temperature inlet WATER_INJECTION [°C]'), value: fmt(T_IN, 1) },
-    { text: t('Temperature outlet WATER_INJECTION [°C]'), value: fmt(T_sortie, 1) },
-    { text: t('Inlet temperature [K]'), value: fmt(T_IN_K, 0) },
-    { text: t('Outlet temperature [K]'), value: fmt(T_sortie_K, 0) },
-    { text: t('Quench surface area [m2]'), value: fmt(Surface_Quench, 2) },
-    { text: t('Sprayed/cooling water [kg/h]'), value: fmt(Eau_add, 0) },
-    { text: t('Spray pressure [bar]'), value: fmt(P_pulverisation, 0) },
-    { text: t('Débit eau [L/min]'), value: fmt(Q_eau_add_l_min, 2) },
-    { text: t('Vitesse des gaz [m/s]'), value: fmt(V_FG_m_s, 2) },
-    { text: t('Prix de l\'eau [€/m³]'), value: fmt(currentWaterPrice, 2) },
-    { text: t('Coût eau par heure [€/h]'), value: fmt(waterCostPerHour, 2) },
-  ];
-
-  const quenchResultsElements = [
-    { text: t('Hauteur minimale du quench [m]'), value: fmt(quenchHeight, 2) },
-    { text: t('Température moyenne gaz [°C]'), value: fmt(T_mean_quench, 0) },
-    { text: t('λ fumées [W/m·K]'), value: fmt(lambda_quench, 4) },
-    { text: t('K évaporation [m²/s]'), value: (K_evap_quench).toExponential(2) },
-    { text: t('Temps évaporation goutte [s]'), value: fmt(t_evap_quench, 3) },
-    { text: t('SMD (Sauter Mean Diameter) [µm]'), value: fmt((sprayCharacteristics.smd * 1e6), 2) },
-    { text: t('Vitesse des gouttes [m/s]'), value: fmt(sprayCharacteristics.dropletVelocity, 2) },
-    { text: t('Angle du spray [°]'), value: fmt(sprayCharacteristics.sprayAngle, 2) },
-    { text: t('Qualité du spray - Atomisation'), value: sprayQuality.atomization },
-    { text: t('Qualité du spray - Uniformité'), value: sprayQuality.uniformity },
-    { text: t('Qualité du spray - Couverture'), value: sprayQuality.coverage },
-    { text: t('Type de buse - Description'), value: currentNozzle.description },
-    { text: t('Paramètre n (distribution)'), value: fmt(n, 2) },
-    { text: t('Taille moyenne des gouttes [µm]'), value: fmt((dMean * 1e6), 2) },
   ];
 
   const elementsGenericSummary = [
@@ -376,20 +312,18 @@ const WATER_INJECTIONDesign = ({ innerData, setInnerData, upstreamT_IN, currentL
   return (
     <div className="cadre_pour_onglet">
       {/* Dimensionnement du WATER_INJECTION */}
-      <Section
-        title={t('Dimensionnement du Quench')}
-      >
+      <Section title={t('Dimensionnement du Quench')} t={t}>
         <ParameterInput translationKey="Type d'eau" value={waterType}
           onChange={(v) => handleParametresChange('Type d\'eau', v)}
-          options={Object.keys(waterTypeLabels)} />
+          options={Object.keys(waterTypeLabels)} t={t} />
       </Section>
 
       {/* Consommation électrique de la pompe */}
-      <Section title={t('Consommation électrique de la pompe')} results={elements_conso_pompe}>
+      <Section title={t('Consommation électrique de la pompe')} results={elements_conso_pompe} t={t}>
         <ParameterInput translationKey="Puissance pompe [kW]" value={Puissance_pompe_kW}
-          onChange={(v) => handleParametresChange('Puissance pompe [kW]', v)} />
+          onChange={(v) => handleParametresChange('Puissance pompe [kW]', v)} t={t} />
         <ParameterInput translationKey="Rendement pompe [%]" value={Rendement_pompe}
-          onChange={(v) => handleParametresChange('Rendement pompe [%]', v)} />
+          onChange={(v) => handleParametresChange('Rendement pompe [%]', v)} t={t} />
       </Section>
 
       {/* Résumé */}
@@ -408,7 +342,6 @@ const WATER_INJECTIONDesign = ({ innerData, setInnerData, upstreamT_IN, currentL
         <h4>{t('Paramètres calculés détaillés')}</h4>
         <TableGeneric elements={elementsGenericSummary} />
       </div>
-
     </div>
   );
 };

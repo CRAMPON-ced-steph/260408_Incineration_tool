@@ -1,10 +1,111 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import COOLINGTOWERImage from '/src/B_Images/quench_img.png';
 import { getLanguageCode } from '../../F_Gestion_Langues/Fonction_Traduction';
 import { translations } from './COOLINGTOWER_traduction';
 import { getOpexData } from '../../A_Transverse_fonction/opexDataService';
 
 import { fmt } from '../../A_Transverse_fonction/formatNumber';
+
+// ─── Composants UI au niveau module (références stables → pas de perte de focus) ───
+const Section = ({ title, children, results: sectionResults, t }) => (
+  <div className="mb-6 p-6 bg-gray-50 rounded-lg shadow">
+    <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b-2 border-blue-500 pb-2">
+      {title}
+    </h3>
+    <div className="space-y-4">
+      {children}
+      {sectionResults && sectionResults.length > 0 && (
+        <div className="mt-6 pt-6 border-t border-gray-300">
+          <h4 className="font-semibold text-gray-700 mb-3">{t('Résultats')}</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {sectionResults.map((result, idx) => (
+              <div key={idx} className="text-sm">
+                <p className="text-gray-600">
+                  <strong>{result.label}:</strong> {result.value}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+);
+
+const ParameterInput = ({ label, name, value, onChange, type = 'number', options = null }) => {
+  const [display, setDisplay] = useState(() => value !== undefined && value !== null ? String(value) : '');
+  const focused = useRef(false);
+
+  useEffect(() => {
+    if (!focused.current) {
+      setDisplay(value !== undefined && value !== null ? String(value) : '');
+    }
+  }, [value]);
+
+  return (
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+      <label className="w-full sm:w-64 text-sm font-medium text-gray-700">
+        {label}:
+      </label>
+      {options ? (
+        <select
+          value={value}
+          onChange={onChange}
+          className="w-full sm:w-72 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
+        >
+          {options.map(opt => (
+            <option key={opt} value={opt}>{opt}</option>
+          ))}
+        </select>
+      ) : (
+        <input
+          type={type}
+          name={name}
+          value={display}
+          onChange={(e) => {
+            setDisplay(e.target.value);
+            onChange(e);
+          }}
+          onFocus={() => { focused.current = true; }}
+          onBlur={() => {
+            focused.current = false;
+            const n = parseFloat(display);
+            setDisplay(isNaN(n) ? (value !== undefined && value !== null ? String(value) : '0') : String(n));
+          }}
+          className="w-full sm:w-72 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
+        />
+      )}
+    </div>
+  );
+};
+
+const ResultsGrid = ({ results: resultsData, t }) => (
+  <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
+    <h3 className="text-xl font-semibold text-gray-800 mb-4">{t('Résultats')}</h3>
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div>
+        <h4 className="font-semibold text-lg text-gray-700 mb-3">{t('Caractéristiques calculées')}</h4>
+        <ul className="space-y-2 text-sm text-gray-600">
+          <li><strong>{t('Hauteur minimale')}:</strong> {fmt(resultsData.height, 2)} m</li>
+          <li><strong>SMD:</strong> {fmt((resultsData.sprayCharacteristics.smd * 1e6), 1)} μm</li>
+          <li><strong>{t('Vitesse des gouttes')}:</strong> {fmt(resultsData.sprayCharacteristics.dropletVelocity, 1)} m/s</li>
+          <li><strong>{t('Angle de spray')}:</strong> {fmt(resultsData.sprayCharacteristics.sprayAngle, 1)}°</li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 className="font-semibold text-lg text-gray-700 mb-3">{t('Qualité du spray')}</h4>
+        <ul className="space-y-2 text-sm text-gray-600">
+          <li><strong>{t('Atomisation')}:</strong> {resultsData.sprayQuality.atomization}</li>
+          <li><strong>{t('Uniformité')}:</strong> {resultsData.sprayQuality.uniformity}</li>
+          <li><strong>{t('Couverture')}:</strong> {resultsData.sprayQuality.coverage}</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+);
+
 const COOLINGTOWERDesign = ({ innerData, setInnerData, currentLanguage = 'fr' }) => {
   const languageCode = getLanguageCode(currentLanguage);
   const t = (key) => {
@@ -168,7 +269,6 @@ const COOLINGTOWERDesign = ({ innerData, setInnerData, currentLanguage = 'fr' })
 
       setInnerData(prevData => ({
         ...prevData,
-        // Electrical consumption (Pumps)
         consoElec1: toSignificantFigures(2),
         consoElec2: toSignificantFigures(0),
         consoElec3: toSignificantFigures(0),
@@ -179,18 +279,12 @@ const COOLINGTOWERDesign = ({ innerData, setInnerData, currentLanguage = 'fr' })
         labelElec3: t('pompe'),
         labelElec4: t('pompe'),
         labelElec5: t('pompe'),
-
-        // Air consumption
         conso_air_co_N_m3: toSignificantFigures(0),
-
-        // Water consumption
         Conso_EauPotable_m3: toSignificantFigures(1),
         Conso_EauRefroidissement_m3: toSignificantFigures(1),
         Conso_EauDemin_m3: toSignificantFigures(1),
         Conso_EauRiviere_m3: toSignificantFigures(1),
         Conso_EauAdoucie_m3: toSignificantFigures(1),
-
-        // Reagent consumption
         Conso_CaCO3_kg: toSignificantFigures(1),
         Conso_CaO_kg: toSignificantFigures(1),
         Conso_CaOH2_dry_kg: toSignificantFigures(1),
@@ -199,113 +293,23 @@ const COOLINGTOWERDesign = ({ innerData, setInnerData, currentLanguage = 'fr' })
         Conso_NaOHCO3_kg: toSignificantFigures(0),
         Conso_Ammonia_kg: toSignificantFigures(0),
         Conso_NaBrCaBr2_kg: toSignificantFigures(0),
-
-        // Transport
         truck15TPrice: toSignificantFigures(truck15TPrice || 0),
-
-        // Gas consumption
         conso_gaz_H_MW: toSignificantFigures(0),
         conso_gaz_L_MW: toSignificantFigures(0),
         conso_gaz_Process_MW: toSignificantFigures(0),
         conso_fuel: toSignificantFigures(0),
-
-        // Ash consumption
         conso_incineration_ash_kg_h: toSignificantFigures(1),
         conso_boiler_ash_kg_h: toSignificantFigures(1),
         conso_fly_ash_kg_h: toSignificantFigures(1),
-
-        // CO2 transport
         CO2_transport_incineratino_ash: toSignificantFigures(90),
         CO2_transport_boiler_ash: toSignificantFigures(90),
         CO2_transport_fly_ash: toSignificantFigures(90),
-
-        // Transport cost
         cout_transport_incineratino_ash: toSignificantFigures(90),
         cout_transport_boiler_ash: toSignificantFigures(90),
         cout_transport_fly_ash: toSignificantFigures(90),
       }));
     }
   }, [innerData, setInnerData, truck15TPrice, t]);
-
-  // ========== REUSABLE COMPONENTS ==========
-  const Section = ({ title, children, results: sectionResults }) => (
-    <div className="mb-6 p-6 bg-gray-50 rounded-lg shadow">
-      <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b-2 border-blue-500 pb-2">
-        {title}
-      </h3>
-      <div className="space-y-4">
-        {children}
-        {sectionResults && sectionResults.length > 0 && (
-          <div className="mt-6 pt-6 border-t border-gray-300">
-            <h4 className="font-semibold text-gray-700 mb-3">{t('Résultats')}</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {sectionResults.map((result, idx) => (
-                <div key={idx} className="text-sm">
-                  <p className="text-gray-600">
-                    <strong>{result.label}:</strong> {result.value}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
-  const ParameterInput = ({ label, name, value, onChange, type = 'number', options = null }) => (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-      <label className="w-full sm:w-64 text-sm font-medium text-gray-700">
-        {label}:
-      </label>
-      {options ? (
-        <select
-          value={value}
-          onChange={onChange}
-          className="w-full sm:w-72 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
-        >
-          {options.map(opt => (
-            <option key={opt} value={opt}>{opt}</option>
-          ))}
-        </select>
-      ) : (
-        <input
-          type={type}
-          name={name}
-          value={value}
-          onChange={onChange}
-          className="w-full sm:w-72 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
-        />
-      )}
-    </div>
-  );
-
-  const ResultsGrid = ({ results: resultsData }) => (
-    <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
-      <h3 className="text-xl font-semibold text-gray-800 mb-4">{t('Résultats')}</h3>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <div>
-          <h4 className="font-semibold text-lg text-gray-700 mb-3">{t('Caractéristiques calculées')}</h4>
-          <ul className="space-y-2 text-sm text-gray-600">
-            <li><strong>{t('Hauteur minimale')}:</strong> {fmt(resultsData.height, 2)} m</li>
-            <li><strong>SMD:</strong> {fmt((resultsData.sprayCharacteristics.smd * 1e6), 1)} μm</li>
-            <li><strong>{t('Vitesse des gouttes')}:</strong> {fmt(resultsData.sprayCharacteristics.dropletVelocity, 1)} m/s</li>
-            <li><strong>{t('Angle de spray')}:</strong> {fmt(resultsData.sprayCharacteristics.sprayAngle, 1)}°</li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 className="font-semibold text-lg text-gray-700 mb-3">{t('Qualité du spray')}</h4>
-          <ul className="space-y-2 text-sm text-gray-600">
-            <li><strong>{t('Atomisation')}:</strong> {resultsData.sprayQuality.atomization}</li>
-            <li><strong>{t('Uniformité')}:</strong> {resultsData.sprayQuality.uniformity}</li>
-            <li><strong>{t('Couverture')}:</strong> {resultsData.sprayQuality.coverage}</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <div className="p-6 flex flex-col lg:flex-row items-start bg-gray-50">
@@ -325,7 +329,7 @@ const COOLINGTOWERDesign = ({ innerData, setInnerData, currentLanguage = 'fr' })
         </h2>
 
         {/* ========== NOZZLE SELECTION SECTION ========== */}
-        <Section title={t('Sélection de la buse')}>
+        <Section title={t('Sélection de la buse')} t={t}>
           <div className="space-y-4">
             <ParameterInput
               label={t('Type de buse')}
@@ -340,7 +344,7 @@ const COOLINGTOWERDesign = ({ innerData, setInnerData, currentLanguage = 'fr' })
         </Section>
 
         {/* ========== SPRAY PARAMETERS SECTION ========== */}
-        <Section title={t('Paramètres du spray')}>
+        <Section title={t('Paramètres du spray')} t={t}>
           <div className="space-y-4">
             <ParameterInput
               label={t('Pression (bar)')}
@@ -370,7 +374,7 @@ const COOLINGTOWERDesign = ({ innerData, setInnerData, currentLanguage = 'fr' })
         </Section>
 
         {/* ========== GAS PARAMETERS SECTION ========== */}
-        <Section title={t('Paramètres du gaz')}>
+        <Section title={t('Paramètres du gaz')} t={t}>
           <div className="space-y-4">
             <ParameterInput
               label={t('Température du gaz (K)')}
@@ -394,7 +398,7 @@ const COOLINGTOWERDesign = ({ innerData, setInnerData, currentLanguage = 'fr' })
         </Section>
 
         {/* ========== LIQUID PARAMETERS SECTION ========== */}
-        <Section title={t('Paramètres du liquide')}>
+        <Section title={t('Paramètres du liquide')} t={t}>
           <div className="space-y-4">
             <ParameterInput
               label={t('Température du liquide (K)')}
@@ -416,7 +420,7 @@ const COOLINGTOWERDesign = ({ innerData, setInnerData, currentLanguage = 'fr' })
         </div>
 
         {/* ========== RESULTS SECTION ========== */}
-        {results && <ResultsGrid results={results} />}
+        {results && <ResultsGrid results={results} t={t} />}
 
         {/* ========== ERROR SECTION ========== */}
         {error && (

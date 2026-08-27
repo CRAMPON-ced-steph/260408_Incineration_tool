@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { T_ref } from '../../A_Transverse_fonction/constantes';
 import TableGeneric from '../../C_Components/Tableau_generique';
 import { coeff_Nm3_to_m3 } from '../../A_Transverse_fonction/conv_calculation';
@@ -8,6 +8,61 @@ import { getLanguageCode } from '../../F_Gestion_Langues/Fonction_Traduction';
 import { translations } from './REACTOR_traduction';
 
 import { fmt } from '../../A_Transverse_fonction/formatNumber';
+
+// ─── Composants UI au niveau module (références stables → pas de perte de focus) ───
+const Section = ({ title, children }) => (
+  <div style={{ backgroundColor: '#f5f5f5', padding: '15px', borderRadius: '4px', marginBottom: '20px' }}>
+    <h3>{title}</h3>
+    <div style={{ display: 'flex', gap: '20px' }}>
+      {children}
+    </div>
+  </div>
+);
+
+const ParameterInput = ({ label, value, onChange, type = 'number', options = null, disabled = false, t }) => {
+  const [display, setDisplay] = useState(() => value !== undefined && value !== null ? String(value) : '');
+  const focused = useRef(false);
+
+  useEffect(() => {
+    if (!focused.current) {
+      setDisplay(value !== undefined && value !== null ? String(value) : '');
+    }
+  }, [value]);
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+      <label style={{ flex: 1, marginRight: '10px', textAlign: 'right', fontWeight: 'bold' }}>
+        {t(label)}:
+      </label>
+      {options ? (
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          style={{ flex: '0 0 100px', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
+        >
+          {options.map((opt) => (
+            <option key={opt} value={opt}>{opt}</option>
+          ))}
+        </select>
+      ) : (
+        <input
+          type={type}
+          value={display}
+          onChange={(e) => { setDisplay(e.target.value); onChange(e.target.value); }}
+          onFocus={() => { focused.current = true; }}
+          onBlur={() => {
+            focused.current = false;
+            const n = parseFloat(display);
+            setDisplay(isNaN(n) ? (value !== undefined && value !== null ? String(value) : '0') : String(n));
+          }}
+          disabled={disabled}
+          style={{ flex: '0 0 100px', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
+        />
+      )}
+    </div>
+  );
+};
+
 const REACTORDesign = ({ innerData, setInnerData, currentLanguage = 'fr' }) => {
   const getInitialValue = (paramName, defaultValue) => {
     return innerData?.[paramName] !== undefined ? innerData[paramName] : defaultValue;
@@ -268,52 +323,15 @@ const REACTORDesign = ({ innerData, setInnerData, currentLanguage = 'fr' }) => {
     setInnerData,
   ]);
 
-  // Reusable components
-  const ParameterInput = ({ label, value, onChange, type = 'number', options = null, disabled = false }) => (
-    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-      <label style={{ flex: 1, marginRight: '10px', textAlign: 'right', fontWeight: 'bold' }}>
-        {t(label)}:
-      </label>
-      {options ? (
-        <select
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          style={{ flex: '0 0 100px', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-        >
-          {options.map((opt) => (
-            <option key={opt} value={opt}>{opt}</option>
-          ))}
-        </select>
-      ) : (
-        <input
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          disabled={disabled}
-          style={{ flex: '0 0 100px', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-        />
-      )}
-    </div>
-  );
-
-  const Section = ({ title, children }) => (
-    <div style={{ backgroundColor: '#f5f5f5', padding: '15px', borderRadius: '4px', marginBottom: '20px' }}>
-      <h3>{title}</h3>
-      <div style={{ display: 'flex', gap: '20px' }}>
-        {children}
-      </div>
-    </div>
-  );
-
   return (
     <div className="cadre_pour_onglet">
       {/* 1. Pressure Loss */}
       <Section title={t('Aeraulic Pressure Loss')}>
         <div style={{ flex: 1 }}>
-          <ParameterInput label="Aeraulic Pressure [mmCE]" value={PDC_calcul['Pression aéraulique [mmCE]']} 
-            onChange={(v) => handleChange('Pression aéraulique [mmCE]', v)} />
-          <ParameterInput label="PDC [mmCE]" value={PDC_calcul['PDC [mmCE]']} 
-            onChange={(v) => handleChange('PDC [mmCE]', v)} />
+          <ParameterInput label="Aeraulic Pressure [mmCE]" value={PDC_calcul['Pression aéraulique [mmCE]']}
+            onChange={(v) => handleChange('Pression aéraulique [mmCE]', v)} t={t} />
+          <ParameterInput label="PDC [mmCE]" value={PDC_calcul['PDC [mmCE]']}
+            onChange={(v) => handleChange('PDC [mmCE]', v)} t={t} />
         </div>
         <div style={{ flex: 1 }}>
           <TableGeneric elements={[{ text: t('Output Pressure [mmCE]'), value: fmt(P_out_mmCE, 2) }]} />
@@ -326,17 +344,17 @@ const REACTORDesign = ({ innerData, setInnerData, currentLanguage = 'fr' }) => {
           <img src={REACTORimage} alt="Reactor" style={{ width: '100%', maxHeight: '300px', objectFit: 'contain' }} />
         </div>
         <div style={{ flex: 1 }}>
-          <ParameterInput label="Flow Rate [Nm3/h]" value={reactorParams['Flow Rate [Nm3/h]']} 
-            onChange={(v) => handleChange('Flow Rate [Nm3/h]', v)} />
-          <ParameterInput label="Temperature [°C]" value={reactorParams['Temperature [°C]']} 
-            onChange={(v) => handleChange('Temperature [°C]', v)} />
-          <ParameterInput label="Residence Time [s]" value={reactorParams['Residence Time [s]']} 
-            onChange={(v) => handleChange('Residence Time [s]', v)} />
-          <ParameterInput label="L/D Ratio" value={reactorParams['L/D Ratio']} 
-            onChange={(v) => handleChange('L/D Ratio', v)} />
-          <ParameterInput label="Agitation Type" value={reactorParams['Agitation Type']} 
+          <ParameterInput label="Flow Rate [Nm3/h]" value={reactorParams['Flow Rate [Nm3/h]']}
+            onChange={(v) => handleChange('Flow Rate [Nm3/h]', v)} t={t} />
+          <ParameterInput label="Temperature [°C]" value={reactorParams['Temperature [°C]']}
+            onChange={(v) => handleChange('Temperature [°C]', v)} t={t} />
+          <ParameterInput label="Residence Time [s]" value={reactorParams['Residence Time [s]']}
+            onChange={(v) => handleChange('Residence Time [s]', v)} t={t} />
+          <ParameterInput label="L/D Ratio" value={reactorParams['L/D Ratio']}
+            onChange={(v) => handleChange('L/D Ratio', v)} t={t} />
+          <ParameterInput label="Agitation Type" value={reactorParams['Agitation Type']}
             onChange={(v) => handleChange('Agitation Type', v)}
-            options={['mechanical', 'air']} />
+            options={['mechanical', 'air']} t={t} />
           <h4 style={{ marginTop: '15px' }}>{t('Design Results')}</h4>
           <TableGeneric elements={[
             { text: t('Reactor Volume [m³]'), value: fmt(reactorResults.reactorVolume, 1) },
@@ -353,8 +371,8 @@ const REACTORDesign = ({ innerData, setInnerData, currentLanguage = 'fr' }) => {
       {/* 3. Electric Consumption Belt */}
       <Section title={t('Electric Consumption Belt')}>
         <div style={{ flex: 1 }}>
-          <ParameterInput label="Electric consumption belt [kW]" value={Conso_elec_vis_transport_kW} 
-            onChange={(v) => handleChange('Electric consumption belt [kW]', v)} />
+          <ParameterInput label="Electric consumption belt [kW]" value={Conso_elec_vis_transport_kW}
+            onChange={(v) => handleChange('Electric consumption belt [kW]', v)} t={t} />
         </div>
         <div style={{ flex: 1 }}>
           <TableGeneric elements={[{ text: t('Belt Consumption [kW]'), value: fmt(Conso_elec_vis_transport_kW, 2) }]} />
@@ -364,13 +382,13 @@ const REACTORDesign = ({ innerData, setInnerData, currentLanguage = 'fr' }) => {
       {/* 4. Compressed Air Consumption */}
       <Section title={t('Compressed Air Consumption')}>
         <div style={{ flex: 1 }}>
-          <ParameterInput label="Number of cycles [Nb]" value={nombre_cycle_nb} 
-            onChange={(v) => handleChange('Number of cycles [Nb]', v)} />
-          <ParameterInput label="Compressed air pressure [Bar]" value={pression_air_comprime_bar} 
+          <ParameterInput label="Number of cycles [Nb]" value={nombre_cycle_nb}
+            onChange={(v) => handleChange('Number of cycles [Nb]', v)} t={t} />
+          <ParameterInput label="Compressed air pressure [Bar]" value={pression_air_comprime_bar}
             onChange={(v) => handleChange('Compressed air pressure [Bar]', v)}
-            options={['7', '10', '13', '15']} />
-          <ParameterInput label="Air per cycle [Nm3/cycle]" value={air_comprime_par_cycle} 
-            onChange={(v) => handleChange('Air per cycle [Nm3/cycle]', v)} />
+            options={['7', '10', '13', '15']} t={t} />
+          <ParameterInput label="Air per cycle [Nm3/cycle]" value={air_comprime_par_cycle}
+            onChange={(v) => handleChange('Air per cycle [Nm3/cycle]', v)} t={t} />
         </div>
         <div style={{ flex: 1 }}>
           <TableGeneric elements={[
@@ -383,11 +401,11 @@ const REACTORDesign = ({ innerData, setInnerData, currentLanguage = 'fr' }) => {
       {/* 5. Ash Evacuation */}
       <Section title={t('Ash Evacuation')}>
         <div style={{ flex: 1 }}>
-          <ParameterInput label="Truck Type" value={type_camion} 
+          <ParameterInput label="Truck Type" value={type_camion}
             onChange={(v) => handleChange('Truck Type', v)}
-            options={['15t', '20t', '25t']} />
-          <ParameterInput label="Distance [km]" value={distance_km} 
-            onChange={(v) => handleChange('Distance [km]', v)} />
+            options={['15t', '20t', '25t']} t={t} />
+          <ParameterInput label="Distance [km]" value={distance_km}
+            onChange={(v) => handleChange('Distance [km]', v)} t={t} />
         </div>
         <div style={{ flex: 1 }}>
           <TableGeneric elements={[

@@ -1,13 +1,73 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import TableGeneric from '../../C_Components/Tableau_generique';
 import { coeff_Nm3_to_m3 } from '../../A_Transverse_fonction/conv_calculation';
 import { getOpexData } from '../../A_Transverse_fonction/opexDataService';
 import BHFimage from '../../B_Images/BHF_img.png';
-import fond_transparent from '../../B_Images/fond_transparent.jpg';
 import { getLanguageCode } from '../../F_Gestion_Langues/Fonction_Traduction';
 import { translations } from './BHF_traduction';
 
 import { fmt } from '../../A_Transverse_fonction/formatNumber';
+
+// ─── Composants UI au niveau module (références stables → pas de perte de focus) ───
+const Section = ({ title, results, children, t }) => (
+  <div style={{ marginBottom: '30px', padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
+    <h3 style={{ marginTop: 0, borderBottom: '2px solid #4a90e2', paddingBottom: '10px' }}>
+      {title}
+    </h3>
+    <div style={{ display: 'grid', gap: '15px' }}>
+      {children}
+      {results && results.length > 0 && (
+        <>
+          <h4 style={{ marginTop: '15px', marginBottom: '10px' }}>{t('Résultats')}</h4>
+          <TableGeneric elements={results} />
+        </>
+      )}
+    </div>
+  </div>
+);
+
+const ParameterInput = ({ translationKey, value, onChange, type = 'number', options = null, disabled = false, t }) => {
+  const [display, setDisplay] = useState(() => value !== undefined && value !== null ? String(value) : '');
+  const focused = useRef(false);
+
+  useEffect(() => {
+    if (!focused.current) {
+      setDisplay(value !== undefined && value !== null ? String(value) : '');
+    }
+  }, [value]);
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <label style={{ flex: 1, minWidth: '200px', textAlign: 'right', fontWeight: '500', color: '#333' }}>
+        {t(translationKey)}:
+      </label>
+      {options ? (
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          style={{ flex: '0 0 150px', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
+        >
+          {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+        </select>
+      ) : (
+        <input
+          type={type}
+          value={display}
+          onChange={(e) => { setDisplay(e.target.value); onChange(e.target.value); }}
+          onFocus={() => { focused.current = true; }}
+          onBlur={() => {
+            focused.current = false;
+            const n = parseFloat(display);
+            setDisplay(isNaN(n) ? (value !== undefined && value !== null ? String(value) : '0') : String(n));
+          }}
+          disabled={disabled}
+          style={{ flex: '0 0 150px', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
+        />
+      )}
+    </div>
+  );
+};
+
 const BHFDesign = ({ innerData, setInnerData, currentLanguage = 'fr' }) => {
   const getInitialValue = (paramName, defaultValue) => {
     return innerData?.[paramName] !== undefined ? innerData[paramName] : defaultValue;
@@ -164,79 +224,38 @@ const BHFDesign = ({ innerData, setInnerData, currentLanguage = 'fr' }) => {
         cout_transport_fly_ash: toSignificantFigures(cout_transport_total),
       }));
     }
-  }, [Conso_elec_vis_transport_kW, Conso_elec_air_co_kW, conso_air_co_Nm3_h, 
-      pression_air_comprime_bar, cout_transport_total, CO2_transport_total, 
+  }, [Conso_elec_vis_transport_kW, Conso_elec_air_co_kW, conso_air_co_Nm3_h,
+      pression_air_comprime_bar, cout_transport_total, CO2_transport_total,
       cendres_kg_h, P_out_mmCE, consommation_reactifs, setInnerData]);
-
-  const Section = ({ title, results, children }) => (
-    <div style={{ marginBottom: '30px', padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
-      <h3 style={{ marginTop: 0, borderBottom: '2px solid #4a90e2', paddingBottom: '10px' }}>
-        {title}
-      </h3>
-      <div style={{ display: 'grid', gap: '15px' }}>
-        {children}
-        {results && results.length > 0 && (
-          <>
-            <h4 style={{ marginTop: '15px', marginBottom: '10px' }}>{t('Résultats')}</h4>
-            <TableGeneric elements={results} />
-          </>
-        )}
-      </div>
-    </div>
-  );
-
-  const ParameterInput = ({ translationKey, value, onChange, type = 'number', options = null, disabled = false }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-      <label style={{ flex: 1, minWidth: '200px', textAlign: 'right', fontWeight: '500', color: '333' }}>
-        {t(translationKey)}:
-      </label>
-      {options ? (
-        <select
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          style={{ flex: '0 0 150px', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-        >
-          {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-        </select>
-      ) : (
-        <input
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          disabled={disabled}
-          style={{ flex: '0 0 150px', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-        />
-      )}
-    </div>
-  );
 
   return (
     <div className="cadre_pour_onglet">
       {/* Pertes de charge aéraulique */}
-      <Section title={t('Pertes de charge aéraulique')} results={[{ text: t('Pression de sortie [mmCE]'), value: fmt(P_out_mmCE, 2) }]}>
-        <ParameterInput translationKey="Pression aéraulique [mmCE]" value={PDC_calcul['Pression aéraulique [mmCE]']} 
-          onChange={(v) => handleParametresChange('Pression aéraulique [mmCE]', v)} />
-        <ParameterInput translationKey="PDC [mmCE]" value={PDC_calcul['PDC [mmCE]']} 
-          onChange={(v) => handleParametresChange('PDC [mmCE]', v)} />
+      <Section title={t('Pertes de charge aéraulique')} results={[{ text: t('Pression de sortie [mmCE]'), value: fmt(P_out_mmCE, 2) }]} t={t}>
+        <ParameterInput translationKey="Pression aéraulique [mmCE]" value={PDC_calcul['Pression aéraulique [mmCE]']}
+          onChange={(v) => handleParametresChange('Pression aéraulique [mmCE]', v)} t={t} />
+        <ParameterInput translationKey="PDC [mmCE]" value={PDC_calcul['PDC [mmCE]']}
+          onChange={(v) => handleParametresChange('PDC [mmCE]', v)} t={t} />
       </Section>
 
       {/* Dimensionnement du FAM */}
-      <Section 
+      <Section
         title={t('Dimensionnement du FAM')}
         results={[
           { text: t('Surface des manches [m²]'), value: fmt(surfaceManches, 2) },
           { text: t('Pression de sortie [mmCE]'), value: fmt(P_out_mmCE, 2) },
         ]}
+        t={t}
       >
         <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
           <div style={{ flex: 1 }}>
             <img src={BHFimage} alt="BHF" style={{ width: '100%', maxWidth: '300px', objectFit: 'contain' }} />
           </div>
           <div style={{ flex: 1, display: 'grid', gap: '15px' }}>
-            <ParameterInput translationKey="Rendement de capture [%]" value={Rdt_capture} 
-              onChange={(v) => handleParametresChange('Rendement de capture [%]', v)} />
-            <ParameterInput translationKey="Vitesse de filtration [m/h]" value={Vitesse_filtration_m_h} 
-              onChange={(v) => handleParametresChange('Vitesse de filtration [m/h]', v)} />
+            <ParameterInput translationKey="Rendement de capture [%]" value={Rdt_capture}
+              onChange={(v) => handleParametresChange('Rendement de capture [%]', v)} t={t} />
+            <ParameterInput translationKey="Vitesse de filtration [m/h]" value={Vitesse_filtration_m_h}
+              onChange={(v) => handleParametresChange('Vitesse de filtration [m/h]', v)} t={t} />
           </div>
         </div>
       </Section>
@@ -244,23 +263,23 @@ const BHFDesign = ({ innerData, setInnerData, currentLanguage = 'fr' }) => {
       {/* Consommation électrique vis */}
       <Section title={t('Consommation électrique de la vis sans fin')} results={[
         { text: t('conso elec vis de transport [kW]'), value: fmt(Conso_elec_vis_transport_kW, 2) },
-      ]}>
-        <ParameterInput translationKey="conso elec vis de transport [kW]" value={Conso_elec_vis_transport_kW} 
-          onChange={(v) => handleParametresChange('conso elec vis de transport [kW]', v)} />
+      ]} t={t}>
+        <ParameterInput translationKey="conso elec vis de transport [kW]" value={Conso_elec_vis_transport_kW}
+          onChange={(v) => handleParametresChange('conso elec vis de transport [kW]', v)} t={t} />
       </Section>
 
       {/* Consommation air comprimé */}
       <Section title={t('Consommation d\'air comprimé')} results={[
         { text: t('Consommation air comprimé [Nm3/h]'), value: fmt(conso_air_co_Nm3_h, 2) },
         { text: t('Conso élec air comprimé [kW]'), value: fmt(Conso_elec_air_co_kW, 2) },
-      ]}>
-        <ParameterInput translationKey="Nombre de cycles [Nb]" value={nombre_cycle_nb} 
-          onChange={(v) => handleParametresChange('Nombre de cycles [Nb]', v)} />
-        <ParameterInput translationKey="Pression air comprimé [Bar]" value={pression_air_comprime_bar} 
+      ]} t={t}>
+        <ParameterInput translationKey="Nombre de cycles [Nb]" value={nombre_cycle_nb}
+          onChange={(v) => handleParametresChange('Nombre de cycles [Nb]', v)} t={t} />
+        <ParameterInput translationKey="Pression air comprimé [Bar]" value={pression_air_comprime_bar}
           onChange={(v) => handleParametresChange('Pression air comprimé [Bar]', v)}
-          options={['7', '10', '13', '15']} />
-        <ParameterInput translationKey="Air comprime par cycle [Nm3/cycle]" value={air_comprime_par_cycle} 
-          onChange={(v) => handleParametresChange('Air comprime par cycle [Nm3/cycle]', v)} />
+          options={['7', '10', '13', '15']} t={t} />
+        <ParameterInput translationKey="Air comprime par cycle [Nm3/cycle]" value={air_comprime_par_cycle}
+          onChange={(v) => handleParametresChange('Air comprime par cycle [Nm3/cycle]', v)} t={t} />
       </Section>
 
       {/* Évacuation résidus */}
@@ -270,12 +289,12 @@ const BHFDesign = ({ innerData, setInnerData, currentLanguage = 'fr' }) => {
         { text: t('Distance [km]'), value: fmt(distance_km, 0) },
         { text: t('CO2 transport total [kg]'), value: fmt(CO2_transport_total, 2) },
         { text: t('Coût transport total [€]'), value: fmt(cout_transport_total, 2) },
-      ]}>
-        <ParameterInput translationKey="Type de camion" value={type_camion} 
+      ]} t={t}>
+        <ParameterInput translationKey="Type de camion" value={type_camion}
           onChange={(v) => handleParametresChange('Type de camion', v)}
-          options={['15t', '20t', '25t']} />
-        <ParameterInput translationKey="Distance [km]" value={distance_km} 
-          onChange={(v) => handleParametresChange('Distance [km]', v)} />
+          options={['15t', '20t', '25t']} t={t} />
+        <ParameterInput translationKey="Distance [km]" value={distance_km}
+          onChange={(v) => handleParametresChange('Distance [km]', v)} t={t} />
       </Section>
 
       {/* Résumé */}
