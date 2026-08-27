@@ -305,16 +305,86 @@ export function calculTour(inp) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// COMPOSANTS UI — définis au niveau module pour avoir des références
+// stables entre renders et éviter la perte de focus sur les inputs.
+// ═══════════════════════════════════════════════════════════════════
+const TLSection = ({ title, children }) => (
+  <div style={{ marginBottom: 20, padding: 16, backgroundColor: '#f9f9f9', borderRadius: 8 }}>
+    <h3 style={{ marginTop: 0, borderBottom: '2px solid #4a90e2', paddingBottom: 8, fontSize: 15 }}>{title}</h3>
+    {children}
+  </div>
+);
+
+const InField = ({ label, unit, step = '0.01', disabled = false, value, onChange, t }) => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, opacity: disabled ? 0.4 : 1 }}>
+    <label style={{ flex: 1, minWidth: 180, textAlign: 'right', fontWeight: 500, color: '#333', fontSize: 13 }}>
+      {t(label)} :
+    </label>
+    <input
+      type="number"
+      step={step}
+      value={value}
+      disabled={disabled}
+      onChange={(e) => onChange(e.target.value)}
+      style={{
+        flex: '0 0 120px', padding: '5px 8px', textAlign: 'right',
+        border: '1px solid #7cc7d8', borderRadius: 4, backgroundColor: disabled ? '#eee' : '#e0f7fa',
+        fontFamily: 'monospace',
+      }}
+    />
+    <span style={{ flex: '0 0 70px', fontSize: 11, color: '#888' }}>{unit}</span>
+  </div>
+);
+
+const OutField = ({ label, value, unit, d = 2, warn = false, hint, disabled = false, t }) => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, opacity: disabled ? 0.4 : 1 }}>
+    <span style={{ flex: 1, minWidth: 180, textAlign: 'right', color: '#333', fontSize: 13 }}>
+      {t(label)}{hint ? ` ${hint}` : ''} :
+    </span>
+    <span
+      style={{
+        flex: '0 0 120px', padding: '5px 8px', textAlign: 'right', borderRadius: 4,
+        border: warn ? '1px solid #e57373' : '1px solid #e0c96a',
+        backgroundColor: warn ? '#ffcdd2' : '#fff9c4',
+        color: warn ? '#b71c1c' : '#333',
+        fontWeight: warn ? 'bold' : 'normal',
+        fontFamily: 'monospace',
+      }}
+    >
+      {disabled ? '—' : fmt(value, d)}
+    </span>
+    <span style={{ flex: '0 0 70px', fontSize: 11, color: '#888' }}>{unit}</span>
+  </div>
+);
+
+const RadioRowField = ({ label, options, value, onChange, t }) => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+    <label style={{ flex: 1, minWidth: 180, textAlign: 'right', fontWeight: 500, color: '#333', fontSize: 13 }}>
+      {t(label)} :
+    </label>
+    <span style={{ flex: '0 0 200px', display: 'flex', gap: 14, fontSize: 13 }}>
+      {options.map((o) => (
+        <label key={String(o.v)} style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
+          <input type="radio" checked={value === o.v} onChange={() => onChange(o.v)} />
+          {t(o.l)}
+        </label>
+      ))}
+    </span>
+  </div>
+);
+
+// ═══════════════════════════════════════════════════════════════════
 // COMPOSANT PRINCIPAL
 // ═══════════════════════════════════════════════════════════════════
 const TourLavageCalculator = ({ innerData = {}, setInnerData, currentLanguage = 'fr', nodeId }) => {
   const languageCode = getLanguageCode(currentLanguage);
-  const t = (key) =>
+  const t = useCallback((key) =>
     tlTranslations[languageCode]?.[key] ||
     tlTranslations['fr']?.[key] ||
     translations[languageCode]?.[key] ||
     translations['fr']?.[key] ||
-    key;
+    key,
+  [languageCode]);
 
   // Valeurs initiales tirées du flux amont (node quench → onglets 2 & 3)
   const defaultsFromNode = useCallback(() => {
@@ -348,8 +418,8 @@ const TourLavageCalculator = ({ innerData = {}, setInnerData, currentLanguage = 
     localStorage.setItem(`tourLavage_${nodeId}`, JSON.stringify(inp));
   }, [inp, nodeId]);
 
-  const set = (k) => (v) => setInp((s) => ({ ...s, [k]: v }));
-  const setNum = (k) => (v) => setInp((s) => ({ ...s, [k]: parseValue(v) }));
+  const set = useCallback((k) => (v) => setInp((s) => ({ ...s, [k]: v })), []);
+  const setNum = useCallback((k) => (v) => setInp((s) => ({ ...s, [k]: parseValue(v) })), []);
 
   const rechargerDepuisFlux = () => {
     const d = defaultsFromNode();
@@ -403,72 +473,6 @@ const TourLavageCalculator = ({ innerData = {}, setInnerData, currentLanguage = 
     setInnerData((prev) => ({ ...prev, ...payload }));
   }, [r, inp, setInnerData]);
 
-  // ═══════ UI ═══════
-  const Section = ({ title, children }) => (
-    <div style={{ marginBottom: 20, padding: 16, backgroundColor: '#f9f9f9', borderRadius: 8 }}>
-      <h3 style={{ marginTop: 0, borderBottom: '2px solid #4a90e2', paddingBottom: 8, fontSize: 15 }}>{title}</h3>
-      {children}
-    </div>
-  );
-
-  const In = ({ k, label, unit, step = '0.01', disabled = false }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, opacity: disabled ? 0.4 : 1 }}>
-      <label style={{ flex: 1, minWidth: 180, textAlign: 'right', fontWeight: 500, color: '#333', fontSize: 13 }}>
-        {t(label)} :
-      </label>
-      <input
-        type="number"
-        step={step}
-        value={inp[k]}
-        disabled={disabled}
-        onChange={(e) => setNum(k)(e.target.value)}
-        style={{
-          flex: '0 0 120px', padding: '5px 8px', textAlign: 'right',
-          border: '1px solid #7cc7d8', borderRadius: 4, backgroundColor: disabled ? '#eee' : '#e0f7fa',
-          fontFamily: 'monospace',
-        }}
-      />
-      <span style={{ flex: '0 0 70px', fontSize: 11, color: '#888' }}>{unit}</span>
-    </div>
-  );
-
-  const Out = ({ label, value, unit, d = 2, warn = false, hint, disabled = false }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, opacity: disabled ? 0.4 : 1 }}>
-      <span style={{ flex: 1, minWidth: 180, textAlign: 'right', color: '#333', fontSize: 13 }}>
-        {t(label)}{hint ? ` ${hint}` : ''} :
-      </span>
-      <span
-        style={{
-          flex: '0 0 120px', padding: '5px 8px', textAlign: 'right', borderRadius: 4,
-          border: warn ? '1px solid #e57373' : '1px solid #e0c96a',
-          backgroundColor: warn ? '#ffcdd2' : '#fff9c4',
-          color: warn ? '#b71c1c' : '#333',
-          fontWeight: warn ? 'bold' : 'normal',
-          fontFamily: 'monospace',
-        }}
-      >
-        {disabled ? '—' : fmt(value, d)}
-      </span>
-      <span style={{ flex: '0 0 70px', fontSize: 11, color: '#888' }}>{unit}</span>
-    </div>
-  );
-
-  const RadioRow = ({ label, options, value, onChange }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-      <label style={{ flex: 1, minWidth: 180, textAlign: 'right', fontWeight: 500, color: '#333', fontSize: 13 }}>
-        {t(label)} :
-      </label>
-      <span style={{ flex: '0 0 200px', display: 'flex', gap: 14, fontSize: 13 }}>
-        {options.map((o) => (
-          <label key={o.v} style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
-            <input type="radio" checked={value === o.v} onChange={() => onChange(o.v)} />
-            {t(o.l)}
-          </label>
-        ))}
-      </span>
-    </div>
-  );
-
   const twoCol = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'start' };
 
   return (
@@ -499,28 +503,28 @@ const TourLavageCalculator = ({ innerData = {}, setInnerData, currentLanguage = 
       <div style={twoCol}>
         {/* ─── Colonne gauche : saisies ─── */}
         <div>
-          <Section title={t('TL_section_inlet')}>
-            <In k="mCO2" label="TL_flow_CO2" unit="kg/h" />
-            <In k="mH2O" label="TL_flow_H2O" unit="kg/h" />
-            <In k="mN2" label="TL_flow_N2" unit="kg/h" />
-            <In k="mO2" label="TL_flow_O2" unit="kg/h" />
-            <In k="mSO2" label="TL_flow_SO2" unit="kg/h" />
-            <In k="mHCl" label="TL_flow_HCl" unit="kg/h" />
-            <In k="mPoussieres" label="TL_flow_dust" unit="kg/h" />
-            <In k="tempFumees" label="TL_temperature" unit="°C" />
-            <In k="pTotal" label="TL_pressure_drop_upstream" unit="mmCE" />
+          <TLSection title={t('TL_section_inlet')}>
+            <InField label="TL_flow_CO2" unit="kg/h" value={inp.mCO2} onChange={setNum('mCO2')} t={t} />
+            <InField label="TL_flow_H2O" unit="kg/h" value={inp.mH2O} onChange={setNum('mH2O')} t={t} />
+            <InField label="TL_flow_N2" unit="kg/h" value={inp.mN2} onChange={setNum('mN2')} t={t} />
+            <InField label="TL_flow_O2" unit="kg/h" value={inp.mO2} onChange={setNum('mO2')} t={t} />
+            <InField label="TL_flow_SO2" unit="kg/h" value={inp.mSO2} onChange={setNum('mSO2')} t={t} />
+            <InField label="TL_flow_HCl" unit="kg/h" value={inp.mHCl} onChange={setNum('mHCl')} t={t} />
+            <InField label="TL_flow_dust" unit="kg/h" value={inp.mPoussieres} onChange={setNum('mPoussieres')} t={t} />
+            <InField label="TL_temperature" unit="°C" value={inp.tempFumees} onChange={setNum('tempFumees')} t={t} />
+            <InField label="TL_pressure_drop_upstream" unit="mmCE" value={inp.pTotal} onChange={setNum('pTotal')} t={t} />
             {r && (
               <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid #ddd' }}>
-                <Out label="TL_total_mass_flow" value={r.masTotIn} unit="kg/h" />
-                <Out label="TL_total_vol_flow" value={r.volTotIn} unit="Nm³/h" />
-                <Out label="TL_o2_dry" value={r.pO2in} unit="% vol" />
-                <Out label="TL_so2_dry_11" value={r.concSO2In} unit="mg/Nm³" d={1} />
-                <Out label="TL_hcl_dry_11" value={r.concHClIn} unit="mg/Nm³" d={1} />
+                <OutField label="TL_total_mass_flow" value={r.masTotIn} unit="kg/h" t={t} />
+                <OutField label="TL_total_vol_flow" value={r.volTotIn} unit="Nm³/h" t={t} />
+                <OutField label="TL_o2_dry" value={r.pO2in} unit="% vol" t={t} />
+                <OutField label="TL_so2_dry_11" value={r.concSO2In} unit="mg/Nm³" d={1} t={t} />
+                <OutField label="TL_hcl_dry_11" value={r.concHClIn} unit="mg/Nm³" d={1} t={t} />
               </div>
             )}
-          </Section>
+          </TLSection>
 
-          <Section title={t('TL_section_column')}>
+          <TLSection title={t('TL_section_column')}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
               <label style={{ flex: 1, minWidth: 180, textAlign: 'right', fontWeight: 500, color: '#333', fontSize: 13 }}>
                 {t('TL_selected_diameter')} :
@@ -536,107 +540,109 @@ const TourLavageCalculator = ({ innerData = {}, setInnerData, currentLanguage = 
               </select>
               <span style={{ flex: '0 0 70px', fontSize: 11, color: '#888' }}>m</span>
             </div>
-            <In k="debArrosage" label="TL_spray_flow" unit="kg/h" step="100" />
-            <In k="pourNaOH" label="TL_naoh_pct" unit="%" step="0.5" />
-            <In k="concLiqSO2" label="TL_so2_salts" unit="%" step="0.1" />
-            <In k="cibleSO2" label="TL_target_so2" unit="mg/Nm³" step="1" />
-            <In k="cibleHCl" label="TL_target_hcl" unit="mg/Nm³" step="1" />
-          </Section>
+            <InField label="TL_spray_flow" unit="kg/h" step="100" value={inp.debArrosage} onChange={setNum('debArrosage')} t={t} />
+            <InField label="TL_naoh_pct" unit="%" step="0.5" value={inp.pourNaOH} onChange={setNum('pourNaOH')} t={t} />
+            <InField label="TL_so2_salts" unit="%" step="0.1" value={inp.concLiqSO2} onChange={setNum('concLiqSO2')} t={t} />
+            <InField label="TL_target_so2" unit="mg/Nm³" step="1" value={inp.cibleSO2} onChange={setNum('cibleSO2')} t={t} />
+            <InField label="TL_target_hcl" unit="mg/Nm³" step="1" value={inp.cibleHCl} onChange={setNum('cibleHCl')} t={t} />
+          </TLSection>
 
-          <Section title={t('TL_section_packing')}>
-            <RadioRow
+          <TLSection title={t('TL_section_packing')}>
+            <RadioRowField
               label="TL_packing_type"
               options={[{ v: 'VSP', l: 'VSP' }, { v: 'Autres', l: 'TL_other' }, { v: 'Aucun', l: 'None' }]}
               value={inp.typeGarn}
               onChange={set('typeGarn')}
+              t={t}
             />
-            <In k="coefHautSat" label="TL_sat_height_coef" unit="—" step="0.1" />
-            <In k="facteurGarn" label="TL_packing_factor" unit="m²/m³" step="1" />
-            <In k="surfaceVolGarn" label="TL_specific_area" unit="m²/m³" step="1" />
-            <In k="diamGarn" label="TL_packing_size" unit="m" step="0.001" />
-            <In k="sigmaTenSup" label="TL_critical_tension" unit="N/m" step="0.001" />
-          </Section>
+            <InField label="TL_sat_height_coef" unit="—" step="0.1" value={inp.coefHautSat} onChange={setNum('coefHautSat')} t={t} />
+            <InField label="TL_packing_factor" unit="m²/m³" step="1" value={inp.facteurGarn} onChange={setNum('facteurGarn')} t={t} />
+            <InField label="TL_specific_area" unit="m²/m³" step="1" value={inp.surfaceVolGarn} onChange={setNum('surfaceVolGarn')} t={t} />
+            <InField label="TL_packing_size" unit="m" step="0.001" value={inp.diamGarn} onChange={setNum('diamGarn')} t={t} />
+            <InField label="TL_critical_tension" unit="N/m" step="0.001" value={inp.sigmaTenSup} onChange={setNum('sigmaTenSup')} t={t} />
+          </TLSection>
 
-          <Section title={t('TL_section_subcooling')}>
-            <RadioRow
+          <TLSection title={t('TL_section_subcooling')}>
+            <RadioRowField
               label="TL_use_subcooling"
               options={[{ v: true, l: 'TL_yes' }, { v: false, l: 'TL_no' }]}
               value={inp.sousRef}
               onChange={set('sousRef')}
+              t={t}
             />
-            <In k="tempLiqRef" label="TL_cooling_liquid_temp" unit="°C" disabled={!inp.sousRef} />
-            <In k="tempSortieCond" label="TL_condenser_outlet_temp" unit="°C" disabled={!inp.sousRef} />
+            <InField label="TL_cooling_liquid_temp" unit="°C" disabled={!inp.sousRef} value={inp.tempLiqRef} onChange={setNum('tempLiqRef')} t={t} />
+            <InField label="TL_condenser_outlet_temp" unit="°C" disabled={!inp.sousRef} value={inp.tempSortieCond} onChange={setNum('tempSortieCond')} t={t} />
             {r && (
               <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid #ddd' }}>
-                <Out label="TL_condenser_height" value={r.hauteurCond} unit="m" disabled={!inp.sousRef} />
-                <Out label="TL_condensate_flow" value={r.cond?.condensat} unit="kg/h" disabled={!inp.sousRef} />
-                <Out label="TL_cooling_water_flow" value={r.cond?.eauRefroid} unit="kg/h" disabled={!inp.sousRef} />
-                <Out label="TL_liquid_outlet_temp" value={r.cond?.tSortieLiq} unit="°C" disabled={!inp.sousRef} />
-                <Out label="TL_condenser_duty" value={r.cond ? r.cond.deltaEnt * 1.163e-3 : 0} unit="kW" d={0} disabled={!inp.sousRef} />
+                <OutField label="TL_condenser_height" value={r.hauteurCond} unit="m" disabled={!inp.sousRef} t={t} />
+                <OutField label="TL_condensate_flow" value={r.cond?.condensat} unit="kg/h" disabled={!inp.sousRef} t={t} />
+                <OutField label="TL_cooling_water_flow" value={r.cond?.eauRefroid} unit="kg/h" disabled={!inp.sousRef} t={t} />
+                <OutField label="TL_liquid_outlet_temp" value={r.cond?.tSortieLiq} unit="°C" disabled={!inp.sousRef} t={t} />
+                <OutField label="TL_condenser_duty" value={r.cond ? r.cond.deltaEnt * 1.163e-3 : 0} unit="kW" d={0} disabled={!inp.sousRef} t={t} />
               </div>
             )}
-          </Section>
+          </TLSection>
 
-          <Section title={t('TL_section_demister')}>
-            <In k="epaisDeves" label="TL_demister_thickness" unit="mm" step="1" />
+          <TLSection title={t('TL_section_demister')}>
+            <InField label="TL_demister_thickness" unit="mm" step="1" value={inp.epaisDeves} onChange={setNum('epaisDeves')} t={t} />
             {r && (
               <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid #ddd' }}>
-                <Out label="TL_demister_diameter" value={r.diamDeves} unit="m" d={1} />
-                <Out label="TL_demister_velocity" value={r.vitRetenue} unit="m/h" d={0} />
-                <Out label="TL_demister_dp" value={r.dPDeves} unit="mmCE" />
+                <OutField label="TL_demister_diameter" value={r.diamDeves} unit="m" d={1} t={t} />
+                <OutField label="TL_demister_velocity" value={r.vitRetenue} unit="m/h" d={0} t={t} />
+                <OutField label="TL_demister_dp" value={r.dPDeves} unit="mmCE" t={t} />
               </div>
             )}
-          </Section>
+          </TLSection>
         </div>
 
         {/* ─── Colonne droite : résultats ─── */}
         <div>
           {r && (
             <>
-              <Section title={t('TL_section_verifications')}>
-                <Out label="TL_flooding_flux" value={r.fluxEngor} unit="kg/(m²·h)" />
-                <Out label="TL_real_flux" value={r.fluxReel} unit="kg/(m²·h)" />
-                <Out label="TL_computed_diameter" value={r.diamCalc} unit="m" />
-                <Out label="TL_wetting_rate" hint="(0,09–0,72)" value={r.tauxMouil} unit="m³/(m²·h)" warn={r.tauxMouil < 0.09 || r.tauxMouil > 0.72} />
-                <Out label="TL_ratio_check" hint="(> 12)" value={r.rapport} unit="—" warn={r.rapport < 12} />
-                <Out label="TL_flooding_rate" hint="(< 70 %)" value={r.tauxEngor} unit="%" warn={r.tauxEngor > 70} />
-              </Section>
+              <TLSection title={t('TL_section_verifications')}>
+                <OutField label="TL_flooding_flux" value={r.fluxEngor} unit="kg/(m²·h)" t={t} />
+                <OutField label="TL_real_flux" value={r.fluxReel} unit="kg/(m²·h)" t={t} />
+                <OutField label="TL_computed_diameter" value={r.diamCalc} unit="m" t={t} />
+                <OutField label="TL_wetting_rate" hint="(0,09–0,72)" value={r.tauxMouil} unit="m³/(m²·h)" warn={r.tauxMouil < 0.09 || r.tauxMouil > 0.72} t={t} />
+                <OutField label="TL_ratio_check" hint="(> 12)" value={r.rapport} unit="—" warn={r.rapport < 12} t={t} />
+                <OutField label="TL_flooding_rate" hint="(< 70 %)" value={r.tauxEngor} unit="%" warn={r.tauxEngor > 70} t={t} />
+              </TLSection>
 
-              <Section title={t('TL_section_absorption')}>
-                <Out label="TL_packing_height_so2" value={r.hGarnSO2} unit="m" />
-                <Out label="TL_packing_height_hcl" value={r.hGarnHCl} unit="m" />
-                <Out label="TL_packing_height_total" value={r.hGarnRetenue} unit="m" />
-                <Out label="TL_packing_dp" value={r.dPGarn} unit="mmCE" />
-                <Out label="TL_packing_dp_per_m" value={r.dPGarnH} unit="mmCE/m" />
-                <Out label="TL_hut_so2" value={r.hutSO2} unit="m" d={3} />
-                <Out label="TL_nut_so2" value={r.nutSO2} unit="—" />
-                <Out label="TL_hut_hcl" value={r.hutHCl} unit="m" d={3} />
-                <Out label="TL_nut_hcl" value={r.nutHCl} unit="—" />
-                <Out label="TL_wetted_area" value={r.aw} unit="m²/m³" d={1} />
-              </Section>
+              <TLSection title={t('TL_section_absorption')}>
+                <OutField label="TL_packing_height_so2" value={r.hGarnSO2} unit="m" t={t} />
+                <OutField label="TL_packing_height_hcl" value={r.hGarnHCl} unit="m" t={t} />
+                <OutField label="TL_packing_height_total" value={r.hGarnRetenue} unit="m" t={t} />
+                <OutField label="TL_packing_dp" value={r.dPGarn} unit="mmCE" t={t} />
+                <OutField label="TL_packing_dp_per_m" value={r.dPGarnH} unit="mmCE/m" t={t} />
+                <OutField label="TL_hut_so2" value={r.hutSO2} unit="m" d={3} t={t} />
+                <OutField label="TL_nut_so2" value={r.nutSO2} unit="—" t={t} />
+                <OutField label="TL_hut_hcl" value={r.hutHCl} unit="m" d={3} t={t} />
+                <OutField label="TL_nut_hcl" value={r.nutHCl} unit="—" t={t} />
+                <OutField label="TL_wetted_area" value={r.aw} unit="m²/m³" d={1} t={t} />
+              </TLSection>
 
-              <Section title={t('TL_section_outlet')}>
-                <Out label="TL_temperature" value={r.tAbs} unit="°C" />
-                <Out label="TL_total_vol_flow" value={r.volTotS} unit="Nm³/h" />
-                <Out label="TL_total_mass_flow" value={r.masTotS} unit="kg/h" />
-                <Out label="TL_so2_dry_11" value={r.cibleSO2} unit="mg/Nm³" />
-                <Out label="TL_flow_SO2" value={r.masSO2s} unit="kg/h" />
-                <Out label="TL_hcl_dry_11" value={r.cibleHCl} unit="mg/Nm³" />
-                <Out label="TL_flow_HCl" value={r.masHCls} unit="kg/h" />
-                <Out label="TL_flow_H2O" value={r.masH2Os} unit="kg/h" />
-                <Out label="TL_efficiency_so2" value={r.effSO2} unit="%" d={1} />
-                <Out label="TL_efficiency_hcl" value={r.effHCl} unit="%" d={1} />
-              </Section>
+              <TLSection title={t('TL_section_outlet')}>
+                <OutField label="TL_temperature" value={r.tAbs} unit="°C" t={t} />
+                <OutField label="TL_total_vol_flow" value={r.volTotS} unit="Nm³/h" t={t} />
+                <OutField label="TL_total_mass_flow" value={r.masTotS} unit="kg/h" t={t} />
+                <OutField label="TL_so2_dry_11" value={r.cibleSO2} unit="mg/Nm³" t={t} />
+                <OutField label="TL_flow_SO2" value={r.masSO2s} unit="kg/h" t={t} />
+                <OutField label="TL_hcl_dry_11" value={r.cibleHCl} unit="mg/Nm³" t={t} />
+                <OutField label="TL_flow_HCl" value={r.masHCls} unit="kg/h" t={t} />
+                <OutField label="TL_flow_H2O" value={r.masH2Os} unit="kg/h" t={t} />
+                <OutField label="TL_efficiency_so2" value={r.effSO2} unit="%" d={1} t={t} />
+                <OutField label="TL_efficiency_hcl" value={r.effHCl} unit="%" d={1} t={t} />
+              </TLSection>
 
-              <Section title={t('TL_section_water_reagent')}>
-                <Out label="TL_makeup_water" value={r.appointAbs} unit="kg/h" />
-                <Out label="TL_so2_purge" value={r.purgeAbs} unit="kg/h" />
-                <Out label="TL_total_purge" value={r.purgeTotale} unit="kg/h" />
-                <Out label="TL_naoh_conc" value={r.concNaOH} unit="g/l" d={1} />
-                <Out label="TL_naoh_nominal" value={r.masNaOHTot} unit="kg/h" />
-                <Out label="TL_naoh_nominal_vol" value={r.volNaOHTot} unit="l/h" />
-                <Out label="TL_naoh_maxi" value={r.masNaOHMaxi} unit="kg/h" />
-              </Section>
+              <TLSection title={t('TL_section_water_reagent')}>
+                <OutField label="TL_makeup_water" value={r.appointAbs} unit="kg/h" t={t} />
+                <OutField label="TL_so2_purge" value={r.purgeAbs} unit="kg/h" t={t} />
+                <OutField label="TL_total_purge" value={r.purgeTotale} unit="kg/h" t={t} />
+                <OutField label="TL_naoh_conc" value={r.concNaOH} unit="g/l" d={1} t={t} />
+                <OutField label="TL_naoh_nominal" value={r.masNaOHTot} unit="kg/h" t={t} />
+                <OutField label="TL_naoh_nominal_vol" value={r.volNaOHTot} unit="l/h" t={t} />
+                <OutField label="TL_naoh_maxi" value={r.masNaOHMaxi} unit="kg/h" t={t} />
+              </TLSection>
             </>
           )}
         </div>
